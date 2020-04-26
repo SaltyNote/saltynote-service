@@ -9,7 +9,6 @@ import net.hzhou.demo.jwt.utils.JwtUtils;
 @Service
 public class UserService {
     public User TEST_USER = new User("1d", "username1", "password1");
-    ;
 
     public String login(String name, String password) {
         String token = null;

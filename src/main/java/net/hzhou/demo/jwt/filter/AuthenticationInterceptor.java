@@ -19,6 +19,7 @@ import net.hzhou.demo.jwt.service.UserService;
 import net.hzhou.demo.jwt.utils.JwtUtils;
 
 public class AuthenticationInterceptor implements HandlerInterceptor {
+
     @Autowired
     private UserService userService;
 
