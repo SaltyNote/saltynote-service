@@ -8,6 +8,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TokenRequired {
-    boolean required() default true;
+  boolean required() default true;
 }
-
