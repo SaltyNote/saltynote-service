@@ -24,7 +24,7 @@ public class UserController {
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
-  @PostMapping("/sign-up")
+  @PostMapping("/signup")
   public void signUp(@Valid @RequestBody SiteUser siteUser) {
     siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
     userRepository.save(siteUser);
