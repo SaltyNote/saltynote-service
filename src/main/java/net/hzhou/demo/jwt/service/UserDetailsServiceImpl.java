@@ -1,13 +1,10 @@
 package net.hzhou.demo.jwt.service;
 
-import java.util.Collections;
-
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import net.hzhou.demo.jwt.domain.LoginUser;
 import net.hzhou.demo.jwt.entity.SiteUser;
 import net.hzhou.demo.jwt.repository.UserRepository;
 
@@ -20,11 +17,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public LoginUser loadUserByUsername(String username) throws UsernameNotFoundException {
     SiteUser user = userRepository.findByUsername(username);
     if (user == null) {
       throw new UsernameNotFoundException(username);
     }
-    return new User(user.getUsername(), user.getPassword(), Collections.emptyList());
+    return new LoginUser(user);
   }
 }

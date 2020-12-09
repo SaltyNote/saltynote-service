@@ -1,7 +1,7 @@
 package net.hzhou.demo.jwt.security;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import net.hzhou.demo.jwt.domain.JwtUser;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
@@ -39,18 +41,23 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     chain.doFilter(req, res);
   }
 
+  // TODO: can inject more user info here
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
     String token = request.getHeader(SecurityConstants.HEADER_STRING);
     if (token != null) {
       // parse the token.
-      String user =
+      DecodedJWT decodedJWT =
           JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
               .build()
-              .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-              .getSubject();
+              .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
 
-      if (user != null) {
-        return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+      if (decodedJWT != null) {
+        return new UsernamePasswordAuthenticationToken(
+            new JwtUser(
+                decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asInt(),
+                decodedJWT.getSubject()),
+            null,
+            Collections.emptyList());
       }
       return null;
     }
