@@ -1,6 +1,7 @@
 # Spring Boot JWT Example
 
 ![Project Build](https://github.com/zhouhao/spring-boot-jwt-example/workflows/Project%20Build/badge.svg)
+![CodeQL](https://github.com/zhouhao/spring-boot-jwt-example/workflows/CodeQL/badge.svg)
 
 This is a simple demo for spring boot with JWT integration, which supports user signup/login and blog creation/reading.
 
