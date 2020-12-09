@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 @Table(name = "user")
 @Data
 @Accessors(chain = true)
-public class User implements Serializable {
+public class SiteUser implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -29,21 +29,9 @@ public class User implements Serializable {
   @Column(name = "username", nullable = false)
   private String username;
 
-  @Column(name = "email", nullable = false)
-  private String email;
-
   @Column(name = "password", nullable = false)
   private String password;
 
-  @Column(name = "register_time", nullable = false)
+  @Column(name = "register_time")
   private LocalDateTime registerTime;
-
-  @Column(name = "activated")
-  private Boolean activated;
-
-  @Column(name = "lock_status", nullable = false)
-  private Integer lockStatus;
-
-  @Column(name = "role", nullable = false)
-  private String role;
 }

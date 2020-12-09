@@ -1,38 +1,30 @@
 package net.hzhou.demo.jwt.controller;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import net.hzhou.demo.jwt.annotation.TokenRequired;
-import net.hzhou.demo.jwt.entity.User;
-import net.hzhou.demo.jwt.service.UserService;
+import net.hzhou.demo.jwt.entity.SiteUser;
+import net.hzhou.demo.jwt.repository.UserRepository;
 
 @RestController
 @RequestMapping("user")
 public class UserController {
-  private final UserService userService;
 
-  public UserController(UserService userService) {
-    this.userService = userService;
+  private final UserRepository userRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+  public UserController(
+      UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    this.userRepository = userRepository;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
-  @PostMapping("/login")
-  public Map<String, ? extends Serializable> login(User user) {
-    String token = userService.login(user.getUsername(), user.getPassword());
-    Map<String, String> tokenMap = new HashMap<>();
-    tokenMap.put("token", token);
-    return tokenMap;
-  }
-
-  @TokenRequired
-  @GetMapping("/hello")
-  public String getMessage() {
-    return "Hello World";
+  @PostMapping("/sign-up")
+  public void signUp(@RequestBody SiteUser siteUser) {
+    siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
+    userRepository.save(siteUser);
   }
 }
