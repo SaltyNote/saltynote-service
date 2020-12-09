@@ -16,8 +16,8 @@ import net.hzhou.demo.jwt.service.UserDetailsServiceImpl;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-  private UserDetailsServiceImpl userDetailsService;
-  private BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final UserDetailsServiceImpl userDetailsService;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   public WebSecurity(
       UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
