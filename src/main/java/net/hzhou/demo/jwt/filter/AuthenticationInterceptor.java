@@ -1,6 +1,7 @@
 package net.hzhou.demo.jwt.filter;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,12 +16,12 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import net.hzhou.demo.jwt.annotation.TokenRequired;
 import net.hzhou.demo.jwt.entity.User;
-import net.hzhou.demo.jwt.service.UserService;
+import net.hzhou.demo.jwt.repository.UserRepository;
 import net.hzhou.demo.jwt.utils.JwtUtils;
 
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-  @Autowired private UserService userService;
+  @Autowired private UserRepository userRepository;
 
   @Override
   public boolean preHandle(
@@ -45,13 +46,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         } catch (JWTDecodeException j) {
           throw new RuntimeException("401");
         }
-        User user = userService.TEST_USER; // should be findByUserId()
-        if (user == null) {
+        Optional<User> user = userRepository.findById(userId);
+        if (!user.isPresent()) {
           throw new RuntimeException("Cannot find user");
         }
 
         try {
-          if (!JwtUtils.verity(token, user.getPassword())) {
+          if (!JwtUtils.verity(token, user.get().getPassword())) {
             throw new RuntimeException("invalid token");
           }
         } catch (JWTVerificationException e) {

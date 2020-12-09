@@ -11,9 +11,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 
 public class JwtUtils {
 
-  private static final long EXPIRE_TIME = 15 * 60 * 1000;
+  private static final long EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes
 
-  public static String sign(String username, String userId, String password) {
+  public static String sign(String username, Integer userId, String password) {
 
     Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
     Algorithm algorithm = Algorithm.HMAC256(password);
