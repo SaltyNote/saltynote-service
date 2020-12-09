@@ -1,5 +1,7 @@
 package net.hzhou.demo.jwt.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +25,7 @@ public class UserController {
   }
 
   @PostMapping("/sign-up")
-  public void signUp(@RequestBody SiteUser siteUser) {
+  public void signUp(@Valid @RequestBody SiteUser siteUser) {
     siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
     userRepository.save(siteUser);
   }

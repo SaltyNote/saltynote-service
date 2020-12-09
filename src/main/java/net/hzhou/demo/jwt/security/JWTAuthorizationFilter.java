@@ -41,7 +41,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     chain.doFilter(req, res);
   }
 
-  // TODO: can inject more user info here
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
     String token = request.getHeader(SecurityConstants.HEADER_STRING);
     if (token != null) {

@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -27,9 +28,11 @@ public class SiteUser implements Serializable {
   private Integer id;
 
   @Column(name = "username", nullable = false)
+  @NotBlank
   private String username;
 
   @Column(name = "password", nullable = false)
+  @NotBlank
   private String password;
 
   @Column(name = "register_time")

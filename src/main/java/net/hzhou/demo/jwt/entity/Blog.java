@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -19,23 +20,24 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Blog implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+  @Column(name = "user_id", nullable = false)
+  private Integer userId;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+  @Column(name = "title", nullable = false)
+  @NotBlank
+  private String title;
 
-    @Column(name = "content")
-    private String content;
+  @Column(name = "content")
+  @NotBlank
+  private String content;
 
-    @Column(name = "created_time", nullable = false)
-    private LocalDateTime createdTime;
-
+  @Column(name = "created_time", nullable = false)
+  private LocalDateTime createdTime;
 }
