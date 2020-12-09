@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mariadb:10.4
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: jwt_demo
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql/data
+
+volumes:
+  mysql_data:
