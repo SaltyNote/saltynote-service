@@ -22,9 +22,5 @@ jobs:
         java-version: 1.8
     - name: Build the docker-compose for Database
       run: docker-compose -f docker-compose.yml up -d
-    - name: Check running containers
-      run: docker ps -a
-    - name: Check logs
-      run: docker logs backend
     - name: Build with Maven
       run: mvn -B package --file pom.xml
