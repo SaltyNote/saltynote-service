@@ -27,6 +27,7 @@ public final class JwtUtils {
   }
 
   public static DecodedJWT verifyToken(String token) throws JWTVerificationException {
+    // This will handle token expiration exception
     return verifier.verify(token);
   }
 
