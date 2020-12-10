@@ -2,12 +2,14 @@ package net.hzhou.demo.jwt.controller;
 
 import javax.validation.Valid;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.hzhou.demo.jwt.domain.JwtUser;
 import net.hzhou.demo.jwt.entity.SiteUser;
 import net.hzhou.demo.jwt.repository.UserRepository;
 
@@ -24,8 +26,13 @@ public class UserController {
   }
 
   @PostMapping("/signup")
-  public void signUp(@Valid @RequestBody SiteUser siteUser) {
+  public ResponseEntity<JwtUser> signUp(@Valid @RequestBody SiteUser siteUser) {
     siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
-    userRepository.save(siteUser);
+    siteUser = userRepository.save(siteUser);
+    if (siteUser.getId() > 0) {
+      return ResponseEntity.ok(new JwtUser(siteUser.getId(), siteUser.getUsername()));
+    } else {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }
