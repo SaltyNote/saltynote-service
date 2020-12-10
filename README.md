@@ -19,7 +19,7 @@ Note: This is a standard spring boot project with Maven, so you can use maven co
 ## Endpoint
 
 ### User
-1. `POST`: `/user/signup`
+1. `POST`: `/signup`
 
 It needs request payload as below, and it will return `200 OK` http status if succeeded.
 ```json
@@ -31,11 +31,11 @@ It needs request payload as below, and it will return `200 OK` http status if su
 
 2. `POST`: `/login`
 
-It needs the same request payload format as "signup", and it will return Authorization JWT token in **http header** if succeeded.
+It needs the same request payload format as "signup", and it will return Authorization JWT token in both response body and http header if succeeded.
 ```json
 {
-  "username": "nice-user-name",
-  "password": "a-strong-password"
+  "username": "your-nice-user-name",
+  "password": "your-strong-password"
 }
 ```
 

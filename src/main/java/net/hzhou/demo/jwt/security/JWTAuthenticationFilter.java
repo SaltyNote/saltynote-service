@@ -8,6 +8,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,9 +25,11 @@ import net.hzhou.demo.jwt.entity.SiteUser;
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
+  private final ObjectMapper objectMapper;
 
   public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
     this.authenticationManager = authenticationManager;
+    this.objectMapper = new ObjectMapper();
   }
 
   @Override
@@ -45,7 +48,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
   @Override
   protected void successfulAuthentication(
-      HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) {
+      HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth)
+      throws IOException {
 
     LoginUser user = (LoginUser) auth.getPrincipal();
     String token =
@@ -55,5 +59,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
             .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
     res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    res.getWriter().write(objectMapper.writeValueAsString(Collections.singletonMap("jwt", token)));
   }
 }

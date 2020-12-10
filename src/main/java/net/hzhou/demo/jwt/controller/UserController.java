@@ -12,7 +12,6 @@ import net.hzhou.demo.jwt.entity.SiteUser;
 import net.hzhou.demo.jwt.repository.UserRepository;
 
 @RestController
-@RequestMapping("user")
 public class UserController {
 
   private final UserRepository userRepository;
