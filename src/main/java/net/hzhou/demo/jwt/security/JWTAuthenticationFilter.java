@@ -17,17 +17,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.hzhou.demo.jwt.domain.LoginUser;
+import net.hzhou.demo.jwt.entity.RefreshToken;
 import net.hzhou.demo.jwt.entity.SiteUser;
+import net.hzhou.demo.jwt.repository.RefreshTokenRepository;
 import net.hzhou.demo.jwt.utils.JwtUtils;
 
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
-  private final ObjectMapper objectMapper;
+  private final RefreshTokenRepository tokenRepository;
 
-  public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+  public JWTAuthenticationFilter(
+      AuthenticationManager authenticationManager, RefreshTokenRepository tokenRepository) {
     this.authenticationManager = authenticationManager;
-    this.objectMapper = new ObjectMapper();
+    this.tokenRepository = tokenRepository;
   }
 
   @Override
@@ -50,12 +53,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       throws IOException {
 
     LoginUser user = (LoginUser) auth.getPrincipal();
-    String token =
-        JwtUtils.createToken(
-            user.getUsername(), user.getId(), SecurityConstants.JWT_TOKEN_TTL_IN_SEC);
-
-    res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+    String accessToken = JwtUtils.createAccessToken(user);
+    String refreshToken = processRefreshToken(user);
+    res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
     res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    res.getWriter().write(objectMapper.writeValueAsString(Collections.singletonMap("jwt", token)));
+    res.getWriter().write(JwtUtils.tokenToJson(accessToken, refreshToken));
+  }
+
+  private String processRefreshToken(LoginUser user) {
+    String refreshToken = JwtUtils.createRefreshToken(user);
+    RefreshToken token = new RefreshToken().setUserId(user.getId()).setRefreshToken(refreshToken);
+    tokenRepository.save(token);
+    return refreshToken;
   }
 }

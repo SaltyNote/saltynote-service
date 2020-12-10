@@ -13,10 +13,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import net.hzhou.demo.jwt.domain.JwtUser;
+import net.hzhou.demo.jwt.utils.JwtUtils;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
@@ -45,10 +44,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     String token = request.getHeader(SecurityConstants.HEADER_STRING);
     if (token != null) {
       // parse the token.
-      DecodedJWT decodedJWT =
-          JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
-              .build()
-              .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
+      DecodedJWT decodedJWT = JwtUtils.verifyAccessToken(token);
 
       if (decodedJWT != null) {
         return new UsernamePasswordAuthenticationToken(

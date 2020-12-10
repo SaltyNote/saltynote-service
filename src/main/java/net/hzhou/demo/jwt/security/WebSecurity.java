@@ -12,17 +12,25 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import net.hzhou.demo.jwt.repository.RefreshTokenRepository;
 import net.hzhou.demo.jwt.service.UserDetailsServiceImpl;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
+  private static final String[] PUBLIC_ENDPOINTS = {
+    SecurityConstants.SIGN_UP_URL, "/refresh_token"
+  };
   private final UserDetailsServiceImpl userDetailsService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final RefreshTokenRepository tokenRepository;
 
   public WebSecurity(
-      UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+      UserDetailsServiceImpl userDetailsService,
+      BCryptPasswordEncoder bCryptPasswordEncoder,
+      RefreshTokenRepository tokenRepository) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    this.tokenRepository = tokenRepository;
   }
 
   @Override
@@ -33,12 +41,12 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
           .csrf()
             .disable()
           .authorizeRequests()
-            .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL)
+            .antMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
               .permitAll()
             .anyRequest()
               .authenticated()
         .and()
-          .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+          .addFilter(new JWTAuthenticationFilter(authenticationManager(), tokenRepository))
           .addFilter(new JWTAuthorizationFilter(authenticationManager()))
           // this disables session creation on Spring Security
           .sessionManagement()

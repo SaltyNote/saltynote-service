@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.hzhou.demo.jwt.domain.JwtToken;
 import net.hzhou.demo.jwt.domain.JwtUser;
 import net.hzhou.demo.jwt.entity.SiteUser;
 import net.hzhou.demo.jwt.repository.UserRepository;
+import net.hzhou.demo.jwt.utils.JwtUtils;
 
 @RestController
 public class UserController {
@@ -34,5 +36,12 @@ public class UserController {
     } else {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  @PostMapping("/refresh_token")
+  public JwtToken refreshToken(@Valid @RequestBody JwtToken jwtToken) {
+    JwtUser user = JwtUtils.parseRefreshToken(jwtToken.getRefreshToken());
+    String newToken = JwtUtils.createAccessToken(user);
+    return new JwtToken(newToken, null);
   }
 }
