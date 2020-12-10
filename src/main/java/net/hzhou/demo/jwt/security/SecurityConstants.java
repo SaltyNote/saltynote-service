@@ -1,8 +1,9 @@
 package net.hzhou.demo.jwt.security;
 
 public class SecurityConstants {
-  public static final String SECRET = "Huuu,it is a secret!";
-  public static final long EXPIRATION_TIME = 864_000_000; // 10 days
+  public static final String SECRET = "emmm, it is a strong secret!";
+  public static final long JWT_TOKEN_TTL_IN_SEC = 60 * 1000; // 1 minute
+  public static final long REFRESH_TOKEN_TTL_IN_SEC = 60 * 60 * 1000; // 1 hour
   public static final String TOKEN_PREFIX = "Bearer ";
   public static final String HEADER_STRING = "Authorization";
   public static final String SIGN_UP_URL = "/signup";
