@@ -83,6 +83,3 @@ Fetch a single blog by its id.
    
 Fetch all blogs belong to the request user.
 
-## TODO
-
-1. Enable `refresh_token`
