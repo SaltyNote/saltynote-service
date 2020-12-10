@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import lombok.extern.slf4j.Slf4j;
 import net.hzhou.demo.jwt.domain.GenericError;
+import net.hzhou.demo.jwt.exception.WebClientRuntimeException;
 
 @ControllerAdvice
 @Slf4j
@@ -19,6 +20,12 @@ public class ExceptionHandlerControllerAdvice {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public String handleNoSuchElementException(NoSuchElementException e) {
     return e.getMessage();
+  }
+
+  @ExceptionHandler(WebClientRuntimeException.class)
+  public ResponseEntity<GenericError> handleWebClientRuntimeException(WebClientRuntimeException e) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new GenericError(HttpStatus.BAD_REQUEST, e.getMessage()));
   }
 
   @ExceptionHandler(RuntimeException.class)

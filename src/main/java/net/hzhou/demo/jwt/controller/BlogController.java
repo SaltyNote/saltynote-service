@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,7 +22,11 @@ import net.hzhou.demo.jwt.repository.BlogRepository;
 @RestController
 @Slf4j
 public class BlogController {
-  @Autowired private BlogRepository blogRepository;
+  private final BlogRepository blogRepository;
+
+  public BlogController(BlogRepository blogRepository) {
+    this.blogRepository = blogRepository;
+  }
 
   @GetMapping("/blog/{id}")
   public ResponseEntity<Blog> getBlog(@PathVariable("id") Integer id) {
