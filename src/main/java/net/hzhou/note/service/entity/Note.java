@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -33,9 +34,11 @@ public class Note implements Serializable {
     private String text;
 
     @Column(name = "url", nullable = false)
+    @NotBlank
     private String url;
 
     @Column(name = "note")
+    @NotBlank
     private String note;
 
     @Column(name = "is_page_only")
