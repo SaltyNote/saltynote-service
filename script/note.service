@@ -1,0 +1,11 @@
+[Unit]
+Description=Web Note Service
+After=syslog.target
+
+[Service]
+User=root
+ExecStart=/var/note-service/service.jar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

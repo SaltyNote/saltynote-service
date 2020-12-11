@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import net.hzhou.note.service.entity.Blog;
+import net.hzhou.note.service.entity.Note;
 
-public interface BlogRepository
-    extends JpaRepository<Blog, Integer>, JpaSpecificationExecutor<Blog> {
-  List<Blog> findAllByUserId(Integer userId);
+public interface NoteRepository
+    extends JpaRepository<Note, Integer>, JpaSpecificationExecutor<Note> {
+  List<Note> findAllByUserId(Integer userId);
 }
