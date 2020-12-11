@@ -3,6 +3,7 @@ Description=Web Note Service
 After=syslog.target
 
 [Service]
+# maybe a bad idea as root here
 User=root
 ExecStart=/var/note-service/service.jar
 SuccessExitStatus=143
