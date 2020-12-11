@@ -8,11 +8,11 @@
         <version>2.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>net.hzhou.demo</groupId>
-    <artifactId>jwt</artifactId>
+    <groupId>net.hzhou.note</groupId>
+    <artifactId>service</artifactId>
     <version>0.0.1</version>
-    <name>jwt</name>
-    <description>Demo project for Spring Boot</description>
+    <name>web-note-service</name>
+    <description>Backend service for web note</description>
 
     <properties>
         <java.version>1.8</java.version>
