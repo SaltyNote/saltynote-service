@@ -20,17 +20,19 @@ import net.hzhou.note.service.domain.LoginUser;
 import net.hzhou.note.service.entity.RefreshToken;
 import net.hzhou.note.service.entity.SiteUser;
 import net.hzhou.note.service.repository.RefreshTokenRepository;
-import net.hzhou.note.service.utils.JwtUtils;
+import net.hzhou.note.service.component.JwtInstance;
 
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
   private final RefreshTokenRepository tokenRepository;
+  private final JwtInstance jwtInstance;
 
   public JWTAuthenticationFilter(
-      AuthenticationManager authenticationManager, RefreshTokenRepository tokenRepository) {
+      AuthenticationManager authenticationManager, RefreshTokenRepository tokenRepository, JwtInstance jwtInstance) {
     this.authenticationManager = authenticationManager;
     this.tokenRepository = tokenRepository;
+    this.jwtInstance = jwtInstance;
   }
 
   @Override
@@ -53,15 +55,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       throws IOException {
 
     LoginUser user = (LoginUser) auth.getPrincipal();
-    String accessToken = JwtUtils.createAccessToken(user);
+    String accessToken = jwtInstance.createAccessToken(user);
     String refreshToken = processRefreshToken(user);
     res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
     res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    res.getWriter().write(JwtUtils.tokenToJson(accessToken, refreshToken));
+    res.getWriter().write(jwtInstance.tokenToJson(accessToken, refreshToken));
   }
 
   private String processRefreshToken(LoginUser user) {
-    String refreshToken = JwtUtils.createRefreshToken(user);
+    String refreshToken = jwtInstance.createRefreshToken(user);
     RefreshToken token = new RefreshToken().setUserId(user.getId()).setRefreshToken(refreshToken);
     tokenRepository.save(token);
     return refreshToken;

@@ -14,13 +14,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import net.hzhou.note.service.component.JwtInstance;
 import net.hzhou.note.service.domain.JwtUser;
-import net.hzhou.note.service.utils.JwtUtils;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-  public JWTAuthorizationFilter(AuthenticationManager authManager) {
+  private final JwtInstance jwtInstance;
+
+  public JWTAuthorizationFilter(AuthenticationManager authManager, JwtInstance jwtInstance) {
     super(authManager);
+    this.jwtInstance = jwtInstance;
   }
 
   @Override
@@ -44,7 +47,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     String token = request.getHeader(SecurityConstants.HEADER_STRING);
     if (token != null) {
       // parse the token.
-      DecodedJWT decodedJWT = JwtUtils.verifyAccessToken(token);
+      DecodedJWT decodedJWT = jwtInstance.verifyAccessToken(token);
 
       if (decodedJWT != null) {
         return new UsernamePasswordAuthenticationToken(

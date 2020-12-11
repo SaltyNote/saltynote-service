@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
+import net.hzhou.note.service.component.JwtInstance;
 import net.hzhou.note.service.domain.JwtToken;
 import net.hzhou.note.service.domain.JwtUser;
 import net.hzhou.note.service.entity.RefreshToken;
@@ -21,7 +22,6 @@ import net.hzhou.note.service.entity.SiteUser;
 import net.hzhou.note.service.exception.WebClientRuntimeException;
 import net.hzhou.note.service.repository.RefreshTokenRepository;
 import net.hzhou.note.service.repository.UserRepository;
-import net.hzhou.note.service.utils.JwtUtils;
 
 @RestController
 @Slf4j
@@ -30,14 +30,16 @@ public class UserController {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final RefreshTokenRepository tokenRepository;
+  private final JwtInstance jwtInstance;
 
   public UserController(
-      UserRepository userRepository,
-      BCryptPasswordEncoder bCryptPasswordEncoder,
-      RefreshTokenRepository tokenRepository) {
+          UserRepository userRepository,
+          BCryptPasswordEncoder bCryptPasswordEncoder,
+          RefreshTokenRepository tokenRepository, JwtInstance jwtInstance) {
     this.userRepository = userRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
+    this.jwtInstance = jwtInstance;
   }
 
   @PostMapping("/signup")
@@ -54,12 +56,12 @@ public class UserController {
   @PostMapping("/refresh_token")
   public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
     // 1. No expiry, and valid.
-    JwtUser user = JwtUtils.parseRefreshToken(jwtToken.getRefreshToken());
+    JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
     // 2. Not deleted from database.
     Optional<RefreshToken> token =
         tokenRepository.findByUserIdAndRefreshToken(user.getId(), jwtToken.getRefreshToken());
     if (token.isPresent()) {
-      String newToken = JwtUtils.createAccessToken(user);
+      String newToken = jwtInstance.createAccessToken(user);
       return ResponseEntity.ok(new JwtToken(newToken, null));
     } else {
       throw new WebClientRuntimeException("Invalid refresh token provided!");
