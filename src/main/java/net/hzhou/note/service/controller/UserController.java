@@ -1,5 +1,7 @@
 package net.hzhou.note.service.controller;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -9,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,5 +78,10 @@ public class UserController {
     log.info("[cleanRefreshTokens] user = {}", user);
     tokenRepository.deleteAllByUserId(user.getId());
     return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/")
+  public ResponseEntity<Map<String, String>> home(){
+    return ResponseEntity.ok(Collections.singletonMap("hello", "world"));
   }
 }
