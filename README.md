@@ -1,7 +1,6 @@
 # Web Note Service
 
 ![Project Build](https://github.com/zhouhao/web-note-service/workflows/Build/badge.svg)
-![CodeQL](https://github.com/zhouhao/web-note-service/workflows/CodeQL/badge.svg)
 
 ## How to Run
 
