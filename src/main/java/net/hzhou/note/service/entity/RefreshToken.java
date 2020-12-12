@@ -19,20 +19,19 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class RefreshToken implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+  @Column(name = "user_id", nullable = false)
+  private Integer userId;
 
-    @Column(name = "refresh_token", nullable = false)
-    private String refreshToken;
+  @Column(name = "refresh_token", nullable = false)
+  private String refreshToken;
 
-    @Column(name = "created_time", nullable = false)
-    private LocalDateTime createdTime;
-
+  @Column(name = "created_time", nullable = false)
+  private LocalDateTime createdTime;
 }

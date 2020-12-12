@@ -20,31 +20,30 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Note implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+  @Column(name = "user_id", nullable = false)
+  private Integer userId;
 
-    @Column(name = "text", nullable = false)
-    private String text;
+  @Column(name = "text", nullable = false)
+  private String text;
 
-    @Column(name = "url", nullable = false)
-    @NotBlank
-    private String url;
+  @Column(name = "url", nullable = false)
+  @NotBlank
+  private String url;
 
-    @Column(name = "note")
-    @NotBlank
-    private String note;
+  @Column(name = "note")
+  @NotBlank
+  private String note;
 
-    @Column(name = "is_page_only")
-    private Boolean pageOnly;
+  @Column(name = "is_page_only")
+  private Boolean pageOnly;
 
-    @Column(name = "created_time", nullable = false)
-    private LocalDateTime createdTime;
-
+  @Column(name = "created_time", nullable = false)
+  private LocalDateTime createdTime;
 }
