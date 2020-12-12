@@ -9,16 +9,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import net.hzhou.note.service.domain.IdentifiableUser;
 
 @Entity
 @Table(name = "user")
 @Data
 @Accessors(chain = true)
-public class SiteUser implements Serializable {
+public class SiteUser implements Serializable, IdentifiableUser {
 
   private static final long serialVersionUID = 1L;
 
@@ -31,9 +33,17 @@ public class SiteUser implements Serializable {
   @NotBlank
   private String username;
 
+  @Column(name = "email", nullable = false)
+  @NotBlank
+  @Email
+  private String email;
+
   @Column(name = "password", nullable = false)
   @NotBlank
   private String password;
+
+  @Column(name = "email_verified")
+  private Boolean emailVerified;
 
   @Column(name = "register_time")
   private LocalDateTime registerTime;
