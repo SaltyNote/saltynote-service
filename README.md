@@ -1,4 +1,4 @@
-# Web Note Service
+# SaltyNote Service
 
 ![Build & Deploy](https://github.com/zhouhao/web-note-service/workflows/Build%20&%20Deploy/badge.svg)
 ![CodeQL](https://github.com/zhouhao/web-note-service/workflows/CodeQL/badge.svg)
