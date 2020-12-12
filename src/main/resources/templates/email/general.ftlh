@@ -463,7 +463,7 @@
                                     href="https://saltynote.com"
                                     class="f-fallback email-masthead_name"
                             >
-                                SaltyNote
+                                <img src="https://hzhou-files.netlify.app/saltynote/logo.png" alt="SaltyNote">
                             </a>
                         </td>
                     </tr>
