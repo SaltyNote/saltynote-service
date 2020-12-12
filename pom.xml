@@ -11,8 +11,8 @@
     <groupId>net.hzhou.note</groupId>
     <artifactId>service</artifactId>
     <version>0.0.1</version>
-    <name>web-note-service</name>
-    <description>Backend service for web note</description>
+    <name>saltynote-service</name>
+    <description>Backend service for saltynote</description>
 
     <properties>
         <java.version>11</java.version>
