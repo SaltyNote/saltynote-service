@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,9 +34,10 @@ public class UserController {
   private final JwtInstance jwtInstance;
 
   public UserController(
-          UserRepository userRepository,
-          BCryptPasswordEncoder bCryptPasswordEncoder,
-          RefreshTokenRepository tokenRepository, JwtInstance jwtInstance) {
+      UserRepository userRepository,
+      BCryptPasswordEncoder bCryptPasswordEncoder,
+      RefreshTokenRepository tokenRepository,
+      JwtInstance jwtInstance) {
     this.userRepository = userRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
@@ -64,7 +66,8 @@ public class UserController {
       String newToken = jwtInstance.createAccessToken(user);
       return ResponseEntity.ok(new JwtToken(newToken, null));
     } else {
-      throw new WebClientRuntimeException("Invalid refresh token provided!");
+      throw new WebClientRuntimeException(
+          HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
     }
   }
 

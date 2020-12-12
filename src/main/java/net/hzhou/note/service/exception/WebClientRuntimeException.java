@@ -1,7 +1,14 @@
 package net.hzhou.note.service.exception;
 
+import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
+
 public class WebClientRuntimeException extends RuntimeException {
-  public WebClientRuntimeException(String message) {
+  @Getter private HttpStatus status;
+
+  public WebClientRuntimeException(HttpStatus status, String message) {
     super(message);
+    this.status = status;
   }
 }

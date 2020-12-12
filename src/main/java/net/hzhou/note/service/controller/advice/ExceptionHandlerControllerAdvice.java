@@ -24,8 +24,8 @@ public class ExceptionHandlerControllerAdvice {
 
   @ExceptionHandler(WebClientRuntimeException.class)
   public ResponseEntity<GenericError> handleWebClientRuntimeException(WebClientRuntimeException e) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new GenericError(HttpStatus.BAD_REQUEST, e.getMessage()));
+    return ResponseEntity.status(e.getStatus())
+        .body(new GenericError(e.getStatus(), e.getMessage()));
   }
 
   @ExceptionHandler(RuntimeException.class)
