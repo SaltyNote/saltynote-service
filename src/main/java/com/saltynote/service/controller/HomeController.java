@@ -1,17 +1,20 @@
 package com.saltynote.service.controller;
 
-import java.util.Collections;
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saltynote.service.domain.transfer.ServiceResponse;
+
 @RestController
 public class HomeController {
 
+  @Value("${app.welcome.message}")
+  private String welcomeMessage;
+
   @GetMapping("/")
-  public ResponseEntity<Map<String, String>> home() {
-    return ResponseEntity.ok(Collections.singletonMap("hello", "world"));
+  public ResponseEntity<ServiceResponse> home() {
+    return ResponseEntity.ok(ServiceResponse.ok(welcomeMessage));
   }
 }

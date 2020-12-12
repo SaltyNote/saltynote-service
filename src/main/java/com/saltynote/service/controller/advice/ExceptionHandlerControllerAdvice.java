@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.saltynote.service.domain.transfer.GenericError;
+import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.exception.WebClientRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,14 +23,15 @@ public class ExceptionHandlerControllerAdvice {
   }
 
   @ExceptionHandler(WebClientRuntimeException.class)
-  public ResponseEntity<GenericError> handleWebClientRuntimeException(WebClientRuntimeException e) {
+  public ResponseEntity<ServiceResponse> handleWebClientRuntimeException(
+      WebClientRuntimeException e) {
     return ResponseEntity.status(e.getStatus())
-        .body(new GenericError(e.getStatus(), e.getMessage()));
+        .body(new ServiceResponse(e.getStatus(), e.getMessage()));
   }
 
   @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<GenericError> handleRuntimeException(RuntimeException e) {
+  public ResponseEntity<ServiceResponse> handleRuntimeException(RuntimeException e) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(new GenericError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+        .body(new ServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
   }
 }
