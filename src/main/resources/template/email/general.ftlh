@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title></title>
     <style type="text/css" rel="stylesheet" media="all">
         /* Base ------------------------------ */
@@ -18,7 +17,7 @@
         }
 
         a {
-            color: #3869D4;
+            color: #3869d4;
         }
 
         a img {
@@ -82,7 +81,7 @@
         ul,
         ol,
         blockquote {
-            margin: .4em 0 1.1875em;
+            margin: 0.4em 0 1.1875em;
             font-size: 16px;
             line-height: 1.625;
         }
@@ -108,13 +107,13 @@
         /* Buttons ------------------------------ */
 
         .button {
-            background-color: #3869D4;
-            border-top: 10px solid #3869D4;
-            border-right: 18px solid #3869D4;
-            border-bottom: 10px solid #3869D4;
-            border-left: 18px solid #3869D4;
+            background-color: #3869d4;
+            border-top: 10px solid #3869d4;
+            border-right: 18px solid #3869d4;
+            border-bottom: 10px solid #3869d4;
+            border-left: 18px solid #3869d4;
             display: inline-block;
-            color: #FFF;
+            color: #fff;
             text-decoration: none;
             border-radius: 3px;
             box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
@@ -123,19 +122,19 @@
         }
 
         .button--green {
-            background-color: #22BC66;
-            border-top: 10px solid #22BC66;
-            border-right: 18px solid #22BC66;
-            border-bottom: 10px solid #22BC66;
-            border-left: 18px solid #22BC66;
+            background-color: #22bc66;
+            border-top: 10px solid #22bc66;
+            border-right: 18px solid #22bc66;
+            border-bottom: 10px solid #22bc66;
+            border-left: 18px solid #22bc66;
         }
 
         .button--red {
-            background-color: #FF6136;
-            border-top: 10px solid #FF6136;
-            border-right: 18px solid #FF6136;
-            border-bottom: 10px solid #FF6136;
-            border-left: 18px solid #FF6136;
+            background-color: #ff6136;
+            border-top: 10px solid #ff6136;
+            border-right: 18px solid #ff6136;
+            border-bottom: 10px solid #ff6136;
+            border-left: 18px solid #ff6136;
         }
 
         @media only screen and (max-width: 500px) {
@@ -152,7 +151,7 @@
         }
 
         .attributes_content {
-            background-color: #F4F4F7;
+            background-color: #f4f4f7;
             padding: 16px;
         }
 
@@ -173,14 +172,14 @@
 
         .related_item {
             padding: 10px 0;
-            color: #CBCCCF;
+            color: #cbcccf;
             font-size: 15px;
             line-height: 18px;
         }
 
         .related_item-title {
             display: block;
-            margin: .5em 0 0;
+            margin: 0.5em 0 0;
         }
 
         .related_item-thumb {
@@ -189,7 +188,7 @@
         }
 
         .related_heading {
-            border-top: 1px solid #CBCCCF;
+            border-top: 1px solid #cbcccf;
             text-align: center;
             padding: 25px 0 10px;
         }
@@ -203,8 +202,8 @@
             -premailer-width: 100%;
             -premailer-cellpadding: 0;
             -premailer-cellspacing: 0;
-            background-color: #F4F4F7;
-            border: 2px dashed #CBCCCF;
+            background-color: #f4f4f7;
+            border: 2px dashed #cbcccf;
         }
 
         .discount_heading {
@@ -255,25 +254,25 @@
 
         .purchase_item {
             padding: 10px 0;
-            color: #51545E;
+            color: #51545e;
             font-size: 15px;
             line-height: 18px;
         }
 
         .purchase_heading {
             padding-bottom: 8px;
-            border-bottom: 1px solid #EAEAEC;
+            border-bottom: 1px solid #eaeaec;
         }
 
         .purchase_heading p {
             margin: 0;
-            color: #85878E;
+            color: #85878e;
             font-size: 12px;
         }
 
         .purchase_footer {
             padding-top: 15px;
-            border-top: 1px solid #EAEAEC;
+            border-top: 1px solid #eaeaec;
         }
 
         .purchase_total {
@@ -288,12 +287,12 @@
         }
 
         body {
-            background-color: #F2F4F6;
-            color: #51545E;
+            background-color: #f2f4f6;
+            color: #51545e;
         }
 
         p {
-            color: #51545E;
+            color: #51545e;
         }
 
         .email-wrapper {
@@ -303,7 +302,7 @@
             -premailer-width: 100%;
             -premailer-cellpadding: 0;
             -premailer-cellspacing: 0;
-            background-color: #F2F4F6;
+            background-color: #f2f4f6;
         }
 
         .email-content {
@@ -329,7 +328,7 @@
         .email-masthead_name {
             font-size: 16px;
             font-weight: bold;
-            color: #A8AAAF;
+            color: #a8aaaf;
             text-decoration: none;
             text-shadow: 0 1px 0 white;
         }
@@ -352,7 +351,7 @@
             -premailer-width: 570px;
             -premailer-cellpadding: 0;
             -premailer-cellspacing: 0;
-            background-color: #FFFFFF;
+            background-color: #ffffff;
         }
 
         .email-footer {
@@ -366,7 +365,7 @@
         }
 
         .email-footer p {
-            color: #A8AAAF;
+            color: #a8aaaf;
         }
 
         .body-action {
@@ -382,7 +381,7 @@
         .body-sub {
             margin-top: 25px;
             padding-top: 25px;
-            border-top: 1px solid #EAEAEC;
+            border-top: 1px solid #eaeaec;
         }
 
         .content-cell {
@@ -407,7 +406,7 @@
             .email-masthead,
             .email-footer {
                 background-color: #333333 !important;
-                color: #FFF !important;
+                color: #fff !important;
             }
 
             p,
@@ -417,7 +416,7 @@
             h1,
             h2,
             h3 {
-                color: #FFF !important;
+                color: #fff !important;
             }
 
             .attributes_content,
@@ -439,146 +438,146 @@
     <![endif]-->
 </head>
 <body>
-<span class="preheader">Thanks for trying out [Product Name]. We’ve pulled together some information and resources to help you get started.</span>
-<table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-    <tr>
-        <td align="center">
-            <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                <tr>
-                    <td class="email-masthead">
-                        <a href="https://example.com" class="f-fallback email-masthead_name">
-                            [Product Name]
-                        </a>
-                    </td>
-                </tr>
-                <!-- Email Body -->
-                <tr>
-                    <td class="email-body" width="570" cellpadding="0" cellspacing="0">
-                        <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0"
-                               role="presentation">
-                            <!-- Body content -->
-                            <tr>
-                                <td class="content-cell">
-                                    <div class="f-fallback">
-                                        <h1>Welcome, {{name}}!</h1>
-                                        <p>Thanks for trying [Product Name]. We’re thrilled to have you on board. To get
-                                            the most out of [Product Name], do this primary next step:</p>
-                                        <!-- Action -->
-                                        <table class="body-action" align="center" width="100%" cellpadding="0"
-                                               cellspacing="0" role="presentation">
-                                            <tr>
-                                                <td align="center">
-                                                    <!-- Border based button
-                                 https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
-                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0"
-                                                           role="presentation">
-                                                        <tr>
-                                                            <td align="center">
-                                                                <a href="{{action_url}}" class="f-fallback button"
-                                                                   target="_blank">Do this Next</a>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <p>For reference, here's your login information:</p>
-                                        <table class="attributes" width="100%" cellpadding="0" cellspacing="0"
-                                               role="presentation">
-                                            <tr>
-                                                <td class="attributes_content">
-                                                    <table width="100%" cellpadding="0" cellspacing="0"
-                                                           role="presentation">
-                                                        <tr>
-                                                            <td class="attributes_item">
-                                    <span class="f-fallback">
-              <strong>Login Page:</strong> {{login_url}}
-            </span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="attributes_item">
-                                    <span class="f-fallback">
-              <strong>Username:</strong> {{username}}
-            </span>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <p>You've started a {{trial_length}} day trial. You can upgrade to a paying
-                                            account or cancel any time.</p>
-                                        <table class="attributes" width="100%" cellpadding="0" cellspacing="0"
-                                               role="presentation">
-                                            <tr>
-                                                <td class="attributes_content">
-                                                    <table width="100%" cellpadding="0" cellspacing="0"
-                                                           role="presentation">
-                                                        <tr>
-                                                            <td class="attributes_item">
-                                    <span class="f-fallback">
-              <strong>Trial Start Date:</strong> {{trial_start_date}}
-            </span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="attributes_item">
-                                    <span class="f-fallback">
-              <strong>Trial End Date:</strong> {{trial_end_date}}
-            </span>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <p>If you have any questions, feel free to <a href="mailto:{{support_email}}">email
-                                                our customer success team</a>. (We're lightning quick at replying.) We
-                                            also offer <a href="{{live_chat_url}}">live chat</a> during business hours.
+    <span class="preheader"
+    >Thanks for trying out SaltyNote. We hope you enjoy it.</span
+    >
+    <table
+            class="email-wrapper"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            role="presentation"
+    >
+        <tr>
+            <td align="center">
+                <table
+                        class="email-content"
+                        width="100%"
+                        cellpadding="0"
+                        cellspacing="0"
+                        role="presentation"
+                >
+                    <tr>
+                        <td class="email-masthead">
+                            <a
+                                    href="https://saltynote.com"
+                                    class="f-fallback email-masthead_name"
+                            >
+                                SaltyNote
+                            </a>
+                        </td>
+                    </tr>
+                    <!-- Email Body -->
+                    <tr>
+                        <td
+                                class="email-body"
+                                width="570"
+                                cellpadding="0"
+                                cellspacing="0"
+                        >
+                            <table
+                                    class="email-body_inner"
+                                    align="center"
+                                    width="570"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    role="presentation"
+                            >
+                                <!-- Body content -->
+                                <tr>
+                                    <td class="content-cell">
+                                        <div class="f-fallback">
+                                            <h1>Hi, ${username}!</h1>
+                                            <p>
+                                                Thanks for using SaltyNote. ${message}
+                                            </p>
+                                            <!-- Action -->
+                                            <#if linkText??>
+                                                <table
+                                                        class="body-action"
+                                                        align="center"
+                                                        width="100%"
+                                                        cellpadding="0"
+                                                        cellspacing="0"
+                                                        role="presentation"
+                                                >
+                                                    <tr>
+                                                        <td align="center">
+                                                            <!-- Border based button
+                                                               https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
+                                                            <table
+                                                                    width="100%"
+                                                                    border="0"
+                                                                    cellspacing="0"
+                                                                    cellpadding="0"
+                                                                    role="presentation"
+                                                            >
+                                                                <tr>
+                                                                    <td align="center">
+                                                                        <a
+                                                                                href="${link}"
+                                                                                class="f-fallback button"
+                                                                                target="_blank"
+                                                                        >${linkText}</a
+                                                                        >
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </#if>
+                                            <p>
+                                                If you have any questions, feel free to
+                                                <a href="mailto:contact@saltynote.com"
+                                                >email our support team</a
+                                                >. (We're lightning quick at replying.)
+                                            </p>
+                                            <p>Thanks, <br />SaltyNote Team</p>
+                                            <#if link?starts_with("http")>
+                                                <!-- Sub copy -->
+                                                <table class="body-sub" role="presentation">
+                                                    <tr>
+                                                        <td>
+                                                            <p class="f-fallback sub">
+                                                                If you’re having trouble with the button above,
+                                                                copy and paste the URL below into your web
+                                                                browser.
+                                                            </p>
+                                                            <p class="f-fallback sub">{{action_url}}</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </#if>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table
+                                    class="email-footer"
+                                    align="center"
+                                    width="570"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    role="presentation"
+                            >
+                                <tr>
+                                    <td class="content-cell" align="center">
+                                        <p class="f-fallback sub align-center">
+                                            ${.now?string('yyyy')} SaltyNote. All rights reserved.
                                         </p>
-                                        <p>Thanks,
-                                            <br>[Sender Name] and the [Product Name] Team</p>
-                                        <p><strong>P.S.</strong> Need immediate help getting started? Check out our <a
-                                                    href="{{help_url}}">help documentation</a>. Or, just reply to this
-                                            email, the [Product Name] support team is always ready to help!</p>
-                                        <!-- Sub copy -->
-                                        <table class="body-sub" role="presentation">
-                                            <tr>
-                                                <td>
-                                                    <p class="f-fallback sub">If you’re having trouble with the button
-                                                        above, copy and paste the URL below into your web browser.</p>
-                                                    <p class="f-fallback sub">{{action_url}}</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0"
-                               role="presentation">
-                            <tr>
-                                <td class="content-cell" align="center">
-                                    <p class="f-fallback sub align-center">&copy; 2019 [Product Name]. All rights
-                                        reserved.</p>
-                                    <p class="f-fallback sub align-center">
-                                        [Company Name, LLC]
-                                        <br>1234 Street Rd.
-                                        <br>Suite 1234
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
