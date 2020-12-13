@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.RefreshToken;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.exception.WebClientRuntimeException;
@@ -45,7 +46,8 @@ public class UserController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<JwtUser> signUp(@Valid @RequestBody SiteUser siteUser) {
+  public ResponseEntity<JwtUser> signUp(@Valid @RequestBody UserCredential userCredential) {
+    SiteUser siteUser = userCredential.toSiteUser();
     siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
     siteUser = userRepository.save(siteUser);
     if (siteUser.getId() > 0) {
