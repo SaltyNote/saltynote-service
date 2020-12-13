@@ -44,6 +44,9 @@ public class Note implements Serializable {
   @Column(name = "is_page_only")
   private Boolean pageOnly;
 
+  @Column(name = "highlight_color")
+  private String highlightColor;
+
   @Column(name = "created_time", nullable = false)
   private LocalDateTime createdTime;
 }
