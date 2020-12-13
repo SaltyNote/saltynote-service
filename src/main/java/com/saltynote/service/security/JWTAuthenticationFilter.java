@@ -17,8 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.LoginUser;
+import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.RefreshToken;
-import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.repository.RefreshTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +41,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
       throws AuthenticationException {
     try {
-      SiteUser user = new ObjectMapper().readValue(req.getInputStream(), SiteUser.class);
+      UserCredential user = new ObjectMapper().readValue(req.getInputStream(), UserCredential.class);
 
       return authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
