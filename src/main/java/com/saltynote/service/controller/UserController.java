@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.RefreshToken;
 import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebClientRuntimeException;
 import com.saltynote.service.repository.RefreshTokenRepository;
 import com.saltynote.service.repository.UserRepository;
@@ -33,25 +35,29 @@ public class UserController {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final RefreshTokenRepository tokenRepository;
   private final JwtInstance jwtInstance;
+  private final ApplicationEventPublisher eventPublisher;
 
   public UserController(
       UserRepository userRepository,
       BCryptPasswordEncoder bCryptPasswordEncoder,
       RefreshTokenRepository tokenRepository,
-      JwtInstance jwtInstance) {
+      JwtInstance jwtInstance,
+      ApplicationEventPublisher eventPublisher) {
     this.userRepository = userRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
     this.jwtInstance = jwtInstance;
+    this.eventPublisher = eventPublisher;
   }
 
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signUp(@Valid @RequestBody UserCredential userCredential) {
-    SiteUser siteUser = userCredential.toSiteUser();
-    siteUser.setPassword(bCryptPasswordEncoder.encode(siteUser.getPassword()));
-    siteUser = userRepository.save(siteUser);
-    if (siteUser.getId() > 0) {
-      return ResponseEntity.ok(new JwtUser(siteUser.getId(), siteUser.getUsername()));
+    SiteUser user = userCredential.toSiteUser();
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    user = userRepository.save(user);
+    if (user.getId() > 0) {
+      eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
+      return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
     } else {
       throw new RuntimeException("Failed to signup, please try again later.");
     }
