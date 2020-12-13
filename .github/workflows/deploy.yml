@@ -6,8 +6,6 @@ name: Build & Deploy
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -24,3 +22,11 @@ jobs:
       run: docker-compose -f docker-compose.yml up -d
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Start ssh-agent
+      uses: webfactory/ssh-agent@v0.4.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy to remote server
+      run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/note-service/
+    - name: Restart service in remote server
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart note.service"
