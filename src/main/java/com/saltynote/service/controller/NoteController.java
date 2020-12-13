@@ -33,14 +33,14 @@ public class NoteController {
   }
 
   @GetMapping("/note/{id}")
-  public ResponseEntity<Note> getNote(@PathVariable("id") Integer id, Authentication auth) {
+  public ResponseEntity<Note> getNoteById(@PathVariable("id") Integer id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
     return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PutMapping("/note/{id}")
-  public ResponseEntity<Note> updateNote(
+  public ResponseEntity<Note> updateNoteById(
       @PathVariable("id") Integer id, @RequestBody Note note, Authentication auth) {
     Optional<Note> queryNote = noteRepository.findById(id);
     checkNoteOwner(queryNote, auth);
@@ -51,7 +51,7 @@ public class NoteController {
   }
 
   @DeleteMapping("/note/{id}")
-  public ResponseEntity<ServiceResponse> deleteNote(
+  public ResponseEntity<ServiceResponse> deleteNoteById(
       @PathVariable("id") Integer id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
