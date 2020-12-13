@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,9 +18,12 @@ import com.github.javafaker.Faker;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.repository.UserRepository;
+import com.saltynote.service.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,6 +38,7 @@ public class UserControllerTest {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private UserRepository userRepository;
+  @MockBean private EmailService emailService;
 
   private final Faker faker = new Faker();
 
@@ -44,6 +49,9 @@ public class UserControllerTest {
 
   @Test
   public void signupShouldReturnSuccess() throws Exception {
+
+    doNothing().when(emailService).sendAsHtml(any(), any(), any());
+
     UserCredential user = new UserCredential();
     String username = faker.name().username();
     user.setEmail(username + "@saltynote.com");
