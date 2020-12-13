@@ -38,4 +38,14 @@ public class ExceptionHandlerControllerAdvice {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Something is going wrong with the server, please try again later."));
   }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ServiceResponse> handleRuntimeException(Exception e) {
+    log.error(e.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(
+            new ServiceResponse(
+                HttpStatus.BAD_REQUEST,
+                "Something is going wrong with your request, please try again later."));
+  }
 }
