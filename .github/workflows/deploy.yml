@@ -1,10 +1,10 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Maven Build
+name: Deploy
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
@@ -22,3 +22,11 @@ jobs:
       run: docker-compose -f docker-compose.yml up -d
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Start ssh-agent
+      uses: webfactory/ssh-agent@v0.4.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy to remote server
+      run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/note-service/
+    - name: Restart service in remote server
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart note.service"
