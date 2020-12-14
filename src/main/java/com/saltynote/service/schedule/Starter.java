@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Starter implements CommandLineRunner {
   @Override
   public void run(String... args) {
-    String baseUrl = "http://127.0.0.1:8080";
+    String baseUrl = "http://127.0.0.1:8888";
     BaseUtils.setBaseUrl(baseUrl);
     log.info("Set base url to {}", baseUrl);
   }
