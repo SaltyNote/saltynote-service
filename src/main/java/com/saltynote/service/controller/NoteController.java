@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.NoteQuery;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.exception.WebClientRuntimeException;
@@ -63,6 +64,12 @@ public class NoteController {
   public List<Note> getNotes(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
     return noteRepository.findAllByUserId(user.getId());
+  }
+
+  @PostMapping("/notes")
+  public List<Note> getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
+    JwtUser user = (JwtUser) auth.getPrincipal();
+    return noteRepository.findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());
   }
 
   @PostMapping("/note")
