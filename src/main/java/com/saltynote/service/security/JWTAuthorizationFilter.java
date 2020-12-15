@@ -52,7 +52,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
       if (decodedJWT != null) {
         return new UsernamePasswordAuthenticationToken(
             new JwtUser(
-                decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asInt(),
+                decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
                 decodedJWT.getSubject()),
             null,
             Collections.emptyList());

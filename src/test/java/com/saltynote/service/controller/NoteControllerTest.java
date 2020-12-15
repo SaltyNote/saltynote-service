@@ -76,7 +76,7 @@ public class NoteControllerTest {
   private String accessToken;
   private Note savedNote;
 
-  private Note createTmpNote(Integer userId) {
+  private Note createTmpNote(String userId) {
     return new Note()
         .setUserId(userId)
         .setNote(faker.lorem().characters(50, 100))

@@ -63,7 +63,7 @@ public class JwtInstance {
     return createToken(user.getUsername(), user.getId(), tokenTTL, secret);
   }
 
-  private String createToken(String subject, Integer userId, Long tokenTTL, String secret)
+  private String createToken(String subject, String userId, Long tokenTTL, String secret)
       throws JWTCreationException {
     return JWT.create()
         .withSubject(subject)
@@ -79,7 +79,7 @@ public class JwtInstance {
 
   public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
     DecodedJWT jwt = refreshTokenVerifier.verify(token);
-    return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asInt(), jwt.getSubject());
+    return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
   }
 
   public String tokenToJson(String accessToken, String refreshToken)

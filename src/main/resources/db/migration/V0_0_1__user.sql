@@ -1,6 +1,6 @@
 create table user
 (
-    id            MEDIUMINT                           NOT NULL AUTO_INCREMENT primary key,
+    id            varchar(40)                         not null    primary key,
     username      varchar(128)                        not null,
     email         varchar(128)                        not null,
     password      varchar(128)                        not null,

@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.saltynote.service.entity.RefreshToken;
 
 public interface RefreshTokenRepository
-    extends JpaRepository<RefreshToken, Integer>, JpaSpecificationExecutor<RefreshToken> {
-  Optional<RefreshToken> findByUserIdAndRefreshToken(Integer userId, String refreshToken);
+    extends JpaRepository<RefreshToken, String>, JpaSpecificationExecutor<RefreshToken> {
+  Optional<RefreshToken> findByUserIdAndRefreshToken(String userId, String refreshToken);
 
-  void deleteAllByUserId(Integer userId);
+  void deleteAllByUserId(String userId);
 }

@@ -1,7 +1,7 @@
 create table refresh_token
 (
-    id            MEDIUMINT                           NOT NULL AUTO_INCREMENT primary key,
-    user_id       MEDIUMINT                           NOT NULL,
+    id            varchar(40)                         not null primary key,
+    user_id       varchar(40)                         NOT NULL,
     refresh_token varchar(512)                        not null,
     created_time  timestamp default CURRENT_TIMESTAMP not null
 );
