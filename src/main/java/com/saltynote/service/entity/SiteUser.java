@@ -1,7 +1,7 @@
 package com.saltynote.service.entity;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,5 +46,5 @@ public class SiteUser implements Serializable, IdentifiableUser {
   private Boolean emailVerified;
 
   @Column(name = "register_time")
-  private LocalDateTime registerTime;
+  private Date registerTime;
 }
