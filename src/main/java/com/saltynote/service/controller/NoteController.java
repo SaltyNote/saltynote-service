@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saltynote.service.domain.transfer.JwtUser;
@@ -41,7 +42,9 @@ public class NoteController {
     return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
-  @PostMapping("/note/{id}")
+  @RequestMapping(
+      value = "/note/{id}",
+      method = {RequestMethod.POST, RequestMethod.PUT})
   public ResponseEntity<Note> updateNoteById(
       @PathVariable("id") Integer id, @RequestBody Note note, Authentication auth) {
     Optional<Note> queryNote = noteRepository.findById(id);
@@ -59,6 +62,17 @@ public class NoteController {
 
   @DeleteMapping("/note/{id}")
   public ResponseEntity<ServiceResponse> deleteNoteById(
+      @PathVariable("id") Integer id, Authentication auth) {
+    Optional<Note> note = noteRepository.findById(id);
+    checkNoteOwner(note, auth);
+    noteRepository.deleteById(id);
+    return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
+  }
+
+  // TODO: this POST is required for chrome extension, which will block PUT and DELETE by default so
+  // far. Further investigation is required for this issue.
+  @PostMapping("/note/{id}/delete")
+  public ResponseEntity<ServiceResponse> postDeleteNoteById(
       @PathVariable("id") Integer id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
