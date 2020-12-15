@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,8 +46,13 @@ public class NoteController {
       @PathVariable("id") Integer id, @RequestBody Note note, Authentication auth) {
     Optional<Note> queryNote = noteRepository.findById(id);
     checkNoteOwner(queryNote, auth);
-    Note noteTobeUpdate =
-        queryNote.get().setNote(note.getNote()).setHighlightColor(note.getHighlightColor());
+    Note noteTobeUpdate = queryNote.get();
+    if (StringUtils.hasText(note.getNote())) {
+      noteTobeUpdate.setNote(note.getNote());
+    }
+    if (StringUtils.hasText(note.getHighlightColor())) {
+      noteTobeUpdate.setHighlightColor(note.getHighlightColor());
+    }
     noteTobeUpdate = noteRepository.save(noteTobeUpdate);
     return ResponseEntity.ok(noteTobeUpdate);
   }
