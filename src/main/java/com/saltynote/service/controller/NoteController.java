@@ -36,7 +36,7 @@ public class NoteController {
   }
 
   @GetMapping("/note/{id}")
-  public ResponseEntity<Note> getNoteById(@PathVariable("id") Integer id, Authentication auth) {
+  public ResponseEntity<Note> getNoteById(@PathVariable("id") String id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
     return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -46,7 +46,7 @@ public class NoteController {
       value = "/note/{id}",
       method = {RequestMethod.POST, RequestMethod.PUT})
   public ResponseEntity<Note> updateNoteById(
-      @PathVariable("id") Integer id, @RequestBody Note note, Authentication auth) {
+      @PathVariable("id") String id, @RequestBody Note note, Authentication auth) {
     Optional<Note> queryNote = noteRepository.findById(id);
     checkNoteOwner(queryNote, auth);
     Note noteTobeUpdate = queryNote.get();
@@ -62,7 +62,7 @@ public class NoteController {
 
   @DeleteMapping("/note/{id}")
   public ResponseEntity<ServiceResponse> deleteNoteById(
-      @PathVariable("id") Integer id, Authentication auth) {
+      @PathVariable("id") String id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
     noteRepository.deleteById(id);
@@ -73,7 +73,7 @@ public class NoteController {
   // far. Further investigation is required for this issue.
   @PostMapping("/note/{id}/delete")
   public ResponseEntity<ServiceResponse> postDeleteNoteById(
-      @PathVariable("id") Integer id, Authentication auth) {
+      @PathVariable("id") String id, Authentication auth) {
     Optional<Note> note = noteRepository.findById(id);
     checkNoteOwner(note, auth);
     noteRepository.deleteById(id);
@@ -97,7 +97,7 @@ public class NoteController {
     JwtUser user = (JwtUser) auth.getPrincipal();
     note.setUserId(user.getId());
     note = noteRepository.save(note);
-    if (note.getId() > 0) {
+    if (StringUtils.hasText(note.getId())) {
       return ResponseEntity.ok(note);
     }
     throw new RuntimeException("Failed to save note into database: " + note);

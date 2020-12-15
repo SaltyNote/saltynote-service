@@ -17,7 +17,7 @@ public class VaultService {
     this.vaultRepository = vaultRepository;
   }
 
-  public Vault create(@NotNull Integer userId, VaultType type) {
+  public Vault create(@NotNull String userId, VaultType type) {
     return vaultRepository.save(
         new Vault()
             .setUserId(userId)

@@ -1,7 +1,7 @@
 create table note
 (
-    id           MEDIUMINT                           NOT NULL AUTO_INCREMENT primary key,
-    user_id      MEDIUMINT                           NOT NULL,
+    id           varchar(40)                         not null primary key,
+    user_id      varchar(40)                         NOT NULL,
     text         varchar(512)                        not null,
     url          varchar(512)                        not null,
     note         text,

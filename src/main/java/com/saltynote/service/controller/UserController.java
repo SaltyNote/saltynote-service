@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,7 +56,7 @@ public class UserController {
     SiteUser user = userCredential.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userRepository.save(user);
-    if (user.getId() > 0) {
+    if (StringUtils.hasText(user.getId())) {
       eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
       return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
     } else {

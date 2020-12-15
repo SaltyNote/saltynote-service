@@ -1,16 +1,19 @@
 package com.saltynote.service.entity;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import org.springframework.util.StringUtils;
+
+import com.devskiller.friendly_id.FriendlyId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -23,12 +26,11 @@ public class Note implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
-  private Integer id;
+  private String id;
 
   @Column(name = "user_id", nullable = false)
-  private Integer userId;
+  private String userId;
 
   @Column(name = "text", nullable = false)
   private String text;
@@ -42,11 +44,24 @@ public class Note implements Serializable {
   private String note;
 
   @Column(name = "is_page_only")
+  @JsonProperty("is_page_only")
   private Boolean pageOnly;
 
   @Column(name = "highlight_color")
   private String highlightColor;
 
   @Column(name = "created_time", nullable = false)
-  private Date createdTime;
+  private Timestamp createdTime;
+
+  @PrePersist
+  private void beforeSave() {
+    this.id = FriendlyId.createFriendlyId();
+    this.createdTime = new Timestamp(System.currentTimeMillis());
+    if (this.pageOnly == null) {
+      this.pageOnly = false;
+    }
+    if (!StringUtils.hasText(this.highlightColor)) {
+      this.highlightColor = "";
+    }
+  }
 }

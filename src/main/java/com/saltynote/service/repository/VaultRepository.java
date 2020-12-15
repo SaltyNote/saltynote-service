@@ -6,4 +6,4 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.saltynote.service.entity.Vault;
 
 public interface VaultRepository
-    extends JpaRepository<Vault, Integer>, JpaSpecificationExecutor<Vault> {}
+    extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {}

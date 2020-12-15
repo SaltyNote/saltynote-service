@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.saltynote.service.entity.Note;
 
 public interface NoteRepository
-    extends JpaRepository<Note, Integer>, JpaSpecificationExecutor<Note> {
-  List<Note> findAllByUserId(Integer userId);
+    extends JpaRepository<Note, String>, JpaSpecificationExecutor<Note> {
+  List<Note> findAllByUserId(String userId);
 
-  List<Note> findAllByUserIdAndUrl(Integer userId, String url);
+  List<Note> findAllByUserIdAndUrl(String userId, String url);
 }
