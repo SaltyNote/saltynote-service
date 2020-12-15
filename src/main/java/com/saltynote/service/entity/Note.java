@@ -1,7 +1,7 @@
 package com.saltynote.service.entity;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,5 +48,5 @@ public class Note implements Serializable {
   private String highlightColor;
 
   @Column(name = "created_time", nullable = false)
-  private LocalDateTime createdTime;
+  private Date createdTime;
 }
