@@ -41,7 +41,7 @@ public class NoteController {
     return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
-  @PutMapping("/note/{id}")
+  @PostMapping("/note/{id}")
   public ResponseEntity<Note> updateNoteById(
       @PathVariable("id") Integer id, @RequestBody Note note, Authentication auth) {
     Optional<Note> queryNote = noteRepository.findById(id);
