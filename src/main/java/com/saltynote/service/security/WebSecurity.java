@@ -13,8 +13,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.saltynote.service.component.JwtInstance;
-import com.saltynote.service.repository.RefreshTokenRepository;
 import com.saltynote.service.service.UserDetailsServiceImpl;
+import com.saltynote.service.service.VaultService;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
@@ -23,17 +23,17 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   };
   private final UserDetailsServiceImpl userDetailsService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
-  private final RefreshTokenRepository tokenRepository;
+  private final VaultService vaultService;
   private final JwtInstance jwtInstance;
 
   public WebSecurity(
       UserDetailsServiceImpl userDetailsService,
       BCryptPasswordEncoder bCryptPasswordEncoder,
-      RefreshTokenRepository tokenRepository,
+      VaultService vaultService,
       JwtInstance jwtInstance) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    this.tokenRepository = tokenRepository;
+    this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
   }
 
@@ -52,7 +52,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             .anyRequest()
               .authenticated()
         .and()
-          .addFilter(new JWTAuthenticationFilter(authenticationManager(), tokenRepository, jwtInstance))
+          .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance))
           .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
           // this disables session creation on Spring Security
           .sessionManagement()

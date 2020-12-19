@@ -131,7 +131,7 @@ public class NoteControllerTest {
 
   @AfterEach
   public void tearDown() {
-    userService.getRepository().deleteById(siteUser.getId());
+    userService.cleanupByUserId(siteUser.getId());
     noteService.getRepository().deleteAll(notesToCleaned);
   }
 

@@ -18,22 +18,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.LoginUser;
 import com.saltynote.service.domain.transfer.UserCredential;
-import com.saltynote.service.entity.RefreshToken;
-import com.saltynote.service.repository.RefreshTokenRepository;
+import com.saltynote.service.service.VaultService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
-  private final RefreshTokenRepository tokenRepository;
+  private final VaultService vaultService;
   private final JwtInstance jwtInstance;
 
   public JWTAuthenticationFilter(
       AuthenticationManager authenticationManager,
-      RefreshTokenRepository tokenRepository,
+      VaultService vaultService,
       JwtInstance jwtInstance) {
     this.authenticationManager = authenticationManager;
-    this.tokenRepository = tokenRepository;
+    this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
   }
 
@@ -41,7 +40,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
       throws AuthenticationException {
     try {
-      UserCredential user = new ObjectMapper().readValue(req.getInputStream(), UserCredential.class);
+      UserCredential user =
+          new ObjectMapper().readValue(req.getInputStream(), UserCredential.class);
 
       return authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
@@ -58,16 +58,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     LoginUser user = (LoginUser) auth.getPrincipal();
     String accessToken = jwtInstance.createAccessToken(user);
-    String refreshToken = processRefreshToken(user);
+    String refreshToken = vaultService.createRefreshToken(user);
     res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
     res.setContentType(MediaType.APPLICATION_JSON_VALUE);
     res.getWriter().write(jwtInstance.tokenToJson(accessToken, refreshToken));
-  }
-
-  private String processRefreshToken(LoginUser user) {
-    String refreshToken = jwtInstance.createRefreshToken(user);
-    RefreshToken token = new RefreshToken().setUserId(user.getId()).setRefreshToken(refreshToken);
-    tokenRepository.save(token);
-    return refreshToken;
   }
 }

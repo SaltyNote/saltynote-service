@@ -12,4 +12,8 @@ public interface VaultRepository
   Optional<Vault> findBySecret(String secret);
 
   void deleteByUserId(String userId);
+
+  void deleteByUserIdAndType(String userId, String type);
+
+  Optional<Vault> findByUserIdAndTypeAndSecret(String userId, String type, String secret);
 }
