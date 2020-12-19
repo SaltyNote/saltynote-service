@@ -1,6 +1,7 @@
 package com.saltynote.service.service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
@@ -14,8 +15,10 @@ import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.repository.VaultRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class VaultService {
   private final VaultRepository vaultRepository;
   private final ObjectMapper objectMapper;
@@ -41,7 +44,13 @@ public class VaultService {
     return encode(VaultEntity.from(vault));
   }
 
-  public VaultEntity decode(@NotNull String encodedValue) throws IOException {
-    return objectMapper.readValue(Base64Utils.decodeFromString(encodedValue), VaultEntity.class);
+  public Optional<VaultEntity> decode(@NotNull String encodedValue) {
+    try {
+      return Optional.of(
+          objectMapper.readValue(Base64Utils.decodeFromString(encodedValue), VaultEntity.class));
+    } catch (IOException e) {
+      log.error(e.getMessage(), e);
+      return Optional.empty();
+    }
   }
 }

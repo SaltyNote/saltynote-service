@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saltynote.service.component.JwtInstance;
+import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.ServiceResponse;
@@ -30,7 +31,9 @@ import com.saltynote.service.exception.WebClientRuntimeException;
 import com.saltynote.service.repository.RefreshTokenRepository;
 import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.repository.VaultRepository;
+import com.saltynote.service.service.VaultService;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 @RestController
 @Slf4j
@@ -42,6 +45,7 @@ public class UserController {
   private final JwtInstance jwtInstance;
   private final ApplicationEventPublisher eventPublisher;
   private final VaultRepository vaultRepository;
+  private final VaultService vaultService;
 
   public UserController(
       UserRepository userRepository,
@@ -49,13 +53,15 @@ public class UserController {
       RefreshTokenRepository tokenRepository,
       JwtInstance jwtInstance,
       ApplicationEventPublisher eventPublisher,
-      VaultRepository vaultRepository) {
+      VaultRepository vaultRepository,
+      VaultService vaultService) {
     this.userRepository = userRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
     this.jwtInstance = jwtInstance;
     this.eventPublisher = eventPublisher;
     this.vaultRepository = vaultRepository;
+    this.vaultService = vaultService;
   }
 
   @PostMapping("/signup")
@@ -96,14 +102,41 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @PostMapping("/user/activation/{token}")
+  @PostMapping("/email/verification/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
-    Optional<Vault> vault = vaultRepository.findBySecret(token);
-    // TODO: implementation
-    if (vault.isPresent()) {
-      Optional<SiteUser> user = userRepository.findById(vault.get().getUserId());
+    val wre = new WebClientRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
+    Optional<VaultEntity> veo = vaultService.decode(token);
+    if (veo.isEmpty()) {
+      throw wre;
     }
-    
-    return null;
+    VaultEntity ve = veo.get();
+    Optional<Vault> vault = vaultRepository.findBySecret(ve.getSecret());
+    if (vault.isPresent()) {
+      if (!vault.get().getUserId().equals(ve.getUserId())) {
+        log.error(
+            "User id are not match from decoded token {} and database {}",
+            ve.getUserId(),
+            vault.get().getUserId());
+        throw wre;
+      }
+    }
+    Optional<SiteUser> usero = userRepository.findById(ve.getUserId());
+    if (usero.isEmpty()) {
+      log.error("User is not found for user id = {}", ve.getUserId());
+      throw wre;
+    }
+
+    SiteUser user = usero.get();
+    if (user.getEmailVerified()) {
+      return ResponseEntity.ok(ServiceResponse.ok("Email is already verified"));
+    }
+    if (vault.isPresent()) {
+      user.setEmailVerified(true);
+      userRepository.save(user);
+      vaultRepository.delete(vault.get());
+      return ResponseEntity.ok(ServiceResponse.ok("Email is verified now"));
+    } else {
+      throw wre;
+    }
   }
 }
