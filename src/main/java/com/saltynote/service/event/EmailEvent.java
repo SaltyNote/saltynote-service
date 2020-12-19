@@ -4,7 +4,6 @@ import org.springframework.context.ApplicationEvent;
 
 import com.saltynote.service.domain.EmailPayload;
 import com.saltynote.service.entity.SiteUser;
-import com.saltynote.service.entity.Vault;
 import com.saltynote.service.utils.BaseUtils;
 import lombok.Getter;
 
@@ -19,9 +18,8 @@ public class EmailEvent extends ApplicationEvent {
             .setLinkText("Click to Verify Your Email")
             .setMessage("Below is the link for your email verification.")) {
       @Override
-      public Type loadVault(Vault vault) {
-
-        this.getPayload().setLink(BaseUtils.getConfirmationUrl(vault.getSecret()));
+      public Type loadLinkInfo(String linkInfo) {
+        this.getPayload().setLink(BaseUtils.getConfirmationUrl(linkInfo));
         return this;
       }
     };
@@ -39,7 +37,7 @@ public class EmailEvent extends ApplicationEvent {
       return this;
     }
 
-    public abstract Type loadVault(Vault vault);
+    public abstract Type loadLinkInfo(String linkInfo);
   }
 
   private SiteUser user;

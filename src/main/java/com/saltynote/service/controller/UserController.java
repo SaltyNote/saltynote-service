@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,13 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.RefreshToken;
 import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.entity.Vault;
 import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebClientRuntimeException;
 import com.saltynote.service.repository.RefreshTokenRepository;
 import com.saltynote.service.repository.UserRepository;
+import com.saltynote.service.repository.VaultRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -37,18 +41,21 @@ public class UserController {
   private final RefreshTokenRepository tokenRepository;
   private final JwtInstance jwtInstance;
   private final ApplicationEventPublisher eventPublisher;
+  private final VaultRepository vaultRepository;
 
   public UserController(
       UserRepository userRepository,
       BCryptPasswordEncoder bCryptPasswordEncoder,
       RefreshTokenRepository tokenRepository,
       JwtInstance jwtInstance,
-      ApplicationEventPublisher eventPublisher) {
+      ApplicationEventPublisher eventPublisher,
+      VaultRepository vaultRepository) {
     this.userRepository = userRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
     this.jwtInstance = jwtInstance;
     this.eventPublisher = eventPublisher;
+    this.vaultRepository = vaultRepository;
   }
 
   @PostMapping("/signup")
@@ -87,5 +94,14 @@ public class UserController {
     log.info("[cleanRefreshTokens] user = {}", user);
     tokenRepository.deleteAllByUserId(user.getId());
     return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/user/activation/{token}")
+  public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
+    Optional<Vault> vault = vaultRepository.findBySecret(token);
+    if (vault.isPresent()) {
+      Optional<SiteUser> user = userRepository.findById(vault.get().getUserId());
+    }
+    return null;
   }
 }

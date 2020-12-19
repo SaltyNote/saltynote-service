@@ -31,9 +31,13 @@ public class EmailEventListener {
       throws MessagingException, IOException, TemplateException {
     log.info(event.getType() + " - " + event.getUser());
     Vault vault = vaultService.create(event.getUser().getId(), VaultType.NEW_ACCOUNT);
-    //    emailService.sendAsHtml(
-    //        event.getUser().getEmail(),
-    //        event.getType().getSubject(),
-    //        event.getType().loadUser(event.getUser()).loadVault(vault).getPayload());
+    emailService.sendAsHtml(
+        event.getUser().getEmail(),
+        event.getType().getSubject(),
+        event
+            .getType()
+            .loadUser(event.getUser())
+            .loadLinkInfo(vaultService.encode(vault))
+            .getPayload());
   }
 }
