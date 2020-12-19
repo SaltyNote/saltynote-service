@@ -86,6 +86,7 @@ public class NoteControllerTest {
 
   private void signupTestUser() throws Exception {
     doNothing().when(emailService).sendAsHtml(any(), any(), any());
+    doNothing().when(emailService).send(any(), any(), any());
 
     UserCredential user = new UserCredential();
     String username = faker.name().username();
