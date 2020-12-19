@@ -10,4 +10,6 @@ import com.saltynote.service.entity.Vault;
 public interface VaultRepository
     extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {
   Optional<Vault> findBySecret(String secret);
+
+  void deleteByUserId(String userId);
 }

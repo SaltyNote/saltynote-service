@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class VaultService {
+public class VaultService implements RepositoryService<VaultRepository> {
   private final VaultRepository vaultRepository;
   private final ObjectMapper objectMapper;
 
@@ -52,5 +52,10 @@ public class VaultService {
       log.error(e.getMessage(), e);
       return Optional.empty();
     }
+  }
+
+  @Override
+  public VaultRepository getRepository() {
+    return vaultRepository;
   }
 }

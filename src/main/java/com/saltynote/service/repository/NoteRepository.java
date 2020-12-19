@@ -12,4 +12,6 @@ public interface NoteRepository
   List<Note> findAllByUserId(String userId);
 
   List<Note> findAllByUserIdAndUrl(String userId, String url);
+
+  void deleteByUserId(String userId);
 }

@@ -18,8 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
-import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTest {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private UserRepository userRepository;
+  @Autowired private UserService userService;
   @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
   @MockBean private EmailService emailService;
 
@@ -69,10 +69,10 @@ public class UserControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
 
-    SiteUser queryUser = userRepository.findByUsername(user.getUsername());
+    SiteUser queryUser = userService.getRepository().findByUsername(user.getUsername());
     assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
 
-    userRepository.deleteById(queryUser.getId());
+    userService.cleanupByUserId(queryUser.getId());
   }
 
   @Test
@@ -85,7 +85,7 @@ public class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
     SiteUser user = uc.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userRepository.save(user);
+    user = userService.getRepository().save(user);
 
     UserCredential userRequest =
         new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
@@ -97,7 +97,7 @@ public class UserControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
 
-    userRepository.delete(user);
+    userService.cleanupByUserId(user.getId());
   }
 
   @Test
@@ -110,7 +110,7 @@ public class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
     SiteUser user = uc.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userRepository.save(user);
+    user = userService.getRepository().save(user);
 
     UserCredential userRequest =
         new UserCredential()
@@ -124,6 +124,6 @@ public class UserControllerTest {
         .andDo(print())
         .andExpect(status().isUnauthorized());
 
-    userRepository.delete(user);
+    userService.cleanupByUserId(user.getId());
   }
 }

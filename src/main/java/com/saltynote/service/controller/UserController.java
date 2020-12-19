@@ -29,8 +29,7 @@ import com.saltynote.service.entity.Vault;
 import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebClientRuntimeException;
 import com.saltynote.service.repository.RefreshTokenRepository;
-import com.saltynote.service.repository.UserRepository;
-import com.saltynote.service.repository.VaultRepository;
+import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -39,36 +38,33 @@ import lombok.val;
 @Slf4j
 public class UserController {
 
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final RefreshTokenRepository tokenRepository;
   private final JwtInstance jwtInstance;
   private final ApplicationEventPublisher eventPublisher;
-  private final VaultRepository vaultRepository;
   private final VaultService vaultService;
 
   public UserController(
-      UserRepository userRepository,
       BCryptPasswordEncoder bCryptPasswordEncoder,
       RefreshTokenRepository tokenRepository,
       JwtInstance jwtInstance,
       ApplicationEventPublisher eventPublisher,
-      VaultRepository vaultRepository,
-      VaultService vaultService) {
-    this.userRepository = userRepository;
+      VaultService vaultService,
+      UserService userService) {
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.tokenRepository = tokenRepository;
     this.jwtInstance = jwtInstance;
     this.eventPublisher = eventPublisher;
-    this.vaultRepository = vaultRepository;
     this.vaultService = vaultService;
+    this.userService = userService;
   }
 
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signUp(@Valid @RequestBody UserCredential userCredential) {
     SiteUser user = userCredential.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userRepository.save(user);
+    user = userService.getRepository().save(user);
     if (StringUtils.hasText(user.getId())) {
       eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
       return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
@@ -98,7 +94,7 @@ public class UserController {
   public ResponseEntity<Void> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
     log.info("[cleanRefreshTokens] user = {}", user);
-    tokenRepository.deleteAllByUserId(user.getId());
+    tokenRepository.deleteByUserId(user.getId());
     return ResponseEntity.ok().build();
   }
 
@@ -110,7 +106,7 @@ public class UserController {
       throw wre;
     }
     VaultEntity ve = veo.get();
-    Optional<Vault> vault = vaultRepository.findBySecret(ve.getSecret());
+    Optional<Vault> vault = vaultService.getRepository().findBySecret(ve.getSecret());
     if (vault.isPresent()) {
       if (!vault.get().getUserId().equals(ve.getUserId())) {
         log.error(
@@ -120,7 +116,7 @@ public class UserController {
         throw wre;
       }
     }
-    Optional<SiteUser> usero = userRepository.findById(ve.getUserId());
+    Optional<SiteUser> usero = userService.getRepository().findById(ve.getUserId());
     if (usero.isEmpty()) {
       log.error("User is not found for user id = {}", ve.getUserId());
       throw wre;
@@ -132,8 +128,8 @@ public class UserController {
     }
     if (vault.isPresent()) {
       user.setEmailVerified(true);
-      userRepository.save(user);
-      vaultRepository.delete(vault.get());
+      userService.getRepository().save(user);
+      vaultService.getRepository().delete(vault.get());
       return ResponseEntity.ok(ServiceResponse.ok("Email is verified now"));
     } else {
       throw wre;
