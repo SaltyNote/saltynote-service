@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,7 @@ public class UserControllerTest {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private UserRepository userRepository;
+  @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
   @MockBean private EmailService emailService;
 
   private final Faker faker = new Faker();
@@ -51,6 +53,7 @@ public class UserControllerTest {
   public void signupShouldReturnSuccess() throws Exception {
 
     doNothing().when(emailService).sendAsHtml(any(), any(), any());
+    doNothing().when(emailService).send(any(), any(), any());
 
     UserCredential user = new UserCredential();
     String username = faker.name().username();
@@ -70,5 +73,57 @@ public class UserControllerTest {
     assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
 
     userRepository.deleteById(queryUser.getId());
+  }
+
+  @Test
+  public void loginShouldSuccess() throws Exception {
+
+    UserCredential uc =
+        new UserCredential()
+            .setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
+    SiteUser user = uc.toSiteUser();
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    user = userRepository.save(user);
+
+    UserCredential userRequest =
+        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+        .andDo(print())
+        .andExpect(status().isOk());
+
+    userRepository.delete(user);
+  }
+
+  @Test
+  public void loginShouldFail() throws Exception {
+
+    UserCredential uc =
+        new UserCredential()
+            .setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
+    SiteUser user = uc.toSiteUser();
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    user = userRepository.save(user);
+
+    UserCredential userRequest =
+        new UserCredential()
+            .setUsername(uc.getUsername())
+            .setPassword(uc.getPassword() + "not valid");
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+        .andDo(print())
+        .andExpect(status().isUnauthorized());
+
+    userRepository.delete(user);
   }
 }
