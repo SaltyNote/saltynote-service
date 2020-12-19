@@ -99,9 +99,11 @@ public class UserController {
   @PostMapping("/user/activation/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
     Optional<Vault> vault = vaultRepository.findBySecret(token);
+    // TODO: implementation
     if (vault.isPresent()) {
       Optional<SiteUser> user = userRepository.findById(vault.get().getUserId());
     }
+    
     return null;
   }
 }
