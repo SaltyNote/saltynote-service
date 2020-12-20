@@ -1,8 +1,8 @@
 # SaltyNote Service
 
-![Maven Build](https://github.com/zhouhao/web-note-service/workflows/Maven%20Build/badge.svg)
-![Deploy](https://github.com/zhouhao/web-note-service/workflows/Deploy/badge.svg)
-![CodeQL](https://github.com/zhouhao/web-note-service/workflows/CodeQL/badge.svg)
+![Maven Build](https://github.com/SaltyNote/saltynote-service/workflows/Maven%20Build/badge.svg)
+![Deploy](https://github.com/SaltyNote/saltynote-service/workflows/Deploy/badge.svg)
+![CodeQL](https://github.com/SaltyNote/saltynote-service/workflows/CodeQL/badge.svg)
 
 ## How to Run
 
