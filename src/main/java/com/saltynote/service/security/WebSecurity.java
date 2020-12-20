@@ -13,27 +13,31 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.saltynote.service.component.JwtInstance;
-import com.saltynote.service.repository.RefreshTokenRepository;
 import com.saltynote.service.service.UserDetailsServiceImpl;
+import com.saltynote.service.service.VaultService;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-  private static final String[] PUBLIC_ENDPOINTS = {
-    SecurityConstants.SIGN_UP_URL, "/refresh_token"
+  private static final String[] PUBLIC_POST_ENDPOINTS = {
+    SecurityConstants.SIGN_UP_URL, "/refresh_token", "/email/verification/*"
+  };
+
+  private static final String[] PUBLIC_GET_ENDPOINTS = {
+    "/", "/email/verification/*"
   };
   private final UserDetailsServiceImpl userDetailsService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
-  private final RefreshTokenRepository tokenRepository;
+  private final VaultService vaultService;
   private final JwtInstance jwtInstance;
 
   public WebSecurity(
       UserDetailsServiceImpl userDetailsService,
       BCryptPasswordEncoder bCryptPasswordEncoder,
-      RefreshTokenRepository tokenRepository,
+      VaultService vaultService,
       JwtInstance jwtInstance) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    this.tokenRepository = tokenRepository;
+    this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
   }
 
@@ -45,14 +49,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
           .csrf()
             .disable()
           .authorizeRequests()
-            .antMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+            .antMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
               .permitAll()
-            .antMatchers(HttpMethod.GET, "/")
+            .antMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
               .permitAll()
             .anyRequest()
               .authenticated()
         .and()
-          .addFilter(new JWTAuthenticationFilter(authenticationManager(), tokenRepository, jwtInstance))
+          .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance))
           .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
           // this disables session creation on Spring Security
           .sessionManagement()

@@ -23,21 +23,21 @@ import com.saltynote.service.domain.transfer.NoteQuery;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.exception.WebClientRuntimeException;
-import com.saltynote.service.repository.NoteRepository;
+import com.saltynote.service.service.NoteService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
 public class NoteController {
-  private final NoteRepository noteRepository;
+  private final NoteService noteService;
 
-  public NoteController(NoteRepository noteRepository) {
-    this.noteRepository = noteRepository;
+  public NoteController(NoteService noteService) {
+    this.noteService = noteService;
   }
 
   @GetMapping("/note/{id}")
   public ResponseEntity<Note> getNoteById(@PathVariable("id") String id, Authentication auth) {
-    Optional<Note> note = noteRepository.findById(id);
+    Optional<Note> note = noteService.getRepository().findById(id);
     checkNoteOwner(note, auth);
     return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
@@ -47,7 +47,7 @@ public class NoteController {
       method = {RequestMethod.POST, RequestMethod.PUT})
   public ResponseEntity<Note> updateNoteById(
       @PathVariable("id") String id, @RequestBody Note note, Authentication auth) {
-    Optional<Note> queryNote = noteRepository.findById(id);
+    Optional<Note> queryNote = noteService.getRepository().findById(id);
     checkNoteOwner(queryNote, auth);
     Note noteTobeUpdate = queryNote.get();
     if (StringUtils.hasText(note.getNote())) {
@@ -56,16 +56,16 @@ public class NoteController {
     if (StringUtils.hasText(note.getHighlightColor())) {
       noteTobeUpdate.setHighlightColor(note.getHighlightColor());
     }
-    noteTobeUpdate = noteRepository.save(noteTobeUpdate);
+    noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);
     return ResponseEntity.ok(noteTobeUpdate);
   }
 
   @DeleteMapping("/note/{id}")
   public ResponseEntity<ServiceResponse> deleteNoteById(
       @PathVariable("id") String id, Authentication auth) {
-    Optional<Note> note = noteRepository.findById(id);
+    Optional<Note> note = noteService.getRepository().findById(id);
     checkNoteOwner(note, auth);
-    noteRepository.deleteById(id);
+    noteService.getRepository().deleteById(id);
     return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
   }
 
@@ -74,29 +74,29 @@ public class NoteController {
   @PostMapping("/note/{id}/delete")
   public ResponseEntity<ServiceResponse> postDeleteNoteById(
       @PathVariable("id") String id, Authentication auth) {
-    Optional<Note> note = noteRepository.findById(id);
+    Optional<Note> note = noteService.getRepository().findById(id);
     checkNoteOwner(note, auth);
-    noteRepository.deleteById(id);
+    noteService.getRepository().deleteById(id);
     return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
   }
 
   @GetMapping("/notes")
   public List<Note> getNotes(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
-    return noteRepository.findAllByUserId(user.getId());
+    return noteService.getRepository().findAllByUserId(user.getId());
   }
 
   @PostMapping("/notes")
   public List<Note> getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
     JwtUser user = (JwtUser) auth.getPrincipal();
-    return noteRepository.findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());
+    return noteService.getRepository().findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());
   }
 
   @PostMapping("/note")
   public ResponseEntity<Note> createNote(@Valid @RequestBody Note note, Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
     note.setUserId(user.getId());
-    note = noteRepository.save(note);
+    note = noteService.getRepository().save(note);
     if (StringUtils.hasText(note.getId())) {
       return ResponseEntity.ok(note);
     }

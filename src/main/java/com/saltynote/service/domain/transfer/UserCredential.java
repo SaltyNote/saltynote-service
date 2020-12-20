@@ -5,8 +5,10 @@ import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.saltynote.service.entity.SiteUser;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class UserCredential {
   @NotBlank private String username;
   @NotBlank private String password;

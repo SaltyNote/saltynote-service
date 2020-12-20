@@ -30,10 +30,10 @@ import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.entity.SiteUser;
-import com.saltynote.service.repository.NoteRepository;
-import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.security.SecurityConstants;
 import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.NoteService;
+import com.saltynote.service.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,8 +66,8 @@ public class NoteControllerTest {
   @Autowired private TestRestTemplate restTemplate;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private NoteRepository noteRepository;
-  @Autowired private UserRepository userRepository;
+  @Autowired private NoteService noteService;
+  @Autowired private UserService userService;
   @MockBean private EmailService emailService;
 
   private final Faker faker = new Faker();
@@ -86,6 +86,7 @@ public class NoteControllerTest {
 
   private void signupTestUser() throws Exception {
     doNothing().when(emailService).sendAsHtml(any(), any(), any());
+    doNothing().when(emailService).send(any(), any(), any());
 
     UserCredential user = new UserCredential();
     String username = faker.name().username();
@@ -101,7 +102,7 @@ public class NoteControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
 
-    siteUser = userRepository.findByUsername(user.getUsername());
+    siteUser = userService.getRepository().findByUsername(user.getUsername());
     assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
 
     HttpHeaders headers = new HttpHeaders();
@@ -124,14 +125,14 @@ public class NoteControllerTest {
     notesToCleaned = new ArrayList<>();
     // Create a temp note for current user.
     Note note = createTmpNote(siteUser.getId());
-    this.savedNote = noteRepository.save(note);
+    this.savedNote = noteService.getRepository().save(note);
     notesToCleaned.add(savedNote);
   }
 
   @AfterEach
   public void tearDown() {
-    userRepository.deleteById(siteUser.getId());
-    noteRepository.deleteAll(notesToCleaned);
+    userService.cleanupByUserId(siteUser.getId());
+    noteService.getRepository().deleteAll(notesToCleaned);
   }
 
   @Test
@@ -172,7 +173,7 @@ public class NoteControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(content().string(containsString(newNoteContent)));
 
-    Optional<Note> queryNote = noteRepository.findById(savedNote.getId());
+    Optional<Note> queryNote = noteService.getRepository().findById(savedNote.getId());
     assertTrue(queryNote.isPresent());
     assertEquals(queryNote.get().getNote(), newNoteContent);
   }
@@ -194,7 +195,7 @@ public class NoteControllerTest {
             .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
     Note returnedNote = objectMapper.readValue(res, Note.class);
-    assertTrue(noteRepository.findById(returnedNote.getId()).isPresent());
+    assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
     this.mockMvc
         .perform(
             delete("/note/" + returnedNote.getId())
@@ -202,7 +203,7 @@ public class NoteControllerTest {
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-    assertFalse(noteRepository.findById(returnedNote.getId()).isPresent());
+    assertFalse(noteService.getRepository().findById(returnedNote.getId()).isPresent());
   }
 
   @Test
@@ -222,7 +223,7 @@ public class NoteControllerTest {
             .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
     Note returnedNote = objectMapper.readValue(res, Note.class);
-    assertTrue(noteRepository.findById(returnedNote.getId()).isPresent());
+    assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
     this.mockMvc
         .perform(get("/notes").header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
         .andDo(print())
