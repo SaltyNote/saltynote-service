@@ -15,6 +15,6 @@ public class BaseUtils {
   }
 
   public static String getConfirmationUrl(@NotNull String secret) {
-    return baseUrl + "/confirmation/" + secret;
+    return baseUrl + "/email/verification?confirmation=" + secret;
   }
 }
