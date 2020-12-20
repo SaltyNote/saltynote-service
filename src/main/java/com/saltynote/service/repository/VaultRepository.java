@@ -1,5 +1,6 @@
 package com.saltynote.service.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface VaultRepository
   void deleteByUserIdAndType(String userId, String type);
 
   Optional<Vault> findByUserIdAndTypeAndSecret(String userId, String type, String secret);
+
+  List<Vault> findByUserIdAndType(String userId, String type);
 }

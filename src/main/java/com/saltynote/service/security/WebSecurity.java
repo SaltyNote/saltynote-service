@@ -18,8 +18,12 @@ import com.saltynote.service.service.VaultService;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-  private static final String[] PUBLIC_ENDPOINTS = {
-    SecurityConstants.SIGN_UP_URL, "/refresh_token"
+  private static final String[] PUBLIC_POST_ENDPOINTS = {
+    SecurityConstants.SIGN_UP_URL, "/refresh_token", "/email/verification/*"
+  };
+
+  private static final String[] PUBLIC_GET_ENDPOINTS = {
+    "/", "/email/verification/*"
   };
   private final UserDetailsServiceImpl userDetailsService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -45,9 +49,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
           .csrf()
             .disable()
           .authorizeRequests()
-            .antMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+            .antMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
               .permitAll()
-            .antMatchers(HttpMethod.GET, "/")
+            .antMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
               .permitAll()
             .anyRequest()
               .authenticated()
