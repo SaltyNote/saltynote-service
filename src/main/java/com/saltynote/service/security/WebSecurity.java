@@ -1,7 +1,11 @@
 package com.saltynote.service.security;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,7 +16,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.component.JwtInstance;
+import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.service.UserDetailsServiceImpl;
 import com.saltynote.service.service.VaultService;
 
@@ -32,16 +38,19 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final VaultService vaultService;
   private final JwtInstance jwtInstance;
+  private final ObjectMapper objectMapper;
 
   public WebSecurity(
       UserDetailsServiceImpl userDetailsService,
       BCryptPasswordEncoder bCryptPasswordEncoder,
       VaultService vaultService,
-      JwtInstance jwtInstance) {
+      JwtInstance jwtInstance,
+      ObjectMapper objectMapper) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
+    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -65,7 +74,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
           .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
           // this disables session creation on Spring Security
           .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and().exceptionHandling()
+          .authenticationEntryPoint((request, response, e) -> {
+              response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+              response.setStatus(HttpStatus.FORBIDDEN.value());
+              response.getWriter().write(objectMapper.writeValueAsString(new ServiceResponse(HttpStatus.FORBIDDEN, "Access Denied")));
+            });
     // @formatter:on
   }
 
