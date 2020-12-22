@@ -31,11 +31,16 @@ import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebClientRuntimeException;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @RestController
 @Slf4j
+@Api(
+    value = "User Endpoint",
+    description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
   private final UserService userService;
@@ -57,6 +62,7 @@ public class UserController {
     this.userService = userService;
   }
 
+  @ApiOperation(value = "Create a new user with email, username and password")
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signUp(@Valid @RequestBody UserCredential userCredential) {
     SiteUser user = userCredential.toSiteUser();
@@ -71,6 +77,7 @@ public class UserController {
   }
 
   @PostMapping("/refresh_token")
+  @ApiOperation(value = "Get a new access token with refresh_token.")
   public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
     // 1. No expiry, and valid.
     JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
@@ -88,6 +95,7 @@ public class UserController {
   }
 
   @Transactional
+  @ApiOperation(value = "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
   @DeleteMapping("/refresh_tokens")
   public ResponseEntity<Void> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
@@ -96,6 +104,9 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  @ApiOperation(
+      value =
+          "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
   @GetMapping("/email/verification/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
     val wre = new WebClientRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
@@ -132,5 +143,12 @@ public class UserController {
     } else {
       throw wre;
     }
+  }
+
+  // Note: this is not a valid endpoint, it is only used for swagger doc.
+  @ApiOperation(value = "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
+  @PostMapping("/login-placeholder-for-swagger-doc")
+  public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
+    return ResponseEntity.ok(new JwtUser("", ""));
   }
 }
