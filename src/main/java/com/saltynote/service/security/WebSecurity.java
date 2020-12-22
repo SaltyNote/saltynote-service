@@ -19,11 +19,11 @@ import com.saltynote.service.service.VaultService;
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
   private static final String[] PUBLIC_POST_ENDPOINTS = {
-    SecurityConstants.SIGN_UP_URL, "/refresh_token", "/email/verification/*"
+    SecurityConstants.SIGN_UP_URL, "/refresh_token"
   };
 
   private static final String[] PUBLIC_GET_ENDPOINTS = {
-    "/", "/email/verification/*"
+    "/", "/email/verification/**"
   };
   private final UserDetailsServiceImpl userDetailsService;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
