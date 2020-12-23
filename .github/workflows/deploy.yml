@@ -26,7 +26,11 @@ jobs:
       uses: webfactory/ssh-agent@v0.4.1
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Deploy to remote server
+    - name: Deploy to remote prod server
       run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/note-service/
-    - name: Restart service in remote server
+    - name: Restart service in remote prod server
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart note.service"
+    - name: Deploy to remote dev server
+      run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_DEV_HOST }}:/var/service/
+    - name: Restart service in remote dev server
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_DEV_HOST }} "systemctl restart note.service"  
