@@ -21,7 +21,7 @@ readonly*)](https://api.saltynote.com/swagger-ui/) for more details.
 ## How to Run
 
 This is a standard spring boot project with Maven, so you can use maven command to run it. While the simplest & quickest
-way is to run `./start.sh`.
+way is to run [`./start.sh`](./start.sh).
 
 ### Configuration
 
@@ -29,3 +29,7 @@ way is to run `./start.sh`.
    to start mariadb (*add `-d` if you want start it as “detached” mode*).
 2. This service also need smtp service to send email. In development env, you can configure it with your gmail account.
    See more details here； https://git.io/JLP6q
+
+## License
+
+saltynote service is licensed under MIT - [LICENSE](./LICENSE)
