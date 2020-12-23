@@ -3,6 +3,7 @@
 ![Maven Build](https://github.com/SaltyNote/saltynote-service/workflows/Maven%20Build/badge.svg)
 ![Deploy](https://github.com/SaltyNote/saltynote-service/workflows/Deploy/badge.svg)
 ![CodeQL](https://github.com/SaltyNote/saltynote-service/workflows/CodeQL/badge.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service?ref=badge_shield)
 
 ## Overview
 
@@ -33,3 +34,6 @@ way is to run [`./start.sh`](./start.sh).
 ## License
 
 saltynote service is licensed under MIT - [LICENSE](./LICENSE)
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service?ref=badge_large)
+
