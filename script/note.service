@@ -1,11 +1,10 @@
 [Unit]
-Description=Web Note Service
+Description=SaltyNote Service
 After=syslog.target
 
 [Service]
-# maybe a bad idea as root here
-User=root
-ExecStart=/var/note-service/service.jar
+User=saltynote
+ExecStart=/home/saltynote/service/service.jar
 SuccessExitStatus=143
 
 [Install]
