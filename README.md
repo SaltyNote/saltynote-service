@@ -5,6 +5,8 @@
 ![CodeQL](https://github.com/SaltyNote/saltynote-service/workflows/CodeQL/badge.svg)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service?ref=badge_shield)
 
+[Documentation](https://saltynote.github.io/saltynote-service/)
+
 ## Overview
 
 This is the backend service for [saltynote](https://saltynote.com). It
