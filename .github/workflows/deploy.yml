@@ -31,6 +31,6 @@ jobs:
     - name: Restart service in remote prod server
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart note.service"
     - name: Deploy to remote dev server
-      run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_DEV_HOST }}:/var/service/
+      run: scp -o "StrictHostKeyChecking no" target/service.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_DEV_HOST }}:/home/saltynote/service/
     - name: Restart service in remote dev server
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_DEV_HOST }} "systemctl restart note.service"  
