@@ -175,6 +175,11 @@ ps aux | grep java | grep -v grep
 ![systemd](./images/systemd-user.png)
 
 ### NginX and HTTPS
+
+Now, we can connect NginX with our service, which means we want `http://dev.saltynote.com` displays the same content as `http://dev.saltynote.com:8888` instead of showing NginX welcome page.
+
+
+
 // TODO
 
 TO BE DONE 
