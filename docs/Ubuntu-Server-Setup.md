@@ -118,13 +118,14 @@ For security, I will create a specific user to run the service. [This post](http
 sudo useradd -m saltynote
 # Update its password, so the new user can log in later
 # Seems no need to log in with this user later.
-sudo passwd saltynote
+# sudo passwd saltynote
 ```
 
 #### Create Service Folder & Service Setup
 
 ```bash
 mkdir -p /home/saltynote/service
+chown saltynote:saltynote /home/saltynote/service
 ```
 
 Upload the jar file to `/home/saltynote/service` folder, and create `application.properties` inside that folder, which can be used to set some sensitive information. e.g. database connection info.
