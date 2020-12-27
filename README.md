@@ -29,6 +29,7 @@ way is to run [`./start.sh`](./start.sh).
 1. JDK 11
 2. Docker (docker-compose) for development database
 3. IDE ([Eclipse](https://www.eclipse.org/) or [Intellij](https://www.jetbrains.com/idea/))
+4. Code format is using [google-java-format](https://github.com/google/google-java-format)
 
 
 ### Configuration
