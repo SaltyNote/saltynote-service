@@ -1,13 +1,17 @@
 package com.saltynote.service.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +29,10 @@ public class VaultService implements RepositoryService<VaultRepository> {
   private final VaultRepository vaultRepository;
   private final ObjectMapper objectMapper;
   private final JwtInstance jwtInstance;
+
+  // TTL in milliseconds
+  @Value("${jwt.refresh_token.ttl}")
+  private long refreshTokenTTL;
 
   public VaultService(
       VaultRepository vaultRepository, ObjectMapper objectMapper, JwtInstance jwtInstance) {
@@ -66,6 +74,29 @@ public class VaultService implements RepositoryService<VaultRepository> {
     return v.getSecret();
   }
 
+  /**
+   * This is try to find the latest refresh token for given user id. If the refresh token ages below
+   * 20%, we will return this refresh token. Otherwise, a new refresh token will be generated and
+   * returned.
+   *
+   * @param user the target user
+   * @return the refresh token value
+   */
+  public String fetchOrCreateRefreshToken(IdentifiableUser user) {
+    Optional<Vault> vaultOp =
+        vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(
+            user.getId(), VaultType.REFRESH_TOKEN.getValue());
+    // If refresh token is young enough, then just return it.
+    if (vaultOp.isPresent() && isRefreshTokenAsKid(vaultOp.get().getSecret())) {
+      return vaultOp.get().getSecret();
+    }
+    // Refresh token is not a kid anymore or no existing refresh token found, a new one should be
+    // created.
+    String refreshToken = jwtInstance.createRefreshToken(user);
+    Vault v = create(user.getId(), VaultType.REFRESH_TOKEN, refreshToken);
+    return v.getSecret();
+  }
+
   @Override
   public VaultRepository getRepository() {
     return vaultRepository;
@@ -77,5 +108,16 @@ public class VaultService implements RepositoryService<VaultRepository> {
 
   public void cleanRefreshTokenByUserId(String userId) {
     vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());
+  }
+
+  private boolean isRefreshTokenAsKid(String refreshToken) {
+    try {
+      DecodedJWT decodedJWT = jwtInstance.verifyRefreshToken(refreshToken);
+      return decodedJWT
+          .getExpiresAt()
+          .after(new Date(System.currentTimeMillis() + (long) (refreshTokenTTL * 0.8)));
+    } catch (JWTVerificationException e) {
+      return false;
+    }
   }
 }
