@@ -20,10 +20,16 @@ For more information about the endpoints, please refer the [swagger ui(*readonly
 
 ![Swagger UI](./docs/images/swagger-ui.png)
 
-## How to Run
+## Get Started
 
-This is a standard spring boot project with Maven, so you can use maven command to run it. While the simplest & quickest
+This is a standard spring boot project with Maven, so you can use generic maven command to run it. While the simplest & quickest
 way is to run [`./start.sh`](./start.sh).
+
+### Prerequisite
+1. JDK 11
+2. Docker (docker-compose) for development database
+3. IDE ([Eclipse](https://www.eclipse.org/) or [Intellij](https://www.jetbrains.com/idea/))
+
 
 ### Configuration
 
