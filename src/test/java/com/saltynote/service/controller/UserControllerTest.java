@@ -46,7 +46,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// Overwrite refresh token ttl to 5 seconds
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "jwt.refresh_token.ttl=5000" })
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = NONE)
@@ -146,6 +147,81 @@ public class UserControllerTest {
     log.info("new token = {}", newToken.getAccessToken());
     assertNotEquals(token.getAccessToken(), newToken.getAccessToken());
     assertEquals(newToken.getRefreshToken(), token.getRefreshToken());
+
+    userService.cleanupByUserId(user.getId());
+  }
+
+  @Test
+  public void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
+
+    UserCredential uc =
+            new UserCredential()
+                    .setUsername(faker.name().username())
+                    .setEmail(faker.internet().emailAddress())
+                    .setPassword(RandomStringUtils.randomAlphanumeric(12));
+    SiteUser user = uc.toSiteUser();
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    user = userService.getRepository().save(user);
+
+    UserCredential userRequest =
+            new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+    MvcResult mvcResult =
+            this.mockMvc
+                    .perform(
+                            post("/login")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(userRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+    String res = mvcResult.getResponse().getContentAsString();
+    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+    assertNotNull(token);
+    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+    String oldRefreshToken = token.getRefreshToken();
+
+    mvcResult =
+            this.mockMvc
+                    .perform(
+                            post("/login")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(userRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+    res = mvcResult.getResponse().getContentAsString();
+    token = objectMapper.readValue(res, JwtToken.class);
+
+    assertNotNull(token);
+    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+    // No new refresh token is generated.
+    assertEquals(oldRefreshToken, token.getRefreshToken());
+
+
+    // Sleep 1 second, so refresh token will age 20%+, then new refresh token should be generated.
+    TimeUnit.SECONDS.sleep(1);
+
+    mvcResult =
+            this.mockMvc
+                    .perform(
+                            post("/login")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(userRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+    res = mvcResult.getResponse().getContentAsString();
+    token = objectMapper.readValue(res, JwtToken.class);
+
+    assertNotNull(token);
+    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+    // New refresh token is generated.
+    assertNotEquals(oldRefreshToken, token.getRefreshToken());
 
     userService.cleanupByUserId(user.getId());
   }

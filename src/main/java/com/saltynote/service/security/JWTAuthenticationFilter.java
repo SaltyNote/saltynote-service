@@ -58,7 +58,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     LoginUser user = (LoginUser) auth.getPrincipal();
     String accessToken = jwtInstance.createAccessToken(user);
-    String refreshToken = vaultService.createRefreshToken(user);
+    String refreshToken = vaultService.fetchOrCreateRefreshToken(user);
     res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
     res.setContentType(MediaType.APPLICATION_JSON_VALUE);
     res.getWriter().write(jwtInstance.tokenToJson(accessToken, refreshToken));

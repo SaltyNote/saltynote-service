@@ -73,12 +73,17 @@ public class JwtInstance {
   }
 
   public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
-    // This will handle token expiration exception
+    // This will also handle token expiration exception
     return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
   }
 
+  public DecodedJWT verifyRefreshToken(String token) throws JWTVerificationException {
+    // This will also handle token expiration exception
+    return refreshTokenVerifier.verify(token);
+  }
+
   public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
-    DecodedJWT jwt = refreshTokenVerifier.verify(token);
+    DecodedJWT jwt = verifyRefreshToken(token);
     return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
   }
 
