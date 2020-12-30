@@ -31,3 +31,5 @@ build/
 .vscode/
 
 **/application-local.properties
+
+.DS_Store
