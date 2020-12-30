@@ -5,7 +5,6 @@ create table user
     email         varchar(128)                        not null,
     password      varchar(128)                        not null,
     register_time timestamp default CURRENT_TIMESTAMP not null,
-    last_login_time timestamp default CURRENT_TIMESTAMP ,
     constraint user_email_uindex unique (email),
     constraint user_username_uindex unique (username)
 );
