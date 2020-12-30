@@ -46,8 +46,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// Overwrite refresh token ttl to 5 seconds
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "jwt.refresh_token.ttl=5000" })
+// Overwrite refresh token ttl to 8 seconds
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "jwt.refresh_token.ttl=8000" })
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = NONE)
@@ -202,8 +202,8 @@ public class UserControllerTest {
     assertEquals(oldRefreshToken, token.getRefreshToken());
 
 
-    // Sleep 1 second, so refresh token will age 20%+, then new refresh token should be generated.
-    TimeUnit.SECONDS.sleep(1);
+    // Sleep 2 second, so refresh token will age 20%+, then new refresh token should be generated.
+    TimeUnit.SECONDS.sleep(2);
 
     mvcResult =
             this.mockMvc
