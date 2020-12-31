@@ -39,7 +39,8 @@ public class JwtInstance {
 
   private final ObjectMapper objectMapper;
 
-  private JWTVerifier accessTokenVerifier, refreshTokenVerifier;
+  private JWTVerifier accessTokenVerifier;
+  private JWTVerifier refreshTokenVerifier;
 
   public JwtInstance(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;

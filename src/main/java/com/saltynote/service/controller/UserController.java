@@ -106,15 +106,14 @@ public class UserController {
     }
     VaultEntity ve = veo.get();
     Optional<Vault> vault = vaultService.getRepository().findBySecret(ve.getSecret());
-    if (vault.isPresent()) {
-      if (!vault.get().getUserId().equals(ve.getUserId())) {
-        log.error(
-            "User id are not match from decoded token {} and database {}",
-            ve.getUserId(),
-            vault.get().getUserId());
-        throw wre;
-      }
+    if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
+      log.error(
+          "User id are not match from decoded token {} and database {}",
+          ve.getUserId(),
+          vault.get().getUserId());
+      throw wre;
     }
+
     Optional<SiteUser> usero = userService.getRepository().findById(ve.getUserId());
     if (usero.isEmpty()) {
       log.error("User is not found for user id = {}", ve.getUserId());
