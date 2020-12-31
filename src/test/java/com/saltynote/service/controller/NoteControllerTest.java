@@ -135,6 +135,8 @@ public class NoteControllerTest {
 
   @Test
   public void getNoteByIdShouldSuccess() throws Exception {
+    // Suppress codacy warning
+    assertNotNull(this.savedNote.getId());
     this.mockMvc
         .perform(
             get("/note/" + this.savedNote.getId())
@@ -146,12 +148,15 @@ public class NoteControllerTest {
 
   @Test
   public void getNoteByIdNoAccessTokenReturnException() throws Exception {
+    // Suppress codacy warning
+    assertNotNull(this.savedNote.getId());
     this.mockMvc.perform(get("/note/" + this.savedNote.getId())).andExpect(status().isForbidden());
   }
 
   @Test
   public void getNoteByIdFromNonOwnerShouldFail() throws Exception {
     Pair<SiteUser, String> pair = signupTestUser();
+    assertNotNull(pair.getRight());
     this.mockMvc
         .perform(
             get("/note/" + this.savedNote.getId())
