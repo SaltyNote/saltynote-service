@@ -151,7 +151,7 @@ public class NoteControllerTest {
   }
 
   @Test
-  public void updateNoteById() throws Exception {
+  public void updateNoteByIdShouldSuccess() throws Exception {
     String newNoteContent = "I am the new note";
     Note noteToUpdate = SerializationUtils.clone(this.savedNote);
     noteToUpdate.setNote(newNoteContent);
@@ -168,6 +168,30 @@ public class NoteControllerTest {
     Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
     assertTrue(queryNote.isPresent());
     assertEquals(queryNote.get().getNote(), newNoteContent);
+  }
+
+  @Test
+  public void updateNoteByIdFromNonOwnerShouldFail() throws Exception {
+
+    Pair<SiteUser, String> pair = signupTestUser();
+
+    String newNoteContent = "I am the new note";
+    Note noteToUpdate = SerializationUtils.clone(this.savedNote);
+    noteToUpdate.setNote(newNoteContent);
+    this.mockMvc
+        .perform(
+            post("/note/" + this.savedNote.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(noteToUpdate))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+    Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+    assertTrue(queryNote.isPresent());
+    assertEquals(queryNote.get().getNote(), this.savedNote.getNote());
+
+    userService.cleanupByUserId(pair.getLeft().getId());
   }
 
   @Test
