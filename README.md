@@ -17,8 +17,7 @@ for:
 1.  User (signup, login, token refresh, token cleanup, password reset)
 2.  Note (create, update, fetch and delete)
 
-For more information about the endpoints, please refer the [swagger ui(*
-readonly*)](https://api.saltynote.com/swagger-ui/) for more details.
+For more information about the endpoints, please refer the [readonly swagger ui](https://api.saltynote.com/swagger-ui/) for more details.
 
 ![Swagger UI](./docs/images/swagger-ui.png)
 
