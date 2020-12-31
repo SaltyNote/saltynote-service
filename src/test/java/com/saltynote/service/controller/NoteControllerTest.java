@@ -135,7 +135,7 @@ public class NoteControllerTest {
   }
 
   @Test
-  public void getNoteById() throws Exception {
+  public void getNoteByIdShouldSuccess() throws Exception {
     this.mockMvc
         .perform(
             get("/note/" + this.savedNote.getId())
@@ -148,6 +148,18 @@ public class NoteControllerTest {
   @Test
   public void getNoteByIdNoAccessTokenReturnException() throws Exception {
     this.mockMvc.perform(get("/note/" + this.savedNote.getId())).andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void getNoteByIdFromNonOwnerShouldFail() throws Exception {
+    Pair<SiteUser, String> pair = signupTestUser();
+    this.mockMvc
+        .perform(
+            get("/note/" + this.savedNote.getId())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    userService.cleanupByUserId(pair.getLeft().getId());
   }
 
   @Test
