@@ -28,7 +28,7 @@ public class UserRepositoryIntegrationTest {
   private final Faker faker = new Faker();
 
   @Test
-  public void whenFindByName_thenReturnUser() {
+  public void whenFindByNameThenReturnUser() {
     // given
     String username = faker.name().username();
     SiteUser user =

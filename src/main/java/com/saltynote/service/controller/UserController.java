@@ -2,6 +2,7 @@ package com.saltynote.service.controller;
 
 import java.util.Optional;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,28 +44,15 @@ import lombok.val;
     description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
-  private final UserService userService;
-  private final BCryptPasswordEncoder bCryptPasswordEncoder;
-  private final JwtInstance jwtInstance;
-  private final ApplicationEventPublisher eventPublisher;
-  private final VaultService vaultService;
-
-  public UserController(
-      BCryptPasswordEncoder bCryptPasswordEncoder,
-      JwtInstance jwtInstance,
-      ApplicationEventPublisher eventPublisher,
-      VaultService vaultService,
-      UserService userService) {
-    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    this.jwtInstance = jwtInstance;
-    this.eventPublisher = eventPublisher;
-    this.vaultService = vaultService;
-    this.userService = userService;
-  }
+  @Resource private UserService userService;
+  @Resource private BCryptPasswordEncoder bCryptPasswordEncoder;
+  @Resource private JwtInstance jwtInstance;
+  @Resource private ApplicationEventPublisher eventPublisher;
+  @Resource private VaultService vaultService;
 
   @ApiOperation(value = "Create a new user with email, username and password")
   @PostMapping("/signup")
-  public ResponseEntity<JwtUser> signUp(@Valid @RequestBody UserCredential userCredential) {
+  public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserCredential userCredential) {
     SiteUser user = userCredential.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
@@ -95,7 +83,9 @@ public class UserController {
   }
 
   @Transactional
-  @ApiOperation(value = "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
+  @ApiOperation(
+      value =
+          "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
   @DeleteMapping("/refresh_tokens")
   public ResponseEntity<Void> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
@@ -146,9 +136,11 @@ public class UserController {
   }
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
-  @ApiOperation(value = "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
+  @ApiOperation(
+      value =
+          "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
   @PostMapping("/login-placeholder-for-swagger-doc")
   public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
-    return ResponseEntity.ok(new JwtUser("", ""));
+    return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));
   }
 }

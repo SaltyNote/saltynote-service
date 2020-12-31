@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +17,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -50,7 +47,6 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,8 +58,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 public class NoteControllerTest {
 
-  @LocalServerPort private int port;
-  @Autowired private TestRestTemplate restTemplate;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private NoteService noteService;
@@ -84,7 +78,7 @@ public class NoteControllerTest {
         .setText(faker.funnyName().name());
   }
 
-  private void signupTestUser() throws Exception {
+  private Pair<SiteUser, String> signupTestUser() throws Exception {
     doNothing().when(emailService).sendAsHtml(any(), any(), any());
     doNothing().when(emailService).send(any(), any(), any());
 
@@ -99,87 +93,125 @@ public class NoteControllerTest {
             post("/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user)))
-        .andDo(print())
         .andExpect(status().isOk());
 
-    siteUser = userService.getRepository().findByUsername(user.getUsername());
+    SiteUser siteUser = userService.getRepository().findByUsername(user.getUsername());
     assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(user), headers);
-    String tokenStr =
-        this.restTemplate.postForObject(
-            "http://localhost:" + port + "/login", entity, String.class);
-    log.info("token = {}", tokenStr);
-    JwtToken token = objectMapper.readValue(tokenStr, JwtToken.class);
+    MvcResult mvcLoginResult =
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andReturn();
+    String res = mvcLoginResult.getResponse().getContentAsString();
+    JwtToken token = objectMapper.readValue(res, JwtToken.class);
     assertNotNull(token.getAccessToken());
 
-    this.accessToken = token.getAccessToken();
+    return Pair.of(siteUser, token.getAccessToken());
   }
 
   @BeforeEach
   public void setUp() throws Exception {
-    signupTestUser();
+    Pair<SiteUser, String> pair = signupTestUser();
+    this.accessToken = pair.getRight();
+    this.siteUser = pair.getLeft();
 
-    notesToCleaned = new ArrayList<>();
+    this.notesToCleaned = new ArrayList<>();
     // Create a temp note for current user.
     Note note = createTmpNote(siteUser.getId());
     this.savedNote = noteService.getRepository().save(note);
-    notesToCleaned.add(savedNote);
+    this.notesToCleaned.add(this.savedNote);
   }
 
   @AfterEach
   public void tearDown() {
-    userService.cleanupByUserId(siteUser.getId());
-    noteService.getRepository().deleteAll(notesToCleaned);
+    userService.cleanupByUserId(this.siteUser.getId());
+    noteService.getRepository().deleteAll(this.notesToCleaned);
   }
 
   @Test
-  public void getNoteById() throws Exception {
-    log.info("getNoteById");
+  public void getNoteByIdShouldSuccess() throws Exception {
+    // Suppress codacy warning
+    assertNotNull(this.savedNote.getId());
     this.mockMvc
         .perform(
-            get("/note/" + savedNote.getId())
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-        .andDo(print())
+            get("/note/" + this.savedNote.getId())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(content().string(containsString(savedNote.getText())));
+        .andExpect(content().string(containsString(this.savedNote.getText())));
   }
 
   @Test
-  public void getNoteById_noAccessToken_returnException() throws Exception {
-    log.info("getNoteById");
+  public void getNoteByIdNoAccessTokenReturnException() throws Exception {
+    // Suppress codacy warning
+    assertNotNull(this.savedNote.getId());
+    this.mockMvc.perform(get("/note/" + this.savedNote.getId())).andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void getNoteByIdFromNonOwnerShouldFail() throws Exception {
+    Pair<SiteUser, String> pair = signupTestUser();
+    assertNotNull(pair.getRight());
     this.mockMvc
-        .perform(get("/note/" + savedNote.getId()))
-        .andDo(print())
-        .andExpect(status().isForbidden());
+        .perform(
+            get("/note/" + this.savedNote.getId())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    userService.cleanupByUserId(pair.getLeft().getId());
   }
 
   @Test
-  public void updateNoteById() throws Exception {
+  public void updateNoteByIdShouldSuccess() throws Exception {
     String newNoteContent = "I am the new note";
-    Note noteToUpdate = SerializationUtils.clone(savedNote);
+    Note noteToUpdate = SerializationUtils.clone(this.savedNote);
     noteToUpdate.setNote(newNoteContent);
     this.mockMvc
         .perform(
-            post("/note/" + savedNote.getId())
+            post("/note/" + this.savedNote.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(noteToUpdate))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-        .andDo(print())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(content().string(containsString(newNoteContent)));
 
-    Optional<Note> queryNote = noteService.getRepository().findById(savedNote.getId());
+    Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
     assertTrue(queryNote.isPresent());
     assertEquals(queryNote.get().getNote(), newNoteContent);
   }
 
   @Test
-  public void deleteNoteById() throws Exception {
+  public void updateNoteByIdFromNonOwnerShouldFail() throws Exception {
+
+    Pair<SiteUser, String> pair = signupTestUser();
+
+    String newNoteContent = "I am the new note";
+    Note noteToUpdate = SerializationUtils.clone(this.savedNote);
+    noteToUpdate.setNote(newNoteContent);
+    this.mockMvc
+        .perform(
+            post("/note/" + this.savedNote.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(noteToUpdate))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+    Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+    assertTrue(queryNote.isPresent());
+    assertEquals(queryNote.get().getNote(), this.savedNote.getNote());
+
+    userService.cleanupByUserId(pair.getLeft().getId());
+  }
+
+  @Test
+  public void deleteNoteByIdShouldSuccess() throws Exception {
     Note note = createTmpNote(null);
     MvcResult mvcResult =
         this.mockMvc
@@ -187,8 +219,7 @@ public class NoteControllerTest {
                 post("/note/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(note))
-                    .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-            .andDo(print())
+                    .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -199,11 +230,41 @@ public class NoteControllerTest {
     this.mockMvc
         .perform(
             delete("/note/" + returnedNote.getId())
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-        .andDo(print())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     assertFalse(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+  }
+
+  @Test
+  public void deleteNoteByIdFromNonOwnerShouldFail() throws Exception {
+    Note note = createTmpNote(null);
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/note/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(note))
+                    .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(content().string(containsString(note.getText())))
+            .andReturn();
+    String res = mvcResult.getResponse().getContentAsString();
+    Note returnedNote = objectMapper.readValue(res, Note.class);
+    assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+
+    Pair<SiteUser, String> pair = signupTestUser();
+
+    this.mockMvc
+        .perform(
+            delete("/note/" + returnedNote.getId())
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+    assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+    userService.cleanupByUserId(pair.getLeft().getId());
   }
 
   @Test
@@ -215,8 +276,7 @@ public class NoteControllerTest {
                 post("/note")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(note))
-                    .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-            .andDo(print())
+                    .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -225,8 +285,8 @@ public class NoteControllerTest {
     Note returnedNote = objectMapper.readValue(res, Note.class);
     assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
     this.mockMvc
-        .perform(get("/notes").header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-        .andDo(print())
+        .perform(
+            get("/notes").header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(content().string(containsString(note.getText())))
@@ -243,8 +303,7 @@ public class NoteControllerTest {
                 post("/note/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(note))
-                    .header(SecurityConstants.HEADER_STRING, "Bearer " + accessToken))
-            .andDo(print())
+                    .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
