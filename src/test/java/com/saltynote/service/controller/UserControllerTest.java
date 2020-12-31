@@ -47,7 +47,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // Overwrite refresh token ttl to 8 seconds
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "jwt.refresh_token.ttl=8000" })
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {"jwt.refresh_token.ttl=8000"})
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = NONE)
@@ -114,7 +116,6 @@ public class UserControllerTest {
                 post("/login")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(userRequest)))
-            .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
@@ -135,7 +136,6 @@ public class UserControllerTest {
                 post("/refresh_token")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(tokenRequest)))
-            .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
 
@@ -155,25 +155,24 @@ public class UserControllerTest {
   public void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
 
     UserCredential uc =
-            new UserCredential()
-                    .setUsername(faker.name().username())
-                    .setEmail(faker.internet().emailAddress())
-                    .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        new UserCredential()
+            .setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
     SiteUser user = uc.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
 
     UserCredential userRequest =
-            new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
     MvcResult mvcResult =
-            this.mockMvc
-                    .perform(
-                            post("/login")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(userRequest)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andReturn();
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
     JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
@@ -184,14 +183,13 @@ public class UserControllerTest {
     String oldRefreshToken = token.getRefreshToken();
 
     mvcResult =
-            this.mockMvc
-                    .perform(
-                            post("/login")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(userRequest)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andReturn();
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
     res = mvcResult.getResponse().getContentAsString();
     token = objectMapper.readValue(res, JwtToken.class);
 
@@ -201,19 +199,17 @@ public class UserControllerTest {
     // No new refresh token is generated.
     assertEquals(oldRefreshToken, token.getRefreshToken());
 
-
     // Sleep 2 second, so refresh token will age 20%+, then new refresh token should be generated.
     TimeUnit.SECONDS.sleep(2);
 
     mvcResult =
-            this.mockMvc
-                    .perform(
-                            post("/login")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(userRequest)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andReturn();
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
     res = mvcResult.getResponse().getContentAsString();
     token = objectMapper.readValue(res, JwtToken.class);
 
@@ -247,7 +243,6 @@ public class UserControllerTest {
             post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRequest)))
-        .andDo(print())
         .andExpect(status().isUnauthorized());
 
     userService.cleanupByUserId(user.getId());
@@ -270,7 +265,6 @@ public class UserControllerTest {
                 post("/signup")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(user)))
-            .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
 
@@ -286,10 +280,7 @@ public class UserControllerTest {
 
     assertFalse(userService.getRepository().findById(jwtUser.getId()).get().getEmailVerified());
     String token = vaultService.encode(vaults.get(0));
-    this.mockMvc
-        .perform(get("/email/verification/" + token))
-        .andDo(print())
-        .andExpect(status().isOk());
+    this.mockMvc.perform(get("/email/verification/" + token)).andExpect(status().isOk());
 
     assertTrue(userService.getRepository().findById(jwtUser.getId()).get().getEmailVerified());
 
