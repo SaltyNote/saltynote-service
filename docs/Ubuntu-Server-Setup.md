@@ -20,7 +20,8 @@ When this step is done, you can restart your server. But usually, I will restart
 sudo apt install git vim curl wget zsh htop
 ```
 
-I really like `zsh`, and I will also enable [oh-my-zsh](https://ohmyz.sh/). But this is optional, even I highly recommend it.
+I really like `zsh`, and I will also enable [oh-my-zsh](https://ohmyz.sh/). But this is optional, even I highly
+recommend it.
 
 ## 2. Setup for Web Server
 
@@ -33,7 +34,8 @@ sudo apt install openjdk-11-jre mariadb-server nginx
 #### Java
 
 I install open Java 11 here, based on your own requirement, you can either install Java 8 or Java 14, whatever you want.
-The reason why I just install JRE not JDK is because I will only need Java Runtime in this server, and I will never try to compile or build any Java projects.
+The reason why I just install JRE not JDK is because I will only need Java Runtime in this server, and I will never try
+to compile or build any Java projects.
 
 ```bash
 # Check whether java is installed correctly
@@ -45,13 +47,15 @@ OpenJDK 64-Bit Server VM (build 11.0.9.1+1-Ubuntu-0ubuntu1.20.04, mixed mode, sh
 
 #### MariaDB
 
-It is almost the same as MySQL. Personally, I choose Mariadb these days.
-An important reason is that they have different licenses.
+It is almost the same as MySQL. Personally, I choose Mariadb these days. An important reason is that they have different
+licenses.
 
-* [MariaDB](https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client) is LGPL 2.1.
-* [MySQL](https://mvnrepository.com/artifact/mysql/mysql-connector-java) is GPL 2.0, which is not compatible with MIT license.
+*  [MariaDB](https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client) is LGPL 2.1.
+*  [MySQL](https://mvnrepository.com/artifact/mysql/mysql-connector-java) is GPL 2.0, which is not compatible with MIT
+  license.
 
-If you take Open Source seriously, this is something that you should care. [如何选择开源许可证](http://www.ruanyifeng.com/blog/2011/05/how_to_choose_free_software_licenses.html)
+If you take Open Source seriously, this is something that you should
+care. [如何选择开源许可证](http://www.ruanyifeng.com/blog/2011/05/how_to_choose_free_software_licenses.html)
 
 **Configure MariaDB**
 
@@ -101,17 +105,22 @@ CREATE USER 'USER_NAME'@'localhost' IDENTIFIED BY 'A_STRONG_PASSWORD';
 GRANT ALL PRIVILEGES ON saltynote.* TO 'USER_NAME'@'localhost' WITH GRANT OPTION;
 ```
 
-Note: You can find more details about how to enable remote access from [this post](https://hzhou.me/2014/04/21/mysql-enable-remote-access-and-create-a-new-user/).
-While here, I only enable it with local access, as I for security reason, it is not required for current stage.
-
+Note: You can find more details about how to enable remote access
+from [this post](https://hzhou.me/2014/04/21/mysql-enable-remote-access-and-create-a-new-user/). While here, I only
+enable it with local access, as I for security reason, it is not required for current stage.
 
 ### Spring Boot Service
 
-The [service](https://github.com/SaltyNote/saltynote-service) is implemented with Spring Boot. So it can be run with a standalone jar file as a [Systemd](https://www.freedesktop.org/wiki/Software/systemd/) service.
-You can find more official information from [this link](https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment-systemd-service).
+The [service](https://github.com/SaltyNote/saltynote-service) is implemented with Spring Boot. So it can be run with a
+standalone jar file as a [Systemd](https://www.freedesktop.org/wiki/Software/systemd/) service. You can find more
+official information
+from [this link](https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment-systemd-service)
+.
 
 #### Create a new user
-For security, I will create a specific user to run the service. [This post](https://www.baeldung.com/spring-boot-app-as-a-service) will be very helpful for this step.
+
+For security, I will create a specific user to run the
+service. [This post](https://www.baeldung.com/spring-boot-app-as-a-service) will be very helpful for this step.
 
 ```bash
 # Create a new user, and create its home dir
@@ -128,7 +137,8 @@ mkdir -p /home/saltynote/service
 chown saltynote:saltynote /home/saltynote/service
 ```
 
-Upload the jar file to `/home/saltynote/service` folder, and create `application.properties` inside that folder, which can be used to set some sensitive information. e.g. database connection info.
+Upload the jar file to `/home/saltynote/service` folder, and create `application.properties` inside that folder, which
+can be used to set some sensitive information. e.g. database connection info.
 
 ```bash
 # Make saltynote is the owner of service.jar
@@ -138,7 +148,9 @@ chmod 500 service.jar
 ```
 
 ##### Systemd Setup
+
 Create `note.service` in `/etc/systemd/system` dir, and populate `note.service` as below:
+
 ```systemd
 [Unit]
 Description=SaltyNote Service
@@ -152,7 +164,9 @@ SuccessExitStatus=143
 [Install]
 WantedBy=multi-user.target
 ```
+
 We can enable this service to auto start when system restarts by:
+
 ```bash
 systemctl enable note.service
 
@@ -163,8 +177,8 @@ systemctl start note.service
 systemctl status note.service
 ```
 
-If everything goes well, the service should start now.
-Open http://YOUR-SERVER-IP:8888, you should see a welcome message in JSON format.
+If everything goes well, the service should start now. Open http://YOUR-SERVER-IP:8888, you should see a welcome message
+in JSON format.
 
 ![welcome page](./images/saltynote-welcome.png)
 
@@ -177,11 +191,13 @@ ps aux | grep java | grep -v grep
 
 ### NginX and HTTPS
 
-Now, we can connect NginX with our service, which means we want `http://dev.saltynote.com` displays the same content as `http://dev.saltynote.com:8888` instead of showing NginX welcome page.
+Now, we can connect NginX with our service, which means we want `http://dev.saltynote.com` displays the same content
+as `http://dev.saltynote.com:8888` instead of showing NginX welcome page.
 
 #### 1. Add Upstream
 
-Open `/etc/nginx/nginx.conf`, and add a new `upstream` inside `http` section. (I named it as `service`, while it can be any name you want.)
+Open `/etc/nginx/nginx.conf`, and add a new `upstream` inside `http` section. (I named it as `service`, while it can be
+any name you want.)
 
 ```nginx
 http {
@@ -217,6 +233,7 @@ server {
 ```
 
 #### 3. Reload or restart NginX
+
 ```bash
 service nginx restart
 ```
@@ -224,11 +241,14 @@ service nginx restart
 ![nginx-service](./images/nginx-service.png)
 
 #### 4. Enable Https
-So far, everything seems working now, while the browser still complains `Not Secure` in the url bar. It is time to enable https for our service.
-It is free with [Let's Encrypt](https://letsencrypt.org/).
+
+So far, everything seems working now, while the browser still complains `Not Secure` in the url bar. It is time to
+enable https for our service. It is free with [Let's Encrypt](https://letsencrypt.org/).
 
 ##### 4.1 Install [Certbot](https://certbot.eff.org/)
-It should be easy to install certbot by following the [instruction](https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx).
+
+It should be easy to install certbot by following
+the [instruction](https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx).
 
 ```bash
 # Since I use nginx, I will run this to enable https
@@ -238,10 +258,12 @@ sudo certbot --nginx
 ![nginx-https](./images/nginx-https.png)
 
 #### 5. Hide service from port 8888
-We enable NginX with https for our service now, and we can hide the original service running in port `8888` from the public.
-There are multiple solutions for this. e.g. [`iptables`](https://www.cyberciti.biz/faq/iptables-block-port/).
 
-While I find [`UFW - Uncomplicated Firewall`](https://help.ubuntu.com/community/UFW) is more user-friendly, so I will choose it here.
+We enable NginX with https for our service now, and we can hide the original service running in port `8888` from the
+public. There are multiple solutions for this. e.g. [`iptables`](https://www.cyberciti.biz/faq/iptables-block-port/).
+
+While I find [`UFW - Uncomplicated Firewall`](https://help.ubuntu.com/community/UFW) is more user-friendly, so I will
+choose it here.
 
 ```bash
 ➜  ~ ufw status
@@ -276,6 +298,5 @@ To                         Action      From
 **Note**:For enhanced security, you can change default SSH port 22 to other number.
 
 Now you will not be able to access the service with http://dev.saltynote.com:8888.
-
 
 ## All Set Now! 🎉

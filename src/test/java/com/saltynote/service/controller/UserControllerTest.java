@@ -234,6 +234,8 @@ public class UserControllerTest {
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
 
+    assertNotNull(user.getId());
+
     UserCredential userRequest =
         new UserCredential()
             .setUsername(uc.getUsername())
