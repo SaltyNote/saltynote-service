@@ -17,10 +17,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -63,8 +59,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 public class NoteControllerTest {
 
-  @LocalServerPort private int port;
-  @Autowired private TestRestTemplate restTemplate;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private NoteService noteService;
@@ -106,13 +100,17 @@ public class NoteControllerTest {
     SiteUser siteUser = userService.getRepository().findByUsername(user.getUsername());
     assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(user), headers);
-    String tokenStr =
-        this.restTemplate.postForObject(
-            "http://localhost:" + this.port + "/login", entity, String.class);
-    JwtToken token = objectMapper.readValue(tokenStr, JwtToken.class);
+    MvcResult mvcLoginResult =
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andReturn();
+    String res = mvcLoginResult.getResponse().getContentAsString();
+    JwtToken token = objectMapper.readValue(res, JwtToken.class);
     assertNotNull(token.getAccessToken());
 
     return Pair.of(siteUser, token.getAccessToken());
