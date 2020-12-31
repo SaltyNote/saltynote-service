@@ -1,24 +1,20 @@
 #!/usr/bin/env bash
 
-# 1. check email configuration
-email_conf=$(cat src/main/resources/application.properties | grep '${MAIL_USERNAME:}')
-if [[ -n "${email_conf}" ]]; then
-  echo "========================================================================================"
-  echo "Error: Email configuration is needed."
-  echo "You can configuration your gmail info inside 'src/main/resources/application.properties'"
-  echo "For more info, please follow this link https://git.io/JLP6q".
-  echo "Note: Please do not commit your gmail credentials."
-  echo "========================================================================================"
+# Check if docker is running
+if ! docker info >/dev/null 2>&1; then
+  echo "==================================================================="
+  echo "Docker does not seem to be running, please start it first and retry"
+  echo "==================================================================="
   exit 1
 fi
 
-# 2. check docker installation
+# run docker-compose to start database
 docker-compose up -d
 
 if [[ $? -ne 0 ]]; then
-  echo "======================================================================================================"
-  echo "Please install & start docker(docker-compose) service, which is needed to start mysql instance locally"
-  echo "======================================================================================================"
+  echo "=============================================================================="
+  echo "Please install docker-compose, which is needed to start mysql instance locally"
+  echo "==============================================================================="
   exit 1
 fi
 

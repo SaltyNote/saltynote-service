@@ -115,7 +115,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
       DecodedJWT decodedJWT = jwtInstance.verifyRefreshToken(refreshToken);
       return decodedJWT
           .getExpiresAt()
-          .after(new Date(System.currentTimeMillis() + (long) (refreshTokenTTL * 0.8)));
+          .after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));
     } catch (JWTVerificationException e) {
       return false;
     }
