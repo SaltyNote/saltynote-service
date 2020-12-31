@@ -1,12 +1,15 @@
 package com.saltynote.service.security;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Collections;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,14 +29,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   private final AuthenticationManager authenticationManager;
   private final VaultService vaultService;
   private final JwtInstance jwtInstance;
+  private final UserService userService;
 
   public JWTAuthenticationFilter(
-      AuthenticationManager authenticationManager,
-      VaultService vaultService,
-      JwtInstance jwtInstance) {
+          AuthenticationManager authenticationManager,
+          VaultService vaultService,
+          JwtInstance jwtInstance, UserService userService) {
     this.authenticationManager = authenticationManager;
     this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
+    this.userService = userService;
   }
 
   @Override
@@ -62,5 +67,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
     res.setContentType(MediaType.APPLICATION_JSON_VALUE);
     res.getWriter().write(jwtInstance.tokenToJson(accessToken, refreshToken));
+
+    // update current user's lastLoginTime, after user logged in successfully
+    SiteUser curtUser = userService.getRepository().findByUsername(user.getUsername());
+    curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));
+    userService.getRepository().save(curtUser);
+
   }
 }
