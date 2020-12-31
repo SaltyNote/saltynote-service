@@ -1,5 +1,6 @@
 package com.saltynote.service.security;
 
+import com.saltynote.service.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -37,18 +38,21 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   private final VaultService vaultService;
   private final JwtInstance jwtInstance;
   private final ObjectMapper objectMapper;
+  private final UserService userService;
+
 
   public WebSecurity(
-      UserDetailsServiceImpl userDetailsService,
-      BCryptPasswordEncoder bCryptPasswordEncoder,
-      VaultService vaultService,
-      JwtInstance jwtInstance,
-      ObjectMapper objectMapper) {
+          UserDetailsServiceImpl userDetailsService,
+          BCryptPasswordEncoder bCryptPasswordEncoder,
+          VaultService vaultService,
+          JwtInstance jwtInstance,
+          ObjectMapper objectMapper, UserService userService) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.vaultService = vaultService;
     this.jwtInstance = jwtInstance;
     this.objectMapper = objectMapper;
+    this.userService = userService;
   }
 
   @Override
@@ -68,7 +72,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             .anyRequest()
               .authenticated()
         .and()
-          .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance))
+          .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance, userService))
           .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
           // this disables session creation on Spring Security
           .sessionManagement()

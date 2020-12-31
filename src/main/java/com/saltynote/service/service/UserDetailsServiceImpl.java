@@ -23,10 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
       throw new UsernameNotFoundException(username);
     }
 
-    // issue #39 : update last_login_time when user login
-    user.setLastLoginTime(new Timestamp(System.currentTimeMillis()));
-    userService.getRepository().save(user);
-
     return new LoginUser(user);
   }
 }
