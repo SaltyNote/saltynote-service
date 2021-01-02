@@ -25,6 +25,7 @@ import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
@@ -135,6 +136,7 @@ public class UserController {
     }
   }
 
+  @ApiOperation(value = "Request password reset email")
   @PostMapping("/password/forget")
   public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
     Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
@@ -148,6 +150,32 @@ public class UserController {
     return ResponseEntity.ok(
         ServiceResponse.ok(
             "Password reset email will be sent to your email, please reset your email with link there."));
+  }
+
+  @ApiOperation(value = "Reset Password")
+  @PostMapping("/password/reset")
+  public ResponseEntity<ServiceResponse> resetPassword(
+      @Valid @RequestBody PasswordReset passwordReset) {
+    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
+    if (passwordReset.getPassword().length() < 6) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST, "Password should be at least 6 characters.");
+    }
+    Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
+    if (vo.isEmpty()) {
+      throw wre;
+    }
+
+    Optional<SiteUser> usero = userService.getRepository().findById(vo.get().getUserId());
+    if (usero.isPresent()) {
+      SiteUser user = usero.get();
+      user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
+      userService.getRepository().save(user);
+      vaultService.getRepository().delete(vo.get());
+      return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
+    } else {
+      throw wre;
+    }
   }
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.

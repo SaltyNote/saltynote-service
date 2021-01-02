@@ -89,6 +89,30 @@ public class VaultService implements RepositoryService<VaultRepository> {
     return createRefreshToken(user);
   }
 
+  /**
+   * Validate given token and return the vault.
+   *
+   * @param token token
+   * @return vault for the token
+   */
+  public Optional<Vault> findByToken(String token) {
+    Optional<VaultEntity> veo = decode(token);
+    if (veo.isEmpty()) {
+      return Optional.empty();
+    }
+    VaultEntity ve = veo.get();
+    Optional<Vault> vault = getRepository().findBySecret(ve.getSecret());
+    if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
+      log.error(
+          "User id are not match from decoded token {} and database {}",
+          ve.getUserId(),
+          vault.get().getUserId());
+      return Optional.empty();
+    }
+
+    return vault;
+  }
+
   @Override
   public VaultRepository getRepository() {
     return vaultRepository;
