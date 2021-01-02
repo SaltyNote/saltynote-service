@@ -24,7 +24,7 @@ import com.saltynote.service.service.VaultService;
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
   private static final String[] PUBLIC_POST_ENDPOINTS = {
-    SecurityConstants.SIGN_UP_URL, "/refresh_token"
+    SecurityConstants.SIGN_UP_URL, "/refresh_token", "/password/forget"
   };
 
   private static final String[] PUBLIC_GET_ENDPOINTS = {"/", "/email/verification/**"};
