@@ -22,7 +22,7 @@ import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.NoteQuery;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.entity.Note;
-import com.saltynote.service.exception.WebClientRuntimeException;
+import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.NoteService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -121,7 +121,8 @@ public class NoteController {
     if (StringUtils.hasText(note.getId())) {
       return ResponseEntity.ok(note);
     }
-    throw new RuntimeException("Failed to save note into database: " + note);
+    throw new WebAppRuntimeException(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save note into database: " + note);
   }
 
   private void checkNoteOwner(Optional<Note> note, Authentication auth) {
@@ -129,7 +130,7 @@ public class NoteController {
     if (note.isPresent() && user.getId().equals(note.get().getUserId())) {
       return;
     }
-    throw new WebClientRuntimeException(
+    throw new WebAppRuntimeException(
         HttpStatus.FORBIDDEN, "Permission Error: You are not the owner of the note.");
   }
 }
