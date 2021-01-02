@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,9 @@ import lombok.val;
     description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
+  @Value("${password.minimal.length}")
+  private int passwordMinimalLength;
+
   @Resource private UserService userService;
   @Resource private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Resource private JwtInstance jwtInstance;
@@ -55,6 +59,11 @@ public class UserController {
   @ApiOperation(value = "Create a new user with email, username and password")
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserCredential userCredential) {
+    if (userCredential.getPassword().length() < passwordMinimalLength) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST,
+          "Password should be at least " + passwordMinimalLength + " characters.");
+    }
     SiteUser user = userCredential.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
@@ -157,9 +166,10 @@ public class UserController {
   public ResponseEntity<ServiceResponse> resetPassword(
       @Valid @RequestBody PasswordReset passwordReset) {
     val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
-    if (passwordReset.getPassword().length() < 6) {
+    if (passwordReset.getPassword().length() < passwordMinimalLength) {
       throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST, "Password should be at least 6 characters.");
+          HttpStatus.BAD_REQUEST,
+          "Password should be at least " + passwordMinimalLength + " characters.");
     }
     Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
     if (vo.isEmpty()) {
