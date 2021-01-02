@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.ServiceResponse;
@@ -29,7 +30,7 @@ import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.event.EmailEvent;
-import com.saltynote.service.exception.WebClientRuntimeException;
+import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import io.swagger.annotations.Api;
@@ -60,7 +61,8 @@ public class UserController {
       eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
       return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
     } else {
-      throw new RuntimeException("Failed to signup, please try again later.");
+      throw new WebAppRuntimeException(
+          HttpStatus.INTERNAL_SERVER_ERROR, "Failed to signup, please try again later.");
     }
   }
 
@@ -77,8 +79,7 @@ public class UserController {
       String newToken = jwtInstance.createAccessToken(user);
       return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
     } else {
-      throw new WebClientRuntimeException(
-          HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
+      throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
     }
   }
 
@@ -99,7 +100,7 @@ public class UserController {
           "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
   @GetMapping("/email/verification/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
-    val wre = new WebClientRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
+    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
     Optional<VaultEntity> veo = vaultService.decode(token);
     if (veo.isEmpty()) {
       throw wre;
@@ -132,6 +133,21 @@ public class UserController {
     } else {
       throw wre;
     }
+  }
+
+  @PostMapping("/password/forget")
+  public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
+    Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
+    if (usero.isEmpty()) {
+      log.warn("User is not found for email = {}", email.getEmail());
+      return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+          .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
+    }
+
+    eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));
+    return ResponseEntity.ok(
+        ServiceResponse.ok(
+            "Password reset email will be sent to your email, please reset your email with link there."));
   }
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
