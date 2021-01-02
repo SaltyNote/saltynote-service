@@ -357,5 +357,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ur)))
         .andExpect(status().isOk());
+
+    userService.cleanupByUserId(user.getId());
   }
 }
