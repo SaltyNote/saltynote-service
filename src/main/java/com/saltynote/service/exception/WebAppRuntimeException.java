@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import lombok.Getter;
 
 public class WebClientRuntimeException extends RuntimeException {
-  @Getter private HttpStatus status;
+  @Getter private final HttpStatus status;
 
   public WebClientRuntimeException(HttpStatus status, String message) {
     super(message);
