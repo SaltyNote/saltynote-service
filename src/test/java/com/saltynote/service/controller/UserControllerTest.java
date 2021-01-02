@@ -349,7 +349,7 @@ public class UserControllerTest {
                 .content(objectMapper.writeValueAsString(userRequest)))
         .andExpect(status().isUnauthorized());
 
-    // login with new password should fail
+    // login with new password should success
     UserCredential ur = new UserCredential().setUsername(uc.getUsername()).setPassword(newPassword);
     this.mockMvc
         .perform(
