@@ -17,4 +17,8 @@ public class BaseUtils {
   public static String getConfirmationUrl(@NotNull String secret) {
     return baseUrl + "/email/verification?confirmation=" + secret;
   }
+
+  public static String getPasswordResetUrl(@NotNull String secret) {
+    return baseUrl + "/password/reset?token=" + secret;
+  }
 }
