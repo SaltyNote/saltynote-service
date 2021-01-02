@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.saltynote.service.domain.EmailPayload;
-import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.service.EmailService;
 import com.saltynote.service.service.VaultService;
@@ -36,7 +35,7 @@ public class EmailEventListener {
   public void handleEvent(EmailEvent event)
       throws MessagingException, IOException, TemplateException {
     log.info("Event is received for {}", event.getType());
-    Vault vault = vaultService.create(event.getUser().getId(), VaultType.NEW_ACCOUNT);
+    Vault vault = vaultService.create(event.getUser().getId(), event.getType().getVaultType());
     EmailPayload payload =
         event
             .getType()
