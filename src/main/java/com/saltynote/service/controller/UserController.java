@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.event.EmailEvent;
-import com.saltynote.service.exception.WebClientRuntimeException;
+import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import io.swagger.annotations.Api;
@@ -44,6 +47,9 @@ import lombok.val;
     description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
+  @Value("${password.minimal.length}")
+  private int passwordMinimalLength;
+
   @Resource private UserService userService;
   @Resource private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Resource private JwtInstance jwtInstance;
@@ -53,6 +59,11 @@ public class UserController {
   @ApiOperation(value = "Create a new user with email, username and password")
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserCredential userCredential) {
+    if (userCredential.getPassword().length() < passwordMinimalLength) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST,
+          "Password should be at least " + passwordMinimalLength + " characters.");
+    }
     SiteUser user = userCredential.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
@@ -60,7 +71,8 @@ public class UserController {
       eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
       return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
     } else {
-      throw new RuntimeException("Failed to signup, please try again later.");
+      throw new WebAppRuntimeException(
+          HttpStatus.INTERNAL_SERVER_ERROR, "Failed to signup, please try again later.");
     }
   }
 
@@ -77,8 +89,7 @@ public class UserController {
       String newToken = jwtInstance.createAccessToken(user);
       return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
     } else {
-      throw new WebClientRuntimeException(
-          HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
+      throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
     }
   }
 
@@ -99,7 +110,7 @@ public class UserController {
           "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
   @GetMapping("/email/verification/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
-    val wre = new WebClientRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
+    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
     Optional<VaultEntity> veo = vaultService.decode(token);
     if (veo.isEmpty()) {
       throw wre;
@@ -129,6 +140,49 @@ public class UserController {
       userService.getRepository().save(user);
       vaultService.getRepository().delete(vault.get());
       return ResponseEntity.ok(ServiceResponse.ok("Email is verified now"));
+    } else {
+      throw wre;
+    }
+  }
+
+  @ApiOperation(value = "Request password reset email")
+  @PostMapping("/password/forget")
+  public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
+    Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
+    if (usero.isEmpty()) {
+      log.warn("User is not found for email = {}", email.getEmail());
+      return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+          .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
+    }
+
+    eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));
+    return ResponseEntity.ok(
+        ServiceResponse.ok(
+            "Password reset email will be sent to your email, please reset your email with link there."));
+  }
+
+  @ApiOperation(value = "Reset Password")
+  @PostMapping("/password/reset")
+  public ResponseEntity<ServiceResponse> resetPassword(
+      @Valid @RequestBody PasswordReset passwordReset) {
+    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
+    if (passwordReset.getPassword().length() < passwordMinimalLength) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST,
+          "Password should be at least " + passwordMinimalLength + " characters.");
+    }
+    Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
+    if (vo.isEmpty()) {
+      throw wre;
+    }
+
+    Optional<SiteUser> usero = userService.getRepository().findById(vo.get().getUserId());
+    if (usero.isPresent()) {
+      SiteUser user = usero.get();
+      user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
+      userService.getRepository().save(user);
+      vaultService.getRepository().delete(vo.get());
+      return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
     } else {
       throw wre;
     }

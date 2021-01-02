@@ -6,16 +6,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.saltynote.service.domain.transfer.ServiceResponse;
-import com.saltynote.service.exception.WebClientRuntimeException;
+import com.saltynote.service.exception.WebAppRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
 @Slf4j
 public class ExceptionHandlerControllerAdvice {
 
-  @ExceptionHandler(WebClientRuntimeException.class)
+  @ExceptionHandler(WebAppRuntimeException.class)
   public ResponseEntity<ServiceResponse> handleWebClientRuntimeException(
-      WebClientRuntimeException e) {
+      WebAppRuntimeException e) {
     return ResponseEntity.status(e.getStatus())
         .body(new ServiceResponse(e.getStatus(), e.getMessage()));
   }

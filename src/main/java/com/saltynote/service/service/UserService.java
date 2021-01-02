@@ -1,5 +1,7 @@
 package com.saltynote.service.service;
 
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,18 +12,9 @@ import com.saltynote.service.repository.VaultRepository;
 @Service
 public class UserService implements RepositoryService<UserRepository> {
 
-  private final UserRepository userRepository;
-  private final NoteRepository noteRepository;
-  private final VaultRepository vaultRepository;
-
-  public UserService(
-      UserRepository userRepository,
-      NoteRepository noteRepository,
-      VaultRepository vaultRepository) {
-    this.userRepository = userRepository;
-    this.noteRepository = noteRepository;
-    this.vaultRepository = vaultRepository;
-  }
+  @Resource private UserRepository userRepository;
+  @Resource private NoteRepository noteRepository;
+  @Resource private VaultRepository vaultRepository;
 
   @Override
   public UserRepository getRepository() {

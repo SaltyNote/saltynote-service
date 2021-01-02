@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,20 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class VaultService implements RepositoryService<VaultRepository> {
-  private final VaultRepository vaultRepository;
-  private final ObjectMapper objectMapper;
-  private final JwtInstance jwtInstance;
+  @Resource private VaultRepository vaultRepository;
+  @Resource private ObjectMapper objectMapper;
+  @Resource private JwtInstance jwtInstance;
 
   // TTL in milliseconds
   @Value("${jwt.refresh_token.ttl}")
   private long refreshTokenTTL;
-
-  public VaultService(
-      VaultRepository vaultRepository, ObjectMapper objectMapper, JwtInstance jwtInstance) {
-    this.vaultRepository = vaultRepository;
-    this.objectMapper = objectMapper;
-    this.jwtInstance = jwtInstance;
-  }
 
   public Vault create(@NotNull String userId, VaultType type) {
     return create(userId, type, FriendlyId.createFriendlyId());
@@ -92,9 +86,31 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
     // Refresh token is not a kid anymore or no existing refresh token found, a new one should be
     // created.
-    String refreshToken = jwtInstance.createRefreshToken(user);
-    Vault v = create(user.getId(), VaultType.REFRESH_TOKEN, refreshToken);
-    return v.getSecret();
+    return createRefreshToken(user);
+  }
+
+  /**
+   * Validate given token and return the vault.
+   *
+   * @param token token
+   * @return vault for the token
+   */
+  public Optional<Vault> findByToken(String token) {
+    Optional<VaultEntity> veo = decode(token);
+    if (veo.isEmpty()) {
+      return Optional.empty();
+    }
+    VaultEntity ve = veo.get();
+    Optional<Vault> vault = getRepository().findBySecret(ve.getSecret());
+    if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
+      log.error(
+          "User id are not match from decoded token {} and database {}",
+          ve.getUserId(),
+          vault.get().getUserId());
+      return Optional.empty();
+    }
+
+    return vault;
   }
 
   @Override

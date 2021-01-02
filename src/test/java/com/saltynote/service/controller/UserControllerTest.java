@@ -22,8 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
@@ -287,5 +289,75 @@ public class UserControllerTest {
     assertTrue(userService.getRepository().findById(jwtUser.getId()).get().getEmailVerified());
 
     userService.cleanupByUserId(jwtUser.getId());
+  }
+
+  @Test
+  public void passwordResetShouldSuccess() throws Exception {
+    // Create a new User
+    UserCredential uc =
+        new UserCredential()
+            .setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
+    SiteUser user = uc.toSiteUser();
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    user = userService.getRepository().save(user);
+
+    // request password change
+    Email email = new Email(user.getEmail());
+    this.mockMvc
+        .perform(
+            post("/password/forget")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(email)))
+        .andExpect(status().isOk());
+
+    List<Vault> vaults =
+        vaultService
+            .getRepository()
+            .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
+
+    assertEquals(vaults.size(), 1);
+    Vault vault = vaults.get(0);
+
+    // Can login without problem
+    UserCredential userRequest =
+        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+        .andExpect(status().isOk());
+
+    PasswordReset pr = new PasswordReset();
+    pr.setToken(vaultService.encode(vault));
+    String newPassword = RandomStringUtils.randomAlphanumeric(10);
+    pr.setPassword(newPassword);
+    this.mockMvc
+        .perform(
+            post("/password/reset")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pr)))
+        .andExpect(status().isOk());
+
+    // login with old password should fail
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+        .andExpect(status().isUnauthorized());
+
+    // login with new password should success
+    UserCredential ur = new UserCredential().setUsername(uc.getUsername()).setPassword(newPassword);
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ur)))
+        .andExpect(status().isOk());
+
+    userService.cleanupByUserId(user.getId());
   }
 }
