@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saltynote.service.component.JwtInstance;
@@ -27,6 +29,7 @@ import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
+import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
@@ -161,7 +164,7 @@ public class UserController {
             "Password reset email will be sent to your email, please reset your email with link there."));
   }
 
-  @ApiOperation(value = "Reset Password")
+  @ApiOperation(value = "Reset Password from email link")
   @PostMapping("/password/reset")
   public ResponseEntity<ServiceResponse> resetPassword(
       @Valid @RequestBody PasswordReset passwordReset) {
@@ -186,6 +189,38 @@ public class UserController {
     } else {
       throw wre;
     }
+  }
+
+  @ApiOperation(value = "Update Password after login")
+  @RequestMapping(
+      value = "/password",
+      method = {RequestMethod.POST, RequestMethod.PUT})
+  public ResponseEntity<ServiceResponse> updatePassword(
+      @Valid @RequestBody PasswordUpdate passwordUpdate, Authentication auth) {
+    JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+    // Validate new password
+    if (passwordUpdate.getPassword().length() < passwordMinimalLength) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST,
+          "New password should be at least " + passwordMinimalLength + " characters.");
+    }
+
+    // Validate old password
+    Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
+    if (usero.isEmpty()) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST,
+          "Something goes wrong when fetching your info, please try later again.");
+    }
+    SiteUser user = usero.get();
+    if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {
+      throw new WebAppRuntimeException(
+          HttpStatus.BAD_REQUEST, "Wrong current password is provided.");
+    }
+
+    user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
+    userService.getRepository().save(user);
+    return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
   }
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
