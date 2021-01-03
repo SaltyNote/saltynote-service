@@ -1,10 +1,13 @@
 package com.saltynote.service.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.MessagingException;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,12 +29,15 @@ import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
+import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
+import com.saltynote.service.security.SecurityConstants;
 import com.saltynote.service.service.EmailService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,17 +73,14 @@ public class UserControllerTest {
 
   private final Faker faker = new Faker();
 
-  @After
-  public void cleanup() {
-    log.info("clean up...");
+  @BeforeEach
+  public void setup() throws MessagingException, IOException, TemplateException {
+    doNothing().when(emailService).sendAsHtml(any(), any(), any());
+    doNothing().when(emailService).send(any(), any(), any());
   }
 
   @Test
   public void signupShouldReturnSuccess() throws Exception {
-
-    doNothing().when(emailService).sendAsHtml(any(), any(), any());
-    doNothing().when(emailService).send(any(), any(), any());
-
     UserCredential user = new UserCredential();
     String username = faker.name().username();
     user.setEmail(username + "@saltynote.com");
@@ -254,9 +257,6 @@ public class UserControllerTest {
 
   @Test
   public void emailVerificationShouldSuccess() throws Exception {
-    doNothing().when(emailService).sendAsHtml(any(), any(), any());
-    doNothing().when(emailService).send(any(), any(), any());
-
     UserCredential user = new UserCredential();
     String username = faker.name().username();
     user.setEmail(username + "@saltynote.com");
@@ -359,5 +359,77 @@ public class UserControllerTest {
         .andExpect(status().isOk());
 
     userService.cleanupByUserId(user.getId());
+  }
+
+  @Test
+  public void passwordUpdateShouldSuccess() throws Exception {
+    String oldPassword = RandomStringUtils.randomAlphanumeric(12);
+    String newPassword = RandomStringUtils.randomAlphanumeric(12);
+
+    // Create a new User
+    String username = faker.name().username();
+    UserCredential user =
+        new UserCredential()
+            .setUsername(username)
+            .setEmail(username + "@saltynote.com")
+            .setPassword(oldPassword);
+
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/signup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
+    String res = mvcResult.getResponse().getContentAsString();
+    JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
+    assertNotNull(jwtUser.getId());
+
+    // Can login without problem
+    mvcResult =
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
+    res = mvcResult.getResponse().getContentAsString();
+    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+    assertNotNull(token);
+    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+    PasswordUpdate pu = new PasswordUpdate().setOldPassword(oldPassword).setPassword(newPassword);
+
+    this.mockMvc
+        .perform(
+            post("/password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pu))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+        .andExpect(status().isOk());
+
+    // login with old password should fail
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+        .andExpect(status().isUnauthorized());
+
+    // login with new password should success
+    UserCredential ur =
+        new UserCredential().setUsername(user.getUsername()).setPassword(newPassword);
+    this.mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ur)))
+        .andExpect(status().isOk());
+
+    userService.cleanupByUserId(jwtUser.getId());
   }
 }
