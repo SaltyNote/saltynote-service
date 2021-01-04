@@ -31,16 +31,19 @@ import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.entity.Note;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.security.SecurityConstants;
 import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.NoteService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -49,9 +52,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // Overwrite refresh token ttl to 8 seconds
@@ -69,6 +74,7 @@ public class UserControllerTest {
   @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Autowired private JwtInstance jwtInstance;
   @Autowired private VaultService vaultService;
+  @Autowired private NoteService noteService;
   @MockBean private EmailService emailService;
 
   private final Faker faker = new Faker();
@@ -292,7 +298,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void passwordResetShouldSuccess() throws Exception {
+  public void passwordResetTest() throws Exception {
     // Create a new User
     UserCredential uc =
         new UserCredential()
@@ -362,7 +368,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void passwordUpdateShouldSuccess() throws Exception {
+  public void passwordUpdateTest() throws Exception {
     String oldPassword = RandomStringUtils.randomAlphanumeric(12);
     String newPassword = RandomStringUtils.randomAlphanumeric(12);
 
@@ -431,5 +437,94 @@ public class UserControllerTest {
         .andExpect(status().isOk());
 
     userService.cleanupByUserId(jwtUser.getId());
+  }
+
+  @Test
+  public void accountDeletionTest() throws Exception {
+    // Create a new User
+    String username = faker.name().username();
+    UserCredential user =
+        new UserCredential()
+            .setUsername(username)
+            .setEmail(username + "@saltynote.com")
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
+
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post("/signup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
+    String res = mvcResult.getResponse().getContentAsString();
+    JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
+    assertNotNull(jwtUser.getId());
+
+    // Can login without problem
+    mvcResult =
+        this.mockMvc
+            .perform(
+                post("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
+    res = mvcResult.getResponse().getContentAsString();
+    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+    assertNotNull(token);
+    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+    Note note = NoteControllerTest.createTmpNote(jwtUser.getId());
+    mvcResult =
+        this.mockMvc
+            .perform(
+                post("/note/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(note))
+                    .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(content().string(containsString(note.getText())))
+            .andReturn();
+    res = mvcResult.getResponse().getContentAsString();
+    Note returnedNote = objectMapper.readValue(res, Note.class);
+    assertEquals(note.getNote(), returnedNote.getNote());
+
+    // deletion should fail due to invalid user id
+    JwtUser userReq = new JwtUser();
+    userReq.setId("not-valid");
+    userReq.setUsername(user.getUsername());
+    this.mockMvc
+        .perform(
+            delete("/account")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userReq))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+        .andExpect(status().isBadRequest());
+
+    // deletion should fail due to no access token
+    userReq.setId(jwtUser.getId());
+    this.mockMvc
+        .perform(
+            delete("/account")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userReq)))
+        .andExpect(status().isForbidden());
+
+    // deletion should success
+    this.mockMvc
+        .perform(
+            delete("/account")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userReq))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+        .andExpect(status().isOk());
+
+    assertTrue(userService.getRepository().findById(jwtUser.getId()).isEmpty());
+    assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
+    assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
   }
 }
