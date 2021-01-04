@@ -21,4 +21,6 @@ public interface VaultRepository
   List<Vault> findByUserIdAndType(String userId, String type);
 
   Optional<Vault> findFirstByUserIdAndTypeOrderByCreatedTimeDesc(String userId, String type);
+
+  List<Vault> findByUserId(String userId);
 }

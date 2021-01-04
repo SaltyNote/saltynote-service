@@ -64,13 +64,13 @@ public class NoteControllerTest {
   @Autowired private UserService userService;
   @MockBean private EmailService emailService;
 
-  private final Faker faker = new Faker();
+  private static final Faker faker = new Faker();
   private List<Note> notesToCleaned;
   private SiteUser siteUser;
   private String accessToken;
   private Note savedNote;
 
-  private Note createTmpNote(String userId) {
+  public static Note createTmpNote(String userId) {
     return new Note()
         .setUserId(userId)
         .setNote(faker.lorem().characters(50, 100))
@@ -309,7 +309,6 @@ public class NoteControllerTest {
             .andExpect(content().string(containsString(note.getText())))
             .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
-    log.info("note resp = {}", res);
     Note returnedNote = objectMapper.readValue(res, Note.class);
     assertEquals(note.getNote(), returnedNote.getNote());
     notesToCleaned.add(returnedNote);

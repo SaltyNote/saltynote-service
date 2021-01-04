@@ -1,5 +1,6 @@
 package com.saltynote.service.controller;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Resource;
@@ -221,6 +222,20 @@ public class UserController {
     user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
     userService.getRepository().save(user);
     return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
+  }
+
+  @ApiOperation(
+      value =
+          "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
+  @DeleteMapping("/account")
+  public ResponseEntity<ServiceResponse> accountDeletion(
+      @RequestBody JwtUser user, Authentication auth) {
+    JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+    if (!Objects.equals(user, jwtUser)) {
+      throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");
+    }
+    userService.cleanupByUserId(jwtUser.getId());
+    return ResponseEntity.ok(ServiceResponse.ok("Account deletion is successful."));
   }
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
