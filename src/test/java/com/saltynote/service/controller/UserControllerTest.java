@@ -494,32 +494,25 @@ public class UserControllerTest {
     assertEquals(note.getNote(), returnedNote.getNote());
 
     // deletion should fail due to invalid user id
-    JwtUser userReq = new JwtUser();
-    userReq.setId("not-valid");
-    userReq.setUsername(user.getUsername());
     this.mockMvc
         .perform(
-            delete("/account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userReq))
+            delete("/account/invalid-id")
                 .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
         .andExpect(status().isBadRequest());
-
-    // deletion should fail due to no access token
-    userReq.setId(jwtUser.getId());
+    // deletion should fail due to missing user id
     this.mockMvc
         .perform(
             delete("/account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userReq)))
-        .andExpect(status().isForbidden());
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+        .andExpect(status().isNotFound());
+
+    // deletion should fail due to no access token
+    this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
 
     // deletion should success
     this.mockMvc
         .perform(
-            delete("/account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userReq))
+            delete("/account/" + jwtUser.getId())
                 .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
         .andExpect(status().isOk());
 
