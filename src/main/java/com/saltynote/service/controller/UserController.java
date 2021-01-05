@@ -102,11 +102,11 @@ public class UserController {
       value =
           "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
   @DeleteMapping("/refresh_tokens")
-  public ResponseEntity<Void> cleanRefreshTokens(Authentication auth) {
+  public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
     log.info("[cleanRefreshTokens] user = {}", user);
     vaultService.cleanRefreshTokenByUserId(user.getId());
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ServiceResponse.ok("All your refresh tokens are cleaned."));
   }
 
   @ApiOperation(
@@ -227,11 +227,11 @@ public class UserController {
   @ApiOperation(
       value =
           "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
-  @DeleteMapping("/account")
+  @DeleteMapping("/account/{id}")
   public ResponseEntity<ServiceResponse> accountDeletion(
-      @RequestBody JwtUser user, Authentication auth) {
+      @PathVariable("id") String userId, Authentication auth) {
     JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-    if (!Objects.equals(user, jwtUser)) {
+    if (!Objects.equals(userId, jwtUser.getId())) {
       throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");
     }
     userService.cleanupByUserId(jwtUser.getId());
