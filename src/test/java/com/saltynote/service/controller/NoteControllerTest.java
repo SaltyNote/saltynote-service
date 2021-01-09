@@ -75,7 +75,8 @@ public class NoteControllerTest {
         .setUserId(userId)
         .setNote(faker.lorem().characters(50, 100))
         .setUrl(faker.internet().url())
-        .setText(faker.funnyName().name());
+        .setText(faker.funnyName().name())
+        .setTags(faker.nation().capitalCity());
   }
 
   private Pair<SiteUser, String> signupTestUser() throws Exception {
@@ -125,6 +126,7 @@ public class NoteControllerTest {
     Note note = createTmpNote(siteUser.getId());
     this.savedNote = noteService.getRepository().save(note);
     this.notesToCleaned.add(this.savedNote);
+
   }
 
   @AfterEach
@@ -185,6 +187,27 @@ public class NoteControllerTest {
     assertTrue(queryNote.isPresent());
     assertEquals(queryNote.get().getNote(), newNoteContent);
   }
+
+  @Test
+  public void updateTagsByIdShouldSuccess() throws Exception {
+    String newTagsContent = "java,python,spring-boot";
+    Note tagToUpdate = SerializationUtils.clone(this.savedNote);
+    tagToUpdate.setTags(newTagsContent);
+    this.mockMvc
+        .perform(
+            post("/note/" + this.savedNote.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagToUpdate))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(content().string(containsString(newTagsContent)));
+
+    Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+    assertTrue(queryNote.isPresent());
+    assertEquals(queryNote.get().getTags(), newTagsContent);
+  }
+
 
   @Test
   public void updateNoteByIdFromNonOwnerShouldFail() throws Exception {
