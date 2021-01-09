@@ -50,10 +50,6 @@ public class Note implements Serializable {
   @Column(name = "highlight_color")
   private String highlightColor;
 
-  @Column(name = "tags")
-  @NotBlank
-  private String tags;
-
   @Column(name = "created_time", nullable = false)
   private Timestamp createdTime;
 
