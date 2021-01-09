@@ -65,6 +65,11 @@ public class NoteController {
     if (StringUtils.hasText(note.getNote())) {
       noteTobeUpdate.setNote(note.getNote());
     }
+    
+    if (StringUtils.hasText(note.getTags())) {
+      noteTobeUpdate.setTags(note.getTags());
+    }
+    
     if (StringUtils.hasText(note.getHighlightColor())) {
       noteTobeUpdate.setHighlightColor(note.getHighlightColor());
     }

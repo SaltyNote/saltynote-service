@@ -201,7 +201,7 @@ public class NoteControllerTest {
                 .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(content().string(containsString(newTagsContent)));
+        .andExpect(content().string(containsString(newTagsContent))); // expexct this string
 
     Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
     assertTrue(queryNote.isPresent());
