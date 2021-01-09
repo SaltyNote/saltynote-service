@@ -53,6 +53,10 @@ public class Note implements Serializable {
   @Column(name = "created_time", nullable = false)
   private Timestamp createdTime;
 
+  @Column(name = "tags")
+  @NotBlank
+  private String tags;
+
   @PrePersist
   private void beforeSave() {
     this.id = FriendlyId.createFriendlyId();
