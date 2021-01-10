@@ -19,10 +19,7 @@ public class UserCredential {
   @JsonIgnore
   public SiteUser toSiteUser() {
     SiteUser user = new SiteUser();
-    user.setEmailVerified(false)
-        .setEmail(this.email)
-        .setUsername(this.username)
-        .setPassword(this.password);
+    user.setEmail(this.email).setUsername(this.username).setPassword(this.password);
     return user;
   }
 }
