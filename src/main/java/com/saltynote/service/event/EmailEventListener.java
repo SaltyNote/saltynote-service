@@ -35,12 +35,16 @@ public class EmailEventListener {
   public void handleEvent(EmailEvent event)
       throws MessagingException, IOException, TemplateException {
     log.info("Event is received for {}", event.getType());
-    Vault vault = vaultService.create(event.getUser().getId(), event.getType().getVaultType());
+    Vault vault =
+        event.getType() == EmailEvent.Type.NEW_USER
+            ? vaultService.createForEmail(
+                event.getUser().getEmail(), event.getType().getVaultType())
+            : vaultService.create(event.getUser().getId(), event.getType().getVaultType());
     EmailPayload payload =
         event
             .getType()
             .loadUser(event.getUser())
-            .loadLinkInfo(vaultService.encode(vault))
+            .loadVault(vault, vaultService.encode(vault))
             .getPayload();
 
     if (StringUtils.hasText(mailUser)) {
