@@ -48,6 +48,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -90,10 +91,7 @@ public class UserControllerTest {
     String emailStr = username + "@saltynote.com";
     String alreadyUsedEmail = "example@exmaple.com";
 
-    SiteUser user =
-        new SiteUser()
-            .setUsername(faker.name().username())
-            .setEmail(alreadyUsedEmail);
+    SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
     user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
     user = userService.getRepository().save(user);
     assertNotNull(user.getId());
@@ -128,6 +126,7 @@ public class UserControllerTest {
     userNewRequest.setEmail(email);
     userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
     userNewRequest.setUsername(username);
+    assertNull(userNewRequest.getToken());
 
     this.mockMvc
         .perform(
