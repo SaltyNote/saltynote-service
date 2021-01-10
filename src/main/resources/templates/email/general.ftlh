@@ -1,8 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title></title>
     <style type="text/css" rel="stylesheet" media="all">
         /* Base ------------------------------ */
@@ -515,7 +516,9 @@
                                                                 <tr>
                                                                     <td align="center">
                                                                         <a
-                                                                                href="${payload.link}"
+                                                                                <#if payload.link?has_content>
+                                                                                    href="${payload.link!"#"}"
+                                                                                </#if>
                                                                                 class="f-fallback button"
                                                                                 target="_blank"
                                                                         >${payload.linkText}</a
@@ -533,7 +536,7 @@
                                                 >email our support team</a
                                                 >. (We're lightning quick at replying.)
                                             </p>
-                                            <p>Thanks, <br />SaltyNote Team</p>
+                                            <p>Thanks, <br/>SaltyNote Team</p>
                                             <#if payload.link?? && payload.link?starts_with("http")>
                                                 <!-- Sub copy -->
                                                 <table class="body-sub" role="presentation">

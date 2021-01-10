@@ -16,7 +16,7 @@ public class HomeController {
   @Value("${app.welcome.message}")
   private String welcomeMessage;
 
-  @ApiOperation(value = "Display a greeting message")
+  @ApiOperation("Display a greeting message")
   @GetMapping("/")
   public ResponseEntity<ServiceResponse> home() {
     return ResponseEntity.ok(ServiceResponse.ok(welcomeMessage));

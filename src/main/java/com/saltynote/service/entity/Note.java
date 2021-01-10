@@ -54,7 +54,6 @@ public class Note implements Serializable {
   private Timestamp createdTime;
 
   @Column(name = "tags")
-  @NotBlank
   private String tags;
 
   @PrePersist

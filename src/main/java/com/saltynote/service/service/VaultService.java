@@ -39,6 +39,14 @@ public class VaultService implements RepositoryService<VaultRepository> {
     return create(userId, type, FriendlyId.createFriendlyId());
   }
 
+  public Vault createForEmail(@NotNull String email, VaultType type) {
+    return vaultRepository.save(
+        new Vault()
+            .setEmail(email)
+            .setType(type.getValue())
+            .setSecret(FriendlyId.createFriendlyId()));
+  }
+
   public Vault create(@NotNull String userId, VaultType type, String secret) {
     return vaultRepository.save(
         new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));

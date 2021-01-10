@@ -15,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saltynote.service.component.JwtInstance;
-import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.transfer.Email;
 import com.saltynote.service.domain.transfer.JwtToken;
@@ -33,6 +31,7 @@ import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.event.EmailEvent;
@@ -60,19 +59,47 @@ public class UserController {
   @Resource private ApplicationEventPublisher eventPublisher;
   @Resource private VaultService vaultService;
 
-  @ApiOperation(value = "Create a new user with email, username and password")
+  @ApiOperation("Get a verification code for email signup")
+  @PostMapping("/email/verification")
+  public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
+    // check whether this email is already signed up or not.
+    if (userService.getRepository().findByEmail(email.getEmail()).isPresent()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
+    }
+
+    SiteUser user = new SiteUser().setEmail(email.getEmail()).setUsername("there");
+    eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
+    return ResponseEntity.ok(
+        ServiceResponse.ok("A verification code for signup is sent to you email now"));
+  }
+
+  @ApiOperation("Create a new user with email, username and password")
   @PostMapping("/signup")
-  public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserCredential userCredential) {
-    if (userCredential.getPassword().length() < passwordMinimalLength) {
+  public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
+    if (userNewRequest.getPassword().length() < passwordMinimalLength) {
       throw new WebAppRuntimeException(
           HttpStatus.BAD_REQUEST,
           "Password should be at least " + passwordMinimalLength + " characters.");
     }
-    SiteUser user = userCredential.toSiteUser();
+    // Check token
+    Optional<Vault> vaultOp =
+        vaultService
+            .getRepository()
+            .findByEmailAndSecretAndType(
+                userNewRequest.getEmail(),
+                userNewRequest.getToken(),
+                VaultType.NEW_ACCOUNT.getValue());
+
+    if (vaultOp.isEmpty()) {
+      throw new WebAppRuntimeException(
+          HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
+    }
+    SiteUser user = userNewRequest.toSiteUser();
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user = userService.getRepository().save(user);
     if (StringUtils.hasText(user.getId())) {
-      eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
+      vaultService.getRepository().delete(vaultOp.get());
       return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
     } else {
       throw new WebAppRuntimeException(
@@ -81,7 +108,7 @@ public class UserController {
   }
 
   @PostMapping("/refresh_token")
-  @ApiOperation(value = "Get a new access token with refresh_token.")
+  @ApiOperation("Get a new access token with refresh_token.")
   public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
     // 1. No expiry, and valid.
     JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
@@ -99,8 +126,7 @@ public class UserController {
 
   @Transactional
   @ApiOperation(
-      value =
-          "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
+      "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
   @DeleteMapping("/refresh_tokens")
   public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
@@ -109,47 +135,7 @@ public class UserController {
     return ResponseEntity.ok(ServiceResponse.ok("All your refresh tokens are cleaned."));
   }
 
-  @ApiOperation(
-      value =
-          "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
-  @GetMapping("/email/verification/{token}")
-  public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
-    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
-    Optional<VaultEntity> veo = vaultService.decode(token);
-    if (veo.isEmpty()) {
-      throw wre;
-    }
-    VaultEntity ve = veo.get();
-    Optional<Vault> vault = vaultService.getRepository().findBySecret(ve.getSecret());
-    if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
-      log.error(
-          "User id are not match from decoded token {} and database {}",
-          ve.getUserId(),
-          vault.get().getUserId());
-      throw wre;
-    }
-
-    Optional<SiteUser> usero = userService.getRepository().findById(ve.getUserId());
-    if (usero.isEmpty()) {
-      log.error("User is not found for user id = {}", ve.getUserId());
-      throw wre;
-    }
-
-    SiteUser user = usero.get();
-    if (user.getEmailVerified()) {
-      return ResponseEntity.ok(ServiceResponse.ok("Email is already verified"));
-    }
-    if (vault.isPresent()) {
-      user.setEmailVerified(true);
-      userService.getRepository().save(user);
-      vaultService.getRepository().delete(vault.get());
-      return ResponseEntity.ok(ServiceResponse.ok("Email is verified now"));
-    } else {
-      throw wre;
-    }
-  }
-
-  @ApiOperation(value = "Request password reset email")
+  @ApiOperation("Request password reset email")
   @PostMapping("/password/forget")
   public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
     Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
@@ -165,7 +151,7 @@ public class UserController {
             "Password reset email will be sent to your email, please reset your email with link there."));
   }
 
-  @ApiOperation(value = "Reset Password from email link")
+  @ApiOperation("Reset Password from email link")
   @PostMapping("/password/reset")
   public ResponseEntity<ServiceResponse> resetPassword(
       @Valid @RequestBody PasswordReset passwordReset) {
@@ -192,7 +178,7 @@ public class UserController {
     }
   }
 
-  @ApiOperation(value = "Update Password after login")
+  @ApiOperation("Update Password after login")
   @RequestMapping(
       value = "/password",
       method = {RequestMethod.POST, RequestMethod.PUT})
@@ -225,8 +211,7 @@ public class UserController {
   }
 
   @ApiOperation(
-      value =
-          "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
+      "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
   @DeleteMapping("/account/{id}")
   public ResponseEntity<ServiceResponse> accountDeletion(
       @PathVariable("id") String userId, Authentication auth) {
@@ -240,8 +225,7 @@ public class UserController {
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
   @ApiOperation(
-      value =
-          "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
+      "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
   @PostMapping("/login-placeholder-for-swagger-doc")
   public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
     return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));

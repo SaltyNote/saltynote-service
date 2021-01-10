@@ -41,9 +41,6 @@ public class SiteUser implements Serializable, IdentifiableUser {
   @NotBlank
   private String password;
 
-  @Column(name = "email_verified")
-  private Boolean emailVerified;
-
   @Column(name = "register_time")
   private Timestamp registerTime;
 

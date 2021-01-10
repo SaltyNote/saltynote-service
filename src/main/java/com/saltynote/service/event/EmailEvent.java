@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEvent;
 import com.saltynote.service.domain.EmailPayload;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.entity.Vault;
 import com.saltynote.service.utils.BaseUtils;
 import lombok.Getter;
 
@@ -13,14 +14,11 @@ public class EmailEvent extends ApplicationEvent {
 
   public enum Type {
     NEW_USER(
-        "Welcome to SaltyNote!",
-        new EmailPayload()
-            .setLink("")
-            .setLinkText("Click to Verify Your Email")
-            .setMessage("Below is the link for your email verification.")) {
+        "Signup Code to SaltyNote!",
+        new EmailPayload().setMessage("Below is the code you will use for signup.")) {
       @Override
-      public Type loadLinkInfo(String linkInfo) {
-        this.getPayload().setLink(BaseUtils.getConfirmationUrl(linkInfo));
+      public Type loadVault(Vault vault, String encodedVault) {
+        this.getPayload().setLinkText(vault.getSecret());
         return this;
       }
 
@@ -36,8 +34,8 @@ public class EmailEvent extends ApplicationEvent {
             .setLinkText("Reset Your Password")
             .setMessage("Below is the link for you to reset your password.")) {
       @Override
-      public Type loadLinkInfo(String secret) {
-        this.getPayload().setLink(BaseUtils.getPasswordResetUrl(secret));
+      public Type loadVault(Vault vault, String encodedVault) {
+        this.getPayload().setLink(BaseUtils.getPasswordResetUrl(encodedVault));
         return this;
       }
 
@@ -60,7 +58,7 @@ public class EmailEvent extends ApplicationEvent {
       return this;
     }
 
-    public abstract Type loadLinkInfo(String linkInfo);
+    public abstract Type loadVault(Vault vault, String encodedVault);
 
     public abstract VaultType getVaultType();
   }

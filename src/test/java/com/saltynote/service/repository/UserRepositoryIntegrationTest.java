@@ -35,8 +35,7 @@ public class UserRepositoryIntegrationTest {
         new SiteUser()
             .setEmail(faker.internet().emailAddress())
             .setUsername(username)
-            .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)))
-            .setEmailVerified(false);
+            .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
     entityManager.persist(user);
     entityManager.flush();
 
