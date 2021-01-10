@@ -60,7 +60,7 @@ public class UserController {
   @Resource private ApplicationEventPublisher eventPublisher;
   @Resource private VaultService vaultService;
 
-  @ApiOperation(value = "Create a new user with email, username and password")
+  @ApiOperation("Create a new user with email, username and password")
   @PostMapping("/signup")
   public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserCredential userCredential) {
     if (userCredential.getPassword().length() < passwordMinimalLength) {
@@ -81,7 +81,7 @@ public class UserController {
   }
 
   @PostMapping("/refresh_token")
-  @ApiOperation(value = "Get a new access token with refresh_token.")
+  @ApiOperation("Get a new access token with refresh_token.")
   public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
     // 1. No expiry, and valid.
     JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
@@ -99,8 +99,7 @@ public class UserController {
 
   @Transactional
   @ApiOperation(
-      value =
-          "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
+      "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
   @DeleteMapping("/refresh_tokens")
   public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
     JwtUser user = (JwtUser) auth.getPrincipal();
@@ -110,8 +109,7 @@ public class UserController {
   }
 
   @ApiOperation(
-      value =
-          "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
+      "Email verification. Once signup, your email will receive a verification message, there you can find this link to verify your email")
   @GetMapping("/email/verification/{token}")
   public ResponseEntity<ServiceResponse> userActivation(@PathVariable("token") String token) {
     val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid token provided.");
@@ -149,7 +147,7 @@ public class UserController {
     }
   }
 
-  @ApiOperation(value = "Request password reset email")
+  @ApiOperation("Request password reset email")
   @PostMapping("/password/forget")
   public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
     Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
@@ -165,7 +163,7 @@ public class UserController {
             "Password reset email will be sent to your email, please reset your email with link there."));
   }
 
-  @ApiOperation(value = "Reset Password from email link")
+  @ApiOperation("Reset Password from email link")
   @PostMapping("/password/reset")
   public ResponseEntity<ServiceResponse> resetPassword(
       @Valid @RequestBody PasswordReset passwordReset) {
@@ -192,7 +190,7 @@ public class UserController {
     }
   }
 
-  @ApiOperation(value = "Update Password after login")
+  @ApiOperation("Update Password after login")
   @RequestMapping(
       value = "/password",
       method = {RequestMethod.POST, RequestMethod.PUT})
@@ -225,8 +223,7 @@ public class UserController {
   }
 
   @ApiOperation(
-      value =
-          "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
+      "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
   @DeleteMapping("/account/{id}")
   public ResponseEntity<ServiceResponse> accountDeletion(
       @PathVariable("id") String userId, Authentication auth) {
@@ -240,8 +237,7 @@ public class UserController {
 
   // Note: this is not a valid endpoint, it is only used for swagger doc.
   @ApiOperation(
-      value =
-          "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
+      "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
   @PostMapping("/login-placeholder-for-swagger-doc")
   public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
     return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));
