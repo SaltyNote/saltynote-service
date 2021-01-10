@@ -85,6 +85,59 @@ public class UserControllerTest {
   }
 
   @Test
+  public void emailVerifyTest() throws Exception {
+    String username = faker.name().username();
+    String emailStr = username + "@saltynote.com";
+    String alreadyUsedEmail = "example@exmaple.com";
+
+    SiteUser user =
+        new SiteUser()
+            .setUsername(faker.name().username())
+            .setEmail(alreadyUsedEmail);
+    user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
+    user = userService.getRepository().save(user);
+    assertNotNull(user.getId());
+
+    this.mockMvc
+        .perform(
+            post("/email/verification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Email(alreadyUsedEmail))))
+        .andExpect(status().isBadRequest());
+
+    this.mockMvc
+        .perform(
+            post("/email/verification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Email(emailStr))))
+        .andExpect(status().isOk());
+
+    List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
+    assertEquals(vaults.size(), 1);
+    vaultService.getRepository().delete(vaults.get(0));
+    userService.cleanupByUserId(user.getId());
+  }
+
+  @Test
+  public void signupShouldFailIfNoToken() throws Exception {
+    String username = faker.name().username();
+    String email = username + "@saltynote.com";
+
+    UserNewRequest userNewRequest = new UserNewRequest();
+
+    userNewRequest.setEmail(email);
+    userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
+    userNewRequest.setUsername(username);
+
+    this.mockMvc
+        .perform(
+            post("/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
   public void signupShouldReturnSuccess() throws Exception {
     String username = faker.name().username();
     String email = username + "@saltynote.com";
