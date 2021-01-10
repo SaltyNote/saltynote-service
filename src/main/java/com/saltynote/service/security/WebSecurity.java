@@ -34,7 +34,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     "/email/verification"
   };
 
-  private static final String[] PUBLIC_GET_ENDPOINTS = {"/", "/email/verification/**"};
+  private static final String[] PUBLIC_GET_ENDPOINTS = {"/"};
 
   private static final String[] SWAGGER_URLS = {
     "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs", "/webjars/**"
