@@ -1,5 +1,7 @@
 package com.saltynote.service.domain.transfer;
 
+import javax.validation.constraints.NotBlank;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Email {
-  @javax.validation.constraints.Email private String email;
+  @NotBlank @javax.validation.constraints.Email private String email;
 }
