@@ -62,6 +62,12 @@ public class UserController {
   @ApiOperation("Get a verification code for email signup")
   @PostMapping("/email/verification")
   public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
+    // check whether this email is already signed up or not.
+    if (userService.getRepository().findByEmail(email.getEmail()).isPresent()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
+    }
+
     SiteUser user = new SiteUser().setEmail(email.getEmail()).setUsername("there");
     eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
     return ResponseEntity.ok(
