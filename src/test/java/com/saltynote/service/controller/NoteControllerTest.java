@@ -23,14 +23,18 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.entity.Vault;
 import com.saltynote.service.security.SecurityConstants;
 import com.saltynote.service.service.EmailService;
 import com.saltynote.service.service.NoteService;
 import com.saltynote.service.service.UserService;
+import com.saltynote.service.service.VaultService;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,6 +66,7 @@ public class NoteControllerTest {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private NoteService noteService;
   @Autowired private UserService userService;
+  @Autowired private VaultService vaultService;
   @MockBean private EmailService emailService;
 
   private static final Faker faker = new Faker();
@@ -83,21 +88,35 @@ public class NoteControllerTest {
     doNothing().when(emailService).sendAsHtml(any(), any(), any());
     doNothing().when(emailService).send(any(), any(), any());
 
-    UserCredential user = new UserCredential();
     String username = faker.name().username();
-    user.setEmail(username + "@saltynote.com");
-    user.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    user.setUsername(username);
+    String email = username + "@saltynote.com";
+    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+
+    assertNotNull(vault.getId());
+    assertEquals(vault.getEmail(), email);
+
+    UserNewRequest userNewRequest = new UserNewRequest();
+
+    userNewRequest.setEmail(email);
+    userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
+    userNewRequest.setUsername(username);
+    userNewRequest.setToken(vault.getSecret());
 
     this.mockMvc
         .perform(
             post("/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user)))
+                .content(objectMapper.writeValueAsString(userNewRequest)))
         .andExpect(status().isOk());
 
-    SiteUser siteUser = userService.getRepository().findByUsername(user.getUsername());
-    assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
+    SiteUser siteUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
+    assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
+
+    UserCredential user =
+        new UserCredential()
+            .setUsername(userNewRequest.getUsername())
+            .setEmail(userNewRequest.getEmail())
+            .setPassword(userNewRequest.getPassword());
 
     MvcResult mvcLoginResult =
         this.mockMvc
@@ -126,7 +145,6 @@ public class NoteControllerTest {
     Note note = createTmpNote(siteUser.getId());
     this.savedNote = noteService.getRepository().save(note);
     this.notesToCleaned.add(this.savedNote);
-
   }
 
   @AfterEach
@@ -207,7 +225,6 @@ public class NoteControllerTest {
     assertTrue(queryNote.isPresent());
     assertEquals(queryNote.get().getTags(), newTagsContent);
   }
-
 
   @Test
   public void updateNoteByIdFromNonOwnerShouldFail() throws Exception {

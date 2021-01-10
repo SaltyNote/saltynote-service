@@ -31,6 +31,7 @@ import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
@@ -45,7 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +53,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -87,22 +86,30 @@ public class UserControllerTest {
 
   @Test
   public void signupShouldReturnSuccess() throws Exception {
-    UserCredential user = new UserCredential();
     String username = faker.name().username();
-    user.setEmail(username + "@saltynote.com");
-    user.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    user.setUsername(username);
+    String email = username + "@saltynote.com";
+    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+
+    assertNotNull(vault.getId());
+    assertEquals(vault.getEmail(), email);
+
+    UserNewRequest userNewRequest = new UserNewRequest();
+
+    userNewRequest.setEmail(email);
+    userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
+    userNewRequest.setUsername(username);
+    userNewRequest.setToken(vault.getSecret());
 
     this.mockMvc
         .perform(
             post("/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user)))
+                .content(objectMapper.writeValueAsString(userNewRequest)))
         .andDo(print())
         .andExpect(status().isOk());
 
-    SiteUser queryUser = userService.getRepository().findByUsername(user.getUsername());
-    assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(user.getEmail());
+    SiteUser queryUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
+    assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
 
     userService.cleanupByUserId(queryUser.getId());
   }
@@ -262,42 +269,6 @@ public class UserControllerTest {
   }
 
   @Test
-  public void emailVerificationShouldSuccess() throws Exception {
-    UserCredential user = new UserCredential();
-    String username = faker.name().username();
-    user.setEmail(username + "@saltynote.com");
-    user.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    user.setUsername(username);
-
-    MvcResult mvcResult =
-        this.mockMvc
-            .perform(
-                post("/signup")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(user)))
-            .andExpect(status().isOk())
-            .andReturn();
-
-    String res = mvcResult.getResponse().getContentAsString();
-    JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
-
-    assertThat(jwtUser).extracting(JwtUser::getId).isNotNull();
-    List<Vault> vaults =
-        vaultService
-            .getRepository()
-            .findByUserIdAndType(jwtUser.getId(), VaultType.NEW_ACCOUNT.getValue());
-    assertEquals(vaults.size(), 1);
-
-    assertFalse(userService.getRepository().findById(jwtUser.getId()).get().getEmailVerified());
-    String token = vaultService.encode(vaults.get(0));
-    this.mockMvc.perform(get("/email/verification/" + token)).andExpect(status().isOk());
-
-    assertTrue(userService.getRepository().findById(jwtUser.getId()).get().getEmailVerified());
-
-    userService.cleanupByUserId(jwtUser.getId());
-  }
-
-  @Test
   public void passwordResetTest() throws Exception {
     // Create a new User
     UserCredential uc =
@@ -374,18 +345,25 @@ public class UserControllerTest {
 
     // Create a new User
     String username = faker.name().username();
-    UserCredential user =
-        new UserCredential()
-            .setUsername(username)
-            .setEmail(username + "@saltynote.com")
-            .setPassword(oldPassword);
+    String email = username + "@saltynote.com";
+    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+
+    assertNotNull(vault.getId());
+    assertEquals(vault.getEmail(), email);
+
+    UserNewRequest userNewRequest = new UserNewRequest();
+
+    userNewRequest.setEmail(email);
+    userNewRequest.setPassword(oldPassword);
+    userNewRequest.setUsername(username);
+    userNewRequest.setToken(vault.getSecret());
 
     MvcResult mvcResult =
         this.mockMvc
             .perform(
                 post("/signup")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(user)))
+                    .content(objectMapper.writeValueAsString(userNewRequest)))
             .andExpect(status().isOk())
             .andReturn();
     String res = mvcResult.getResponse().getContentAsString();
@@ -398,7 +376,7 @@ public class UserControllerTest {
             .perform(
                 post("/login")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(user)))
+                    .content(objectMapper.writeValueAsString(userNewRequest)))
             .andExpect(status().isOk())
             .andReturn();
     res = mvcResult.getResponse().getContentAsString();
@@ -423,12 +401,12 @@ public class UserControllerTest {
         .perform(
             post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user)))
+                .content(objectMapper.writeValueAsString(userNewRequest)))
         .andExpect(status().isUnauthorized());
 
     // login with new password should success
     UserCredential ur =
-        new UserCredential().setUsername(user.getUsername()).setPassword(newPassword);
+        new UserCredential().setUsername(userNewRequest.getUsername()).setPassword(newPassword);
     this.mockMvc
         .perform(
             post("/login")
@@ -443,11 +421,18 @@ public class UserControllerTest {
   public void accountDeletionTest() throws Exception {
     // Create a new User
     String username = faker.name().username();
-    UserCredential user =
-        new UserCredential()
-            .setUsername(username)
-            .setEmail(username + "@saltynote.com")
-            .setPassword(RandomStringUtils.randomAlphanumeric(12));
+    String email = username + "@saltynote.com";
+    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+
+    assertNotNull(vault.getId());
+    assertEquals(vault.getEmail(), email);
+
+    UserNewRequest user = new UserNewRequest();
+
+    user.setEmail(email);
+    user.setPassword(RandomStringUtils.randomAlphanumeric(12));
+    user.setUsername(username);
+    user.setToken(vault.getSecret());
 
     MvcResult mvcResult =
         this.mockMvc
