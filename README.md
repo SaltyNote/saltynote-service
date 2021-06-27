@@ -1,12 +1,6 @@
 # SaltyNote Service
 
 ![Maven Build](https://github.com/zhouhao/saltynote-service/workflows/Maven%20Build/badge.svg)
-![Deploy](https://github.com/zhouhao/saltynote-service/workflows/Deploy/badge.svg)
-![CodeQL](https://github.com/zhouhao/saltynote-service/workflows/CodeQL/badge.svg)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d3e7a71493b412383c5703cf062b16c)](https://app.codacy.com/gh/zhouhao/saltynote-service?utm_source=github.com&utm_medium=referral&utm_content=SaltyNote/saltynote-service&utm_campaign=Badge_Grade)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzhouhao%2Fsaltynote-service.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service?ref=badge_shield)
-
-[Documentation](https://saltynote.github.io/saltynote-service/)
 
 ## Overview
 
