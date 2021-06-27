@@ -297,6 +297,6 @@ To                         Action      From
 
 **Note**:For enhanced security, you can change default SSH port 22 to other number.
 
-Now you will not be able to access the service with http://dev.saltynote.com:8888.
+Now you will not be able to access the service with https://dev.saltynote.com.
 
 ## All Set Now! 🎉
