@@ -33,6 +33,7 @@ public class Note implements Serializable {
   private String userId;
 
   @Column(name = "text", nullable = false)
+  @NotBlank
   private String text;
 
   @Column(name = "url", nullable = false)
@@ -40,7 +41,6 @@ public class Note implements Serializable {
   private String url;
 
   @Column(name = "note")
-  @NotBlank
   private String note;
 
   @Column(name = "is_page_only")
