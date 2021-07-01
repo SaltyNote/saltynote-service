@@ -46,188 +46,193 @@ import lombok.val;
 @RestController
 @Slf4j
 @Api(
-    value = "User Endpoint",
-    description = "Everything about User operation, e.g. login, signup, etc")
+        value = "User Endpoint",
+        description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
-  @Value("${password.minimal.length}")
-  private int passwordMinimalLength;
+    @Value("${password.minimal.length}")
+    private int passwordMinimalLength;
 
-  @Resource private UserService userService;
-  @Resource private BCryptPasswordEncoder bCryptPasswordEncoder;
-  @Resource private JwtInstance jwtInstance;
-  @Resource private ApplicationEventPublisher eventPublisher;
-  @Resource private VaultService vaultService;
+    @Resource
+    private UserService userService;
+    @Resource
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Resource
+    private JwtInstance jwtInstance;
+    @Resource
+    private ApplicationEventPublisher eventPublisher;
+    @Resource
+    private VaultService vaultService;
 
-  @ApiOperation("Get a verification code for email signup")
-  @PostMapping("/email/verification")
-  public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
-    // check whether this email is already signed up or not.
-    if (userService.getRepository().findByEmail(email.getEmail()).isPresent()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
+    @ApiOperation("Get a verification code for email signup")
+    @PostMapping("/email/verification")
+    public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
+        // check whether this email is already signed up or not.
+        if (userService.getRepository().findByEmail(email.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
+        }
+
+        SiteUser user = new SiteUser().setEmail(email.getEmail()).setUsername("there");
+        eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
+        return ResponseEntity.ok(
+                ServiceResponse.ok("A verification code for signup is sent to you email now"));
     }
 
-    SiteUser user = new SiteUser().setEmail(email.getEmail()).setUsername("there");
-    eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
-    return ResponseEntity.ok(
-        ServiceResponse.ok("A verification code for signup is sent to you email now"));
-  }
+    @ApiOperation("Create a new user with email, username and password")
+    @PostMapping("/signup")
+    public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
+        if (userNewRequest.getPassword().length() < passwordMinimalLength) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password should be at least " + passwordMinimalLength + " characters.");
+        }
+        // Check token
+        Optional<Vault> vaultOp =
+                vaultService
+                        .getRepository()
+                        .findByEmailAndSecretAndType(
+                                userNewRequest.getEmail(),
+                                userNewRequest.getToken(),
+                                VaultType.NEW_ACCOUNT.getValue());
 
-  @ApiOperation("Create a new user with email, username and password")
-  @PostMapping("/signup")
-  public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
-    if (userNewRequest.getPassword().length() < passwordMinimalLength) {
-      throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST,
-          "Password should be at least " + passwordMinimalLength + " characters.");
-    }
-    // Check token
-    Optional<Vault> vaultOp =
-        vaultService
-            .getRepository()
-            .findByEmailAndSecretAndType(
-                userNewRequest.getEmail(),
-                userNewRequest.getToken(),
-                VaultType.NEW_ACCOUNT.getValue());
-
-    if (vaultOp.isEmpty()) {
-      throw new WebAppRuntimeException(
-          HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
-    }
-    SiteUser user = userNewRequest.toSiteUser();
-    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userService.getRepository().save(user);
-    if (StringUtils.hasText(user.getId())) {
-      vaultService.getRepository().delete(vaultOp.get());
-      return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
-    } else {
-      throw new WebAppRuntimeException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "Failed to signup, please try again later.");
-    }
-  }
-
-  @PostMapping("/refresh_token")
-  @ApiOperation("Get a new access token with refresh_token.")
-  public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
-    // 1. No expiry, and valid.
-    JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
-    // 2. Not deleted from database.
-    Optional<Vault> token =
-        vaultService.findByUserIdAndTypeAndValue(
-            user.getId(), VaultType.REFRESH_TOKEN, jwtToken.getRefreshToken());
-    if (token.isPresent()) {
-      String newToken = jwtInstance.createAccessToken(user);
-      return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
-    } else {
-      throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
-    }
-  }
-
-  @Transactional
-  @ApiOperation(
-      "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
-  @DeleteMapping("/refresh_tokens")
-  public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
-    JwtUser user = (JwtUser) auth.getPrincipal();
-    log.info("[cleanRefreshTokens] user = {}", user);
-    vaultService.cleanRefreshTokenByUserId(user.getId());
-    return ResponseEntity.ok(ServiceResponse.ok("All your refresh tokens are cleaned."));
-  }
-
-  @ApiOperation("Request password reset email")
-  @PostMapping("/password/forget")
-  public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
-    Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
-    if (usero.isEmpty()) {
-      log.warn("User is not found for email = {}", email.getEmail());
-      return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
-          .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
+        if (vaultOp.isEmpty()) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
+        }
+        SiteUser user = userNewRequest.toSiteUser();
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user = userService.getRepository().save(user);
+        if (StringUtils.hasText(user.getId())) {
+            vaultService.getRepository().delete(vaultOp.get());
+            return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
+        } else {
+            throw new WebAppRuntimeException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Failed to signup, please try again later.");
+        }
     }
 
-    eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));
-    return ResponseEntity.ok(
-        ServiceResponse.ok(
-            "Password reset email will be sent to your email, please reset your email with link there."));
-  }
-
-  @ApiOperation("Reset Password from email link")
-  @PostMapping("/password/reset")
-  public ResponseEntity<ServiceResponse> resetPassword(
-      @Valid @RequestBody PasswordReset passwordReset) {
-    val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
-    if (passwordReset.getPassword().length() < passwordMinimalLength) {
-      throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST,
-          "Password should be at least " + passwordMinimalLength + " characters.");
-    }
-    Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
-    if (vo.isEmpty()) {
-      throw wre;
+    @PostMapping("/refresh_token")
+    @ApiOperation("Get a new access token with refresh_token.")
+    public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
+        // 1. No expiry, and valid.
+        JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
+        // 2. Not deleted from database.
+        Optional<Vault> token =
+                vaultService.findByUserIdAndTypeAndValue(
+                        user.getId(), VaultType.REFRESH_TOKEN, jwtToken.getRefreshToken());
+        if (token.isPresent()) {
+            String newToken = jwtInstance.createAccessToken(user);
+            return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
+        } else {
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
+        }
     }
 
-    Optional<SiteUser> usero = userService.getRepository().findById(vo.get().getUserId());
-    if (usero.isPresent()) {
-      SiteUser user = usero.get();
-      user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
-      userService.getRepository().save(user);
-      vaultService.getRepository().delete(vo.get());
-      return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
-    } else {
-      throw wre;
-    }
-  }
-
-  @ApiOperation("Update Password after login")
-  @RequestMapping(
-      value = "/password",
-      method = {RequestMethod.POST, RequestMethod.PUT})
-  public ResponseEntity<ServiceResponse> updatePassword(
-      @Valid @RequestBody PasswordUpdate passwordUpdate, Authentication auth) {
-    JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-    // Validate new password
-    if (passwordUpdate.getPassword().length() < passwordMinimalLength) {
-      throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST,
-          "New password should be at least " + passwordMinimalLength + " characters.");
+    @Transactional
+    @ApiOperation(
+            "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
+    @DeleteMapping("/refresh_tokens")
+    public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
+        JwtUser user = (JwtUser) auth.getPrincipal();
+        log.info("[cleanRefreshTokens] user = {}", user);
+        vaultService.cleanRefreshTokenByUserId(user.getId());
+        return ResponseEntity.ok(ServiceResponse.ok("All your refresh tokens are cleaned."));
     }
 
-    // Validate old password
-    Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
-    if (usero.isEmpty()) {
-      throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST,
-          "Something goes wrong when fetching your info, please try later again.");
-    }
-    SiteUser user = usero.get();
-    if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {
-      throw new WebAppRuntimeException(
-          HttpStatus.BAD_REQUEST, "Wrong current password is provided.");
+    @ApiOperation("Request password reset email")
+    @PostMapping("/password/forget")
+    public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
+        Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
+        if (usero.isEmpty()) {
+            log.warn("User is not found for email = {}", email.getEmail());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+                    .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
+        }
+
+        eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));
+        return ResponseEntity.ok(
+                ServiceResponse.ok(
+                        "Password reset email will be sent to your email, please reset your email with link there."));
     }
 
-    user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
-    userService.getRepository().save(user);
-    return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
-  }
+    @ApiOperation("Reset Password from email link")
+    @PostMapping("/password/reset")
+    public ResponseEntity<ServiceResponse> resetPassword(
+            @Valid @RequestBody PasswordReset passwordReset) {
+        val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
+        if (passwordReset.getPassword().length() < passwordMinimalLength) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password should be at least " + passwordMinimalLength + " characters.");
+        }
+        Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
+        if (vo.isEmpty()) {
+            throw wre;
+        }
 
-  @ApiOperation(
-      "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
-  @DeleteMapping("/account/{id}")
-  public ResponseEntity<ServiceResponse> accountDeletion(
-      @PathVariable("id") String userId, Authentication auth) {
-    JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-    if (!Objects.equals(userId, jwtUser.getId())) {
-      throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");
+        Optional<SiteUser> usero = userService.getRepository().findById(vo.get().getUserId());
+        if (usero.isPresent()) {
+            SiteUser user = usero.get();
+            user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
+            userService.getRepository().save(user);
+            vaultService.getRepository().delete(vo.get());
+            return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
+        } else {
+            throw wre;
+        }
     }
-    userService.cleanupByUserId(jwtUser.getId());
-    return ResponseEntity.ok(ServiceResponse.ok("Account deletion is successful."));
-  }
 
-  // Note: this is not a valid endpoint, it is only used for swagger doc.
-  @ApiOperation(
-      "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
-  @PostMapping("/login-placeholder-for-swagger-doc")
-  public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
-    return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));
-  }
+    @ApiOperation("Update Password after login")
+    @RequestMapping(
+            value = "/password",
+            method = {RequestMethod.POST, RequestMethod.PUT})
+    public ResponseEntity<ServiceResponse> updatePassword(
+            @Valid @RequestBody PasswordUpdate passwordUpdate, Authentication auth) {
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        // Validate new password
+        if (passwordUpdate.getPassword().length() < passwordMinimalLength) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.BAD_REQUEST,
+                    "New password should be at least " + passwordMinimalLength + " characters.");
+        }
+
+        // Validate old password
+        Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
+        if (usero.isEmpty()) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.BAD_REQUEST,
+                    "Something goes wrong when fetching your info, please try later again.");
+        }
+        SiteUser user = usero.get();
+        if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {
+            throw new WebAppRuntimeException(
+                    HttpStatus.BAD_REQUEST, "Wrong current password is provided.");
+        }
+
+        user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
+        userService.getRepository().save(user);
+        return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
+    }
+
+    @ApiOperation(
+            "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
+    @DeleteMapping("/account/{id}")
+    public ResponseEntity<ServiceResponse> accountDeletion(
+            @PathVariable("id") String userId, Authentication auth) {
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        if (!Objects.equals(userId, jwtUser.getId())) {
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");
+        }
+        userService.cleanupByUserId(jwtUser.getId());
+        return ResponseEntity.ok(ServiceResponse.ok("Account deletion is successful."));
+    }
+
+    // Note: this is not a valid endpoint, it is only used for swagger doc.
+    @ApiOperation(
+            "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
+    @PostMapping("/login-placeholder-for-swagger-doc")
+    public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
+        return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));
+    }
 }

@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.saltynote.service.entity.SiteUser;
 
 public interface UserRepository
-    extends JpaRepository<SiteUser, String>, JpaSpecificationExecutor<SiteUser> {
+        extends JpaRepository<SiteUser, String>, JpaSpecificationExecutor<SiteUser> {
 
-  SiteUser findByUsername(String username);
+    SiteUser findByUsername(String username);
 
-  Optional<SiteUser> findByEmail(String email);
+    Optional<SiteUser> findByEmail(String email);
 }

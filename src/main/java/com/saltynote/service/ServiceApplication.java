@@ -11,17 +11,17 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 @SpringBootApplication
 public class ServiceApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(ServiceApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(ServiceApplication.class, args);
+    }
 
-  @Bean
-  public BCryptPasswordEncoder bCryptPasswordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-  @Bean
-  public ObjectMapper objectMapper() {
-    return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-  }
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    }
 }

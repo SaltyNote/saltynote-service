@@ -6,14 +6,14 @@ import com.saltynote.service.repository.NoteRepository;
 
 @Service
 public class NoteService implements RepositoryService<NoteRepository> {
-  private final NoteRepository repository;
+    private final NoteRepository repository;
 
-  public NoteService(NoteRepository repository) {
-    this.repository = repository;
-  }
+    public NoteService(NoteRepository repository) {
+        this.repository = repository;
+    }
 
-  @Override
-  public NoteRepository getRepository() {
-    return repository;
-  }
+    @Override
+    public NoteRepository getRepository() {
+        return repository;
+    }
 }

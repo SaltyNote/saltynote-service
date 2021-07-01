@@ -61,500 +61,508 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Overwrite refresh token ttl to 8 seconds
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {"jwt.refresh_token.ttl=8000"})
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"jwt.refresh_token.ttl=8000"})
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = NONE)
 @Slf4j
 public class UserControllerTest {
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @Autowired private UserService userService;
-  @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
-  @Autowired private JwtInstance jwtInstance;
-  @Autowired private VaultService vaultService;
-  @Autowired private NoteService noteService;
-  @MockBean private EmailService emailService;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private JwtInstance jwtInstance;
+    @Autowired
+    private VaultService vaultService;
+    @Autowired
+    private NoteService noteService;
+    @MockBean
+    private EmailService emailService;
 
-  private final Faker faker = new Faker();
+    private final Faker faker = new Faker();
 
-  @BeforeEach
-  public void setup() throws MessagingException, IOException, TemplateException {
-    doNothing().when(emailService).sendAsHtml(any(), any(), any());
-    doNothing().when(emailService).send(any(), any(), any());
-  }
+    @BeforeEach
+    public void setup() throws MessagingException, IOException, TemplateException {
+        doNothing().when(emailService).sendAsHtml(any(), any(), any());
+        doNothing().when(emailService).send(any(), any(), any());
+    }
 
-  @Test
-  public void emailVerifyTest() throws Exception {
-    String username = faker.name().username();
-    String emailStr = username + "@saltynote.com";
-    String alreadyUsedEmail = "example@exmaple.com";
+    @Test
+    public void emailVerifyTest() throws Exception {
+        String username = faker.name().username();
+        String emailStr = username + "@saltynote.com";
+        String alreadyUsedEmail = "example@exmaple.com";
 
-    SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
-    user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
-    user = userService.getRepository().save(user);
-    assertNotNull(user.getId());
+        SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
+        user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
+        user = userService.getRepository().save(user);
+        assertNotNull(user.getId());
 
-    this.mockMvc
-        .perform(
-            post("/email/verification")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new Email(alreadyUsedEmail))))
-        .andExpect(status().isBadRequest());
-
-    this.mockMvc
-        .perform(
-            post("/email/verification")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new Email(emailStr))))
-        .andExpect(status().isOk());
-
-    List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
-    assertEquals(vaults.size(), 1);
-    vaultService.getRepository().delete(vaults.get(0));
-    userService.cleanupByUserId(user.getId());
-  }
-
-  @Test
-  public void signupShouldFailIfNoToken() throws Exception {
-    String username = faker.name().username();
-    String email = username + "@saltynote.com";
-
-    UserNewRequest userNewRequest = new UserNewRequest();
-
-    userNewRequest.setEmail(email);
-    userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    userNewRequest.setUsername(username);
-    assertNull(userNewRequest.getToken());
-
-    this.mockMvc
-        .perform(
-            post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userNewRequest)))
-        .andExpect(status().isInternalServerError());
-  }
-
-  @Test
-  public void signupShouldReturnSuccess() throws Exception {
-    String username = faker.name().username();
-    String email = username + "@saltynote.com";
-    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
-
-    assertNotNull(vault.getId());
-    assertEquals(vault.getEmail(), email);
-
-    UserNewRequest userNewRequest = new UserNewRequest();
-
-    userNewRequest.setEmail(email);
-    userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    userNewRequest.setUsername(username);
-    userNewRequest.setToken(vault.getSecret());
-
-    this.mockMvc
-        .perform(
-            post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userNewRequest)))
-        .andDo(print())
-        .andExpect(status().isOk());
-
-    SiteUser queryUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
-    assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
-
-    userService.cleanupByUserId(queryUser.getId());
-  }
-
-  @Test
-  public void loginAndRefreshTokenShouldSuccess() throws Exception {
-
-    UserCredential uc =
-        new UserCredential()
-            .setUsername(faker.name().username())
-            .setEmail(faker.internet().emailAddress())
-            .setPassword(RandomStringUtils.randomAlphanumeric(12));
-    SiteUser user = uc.toSiteUser();
-    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userService.getRepository().save(user);
-
-    UserCredential userRequest =
-        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
-    MvcResult mvcResult =
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    String res = mvcResult.getResponse().getContentAsString();
-    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/email/verification")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(new Email(alreadyUsedEmail))))
+                .andExpect(status().isBadRequest());
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
-
-    // Note: have to sleep 1 second to have different expire time for new access token
-    TimeUnit.SECONDS.sleep(1);
-
-    // try refresh token
-    JwtToken tokenRequest = new JwtToken(null, token.getRefreshToken());
-    mvcResult =
         this.mockMvc
-            .perform(
-                post("/refresh_token")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(tokenRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
+                .perform(
+                        post("/email/verification")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(new Email(emailStr))))
+                .andExpect(status().isOk());
 
-    res = mvcResult.getResponse().getContentAsString();
-    JwtToken newToken = objectMapper.readValue(res, JwtToken.class);
-    assertNotNull(newToken.getAccessToken());
-    assertNotNull(jwtInstance.verifyAccessToken(newToken.getAccessToken()));
-    log.info("old token = {}", token.getAccessToken());
-    log.info("new token = {}", newToken.getAccessToken());
-    assertNotEquals(token.getAccessToken(), newToken.getAccessToken());
-    assertEquals(newToken.getRefreshToken(), token.getRefreshToken());
+        List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
+        assertEquals(vaults.size(), 1);
+        vaultService.getRepository().delete(vaults.get(0));
+        userService.cleanupByUserId(user.getId());
+    }
 
-    userService.cleanupByUserId(user.getId());
-  }
+    @Test
+    public void signupShouldFailIfNoToken() throws Exception {
+        String username = faker.name().username();
+        String email = username + "@saltynote.com";
 
-  @Test
-  public void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
+        UserNewRequest userNewRequest = new UserNewRequest();
 
-    UserCredential uc =
-        new UserCredential()
-            .setUsername(faker.name().username())
-            .setEmail(faker.internet().emailAddress())
-            .setPassword(RandomStringUtils.randomAlphanumeric(12));
-    SiteUser user = uc.toSiteUser();
-    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userService.getRepository().save(user);
+        userNewRequest.setEmail(email);
+        userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
+        userNewRequest.setUsername(username);
+        assertNull(userNewRequest.getToken());
 
-    UserCredential userRequest =
-        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
-    MvcResult mvcResult =
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    String res = mvcResult.getResponse().getContentAsString();
-    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/signup")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userNewRequest)))
+                .andExpect(status().isInternalServerError());
+    }
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+    @Test
+    public void signupShouldReturnSuccess() throws Exception {
+        String username = faker.name().username();
+        String email = username + "@saltynote.com";
+        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
 
-    String oldRefreshToken = token.getRefreshToken();
+        assertNotNull(vault.getId());
+        assertEquals(vault.getEmail(), email);
 
-    mvcResult =
+        UserNewRequest userNewRequest = new UserNewRequest();
+
+        userNewRequest.setEmail(email);
+        userNewRequest.setPassword(RandomStringUtils.randomAlphanumeric(12));
+        userNewRequest.setUsername(username);
+        userNewRequest.setToken(vault.getSecret());
+
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    res = mvcResult.getResponse().getContentAsString();
-    token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/signup")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userNewRequest)))
+                .andDo(print())
+                .andExpect(status().isOk());
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
-    // No new refresh token is generated.
-    assertEquals(oldRefreshToken, token.getRefreshToken());
+        SiteUser queryUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
+        assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
 
-    // Sleep 2 second, so refresh token will age 20%+, then new refresh token should be generated.
-    TimeUnit.SECONDS.sleep(2);
+        userService.cleanupByUserId(queryUser.getId());
+    }
 
-    mvcResult =
+    @Test
+    public void loginAndRefreshTokenShouldSuccess() throws Exception {
+
+        UserCredential uc =
+                new UserCredential()
+                        .setUsername(faker.name().username())
+                        .setEmail(faker.internet().emailAddress())
+                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        SiteUser user = uc.toSiteUser();
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user = userService.getRepository().save(user);
+
+        UserCredential userRequest =
+                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        MvcResult mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String res = mvcResult.getResponse().getContentAsString();
+        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+        // Note: have to sleep 1 second to have different expire time for new access token
+        TimeUnit.SECONDS.sleep(1);
+
+        // try refresh token
+        JwtToken tokenRequest = new JwtToken(null, token.getRefreshToken());
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/refresh_token")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(tokenRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        res = mvcResult.getResponse().getContentAsString();
+        JwtToken newToken = objectMapper.readValue(res, JwtToken.class);
+        assertNotNull(newToken.getAccessToken());
+        assertNotNull(jwtInstance.verifyAccessToken(newToken.getAccessToken()));
+        log.info("old token = {}", token.getAccessToken());
+        log.info("new token = {}", newToken.getAccessToken());
+        assertNotEquals(token.getAccessToken(), newToken.getAccessToken());
+        assertEquals(newToken.getRefreshToken(), token.getRefreshToken());
+
+        userService.cleanupByUserId(user.getId());
+    }
+
+    @Test
+    public void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
+
+        UserCredential uc =
+                new UserCredential()
+                        .setUsername(faker.name().username())
+                        .setEmail(faker.internet().emailAddress())
+                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        SiteUser user = uc.toSiteUser();
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user = userService.getRepository().save(user);
+
+        UserCredential userRequest =
+                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        MvcResult mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String res = mvcResult.getResponse().getContentAsString();
+        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+        String oldRefreshToken = token.getRefreshToken();
+
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        res = mvcResult.getResponse().getContentAsString();
+        token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        // No new refresh token is generated.
+        assertEquals(oldRefreshToken, token.getRefreshToken());
+
+        // Sleep 2 second, so refresh token will age 20%+, then new refresh token should be generated.
+        TimeUnit.SECONDS.sleep(2);
+
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        res = mvcResult.getResponse().getContentAsString();
+        token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        // New refresh token is generated.
+        assertNotEquals(oldRefreshToken, token.getRefreshToken());
+
+        userService.cleanupByUserId(user.getId());
+    }
+
+    @Test
+    public void loginShouldFail() throws Exception {
+
+        UserCredential uc =
+                new UserCredential()
+                        .setUsername(faker.name().username())
+                        .setEmail(faker.internet().emailAddress())
+                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        SiteUser user = uc.toSiteUser();
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user = userService.getRepository().save(user);
+
+        assertNotNull(user.getId());
+
+        UserCredential userRequest =
+                new UserCredential()
+                        .setUsername(uc.getUsername())
+                        .setPassword(uc.getPassword() + "not valid");
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    res = mvcResult.getResponse().getContentAsString();
-    token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isUnauthorized());
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
-    // New refresh token is generated.
-    assertNotEquals(oldRefreshToken, token.getRefreshToken());
+        userService.cleanupByUserId(user.getId());
+    }
 
-    userService.cleanupByUserId(user.getId());
-  }
+    @Test
+    public void passwordResetTest() throws Exception {
+        // Create a new User
+        UserCredential uc =
+                new UserCredential()
+                        .setUsername(faker.name().username())
+                        .setEmail(faker.internet().emailAddress())
+                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        SiteUser user = uc.toSiteUser();
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user = userService.getRepository().save(user);
 
-  @Test
-  public void loginShouldFail() throws Exception {
-
-    UserCredential uc =
-        new UserCredential()
-            .setUsername(faker.name().username())
-            .setEmail(faker.internet().emailAddress())
-            .setPassword(RandomStringUtils.randomAlphanumeric(12));
-    SiteUser user = uc.toSiteUser();
-    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userService.getRepository().save(user);
-
-    assertNotNull(user.getId());
-
-    UserCredential userRequest =
-        new UserCredential()
-            .setUsername(uc.getUsername())
-            .setPassword(uc.getPassword() + "not valid");
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
-        .andExpect(status().isUnauthorized());
-
-    userService.cleanupByUserId(user.getId());
-  }
-
-  @Test
-  public void passwordResetTest() throws Exception {
-    // Create a new User
-    UserCredential uc =
-        new UserCredential()
-            .setUsername(faker.name().username())
-            .setEmail(faker.internet().emailAddress())
-            .setPassword(RandomStringUtils.randomAlphanumeric(12));
-    SiteUser user = uc.toSiteUser();
-    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    user = userService.getRepository().save(user);
-
-    // request password change
-    Email email = new Email(user.getEmail());
-    this.mockMvc
-        .perform(
-            post("/password/forget")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(email)))
-        .andExpect(status().isOk());
-
-    List<Vault> vaults =
-        vaultService
-            .getRepository()
-            .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
-
-    assertEquals(vaults.size(), 1);
-    Vault vault = vaults.get(0);
-
-    // Can login without problem
-    UserCredential userRequest =
-        new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
-        .andExpect(status().isOk());
-
-    PasswordReset pr = new PasswordReset();
-    pr.setToken(vaultService.encode(vault));
-    String newPassword = RandomStringUtils.randomAlphanumeric(10);
-    pr.setPassword(newPassword);
-    this.mockMvc
-        .perform(
-            post("/password/reset")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(pr)))
-        .andExpect(status().isOk());
-
-    // login with old password should fail
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
-        .andExpect(status().isUnauthorized());
-
-    // login with new password should success
-    UserCredential ur = new UserCredential().setUsername(uc.getUsername()).setPassword(newPassword);
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ur)))
-        .andExpect(status().isOk());
-
-    userService.cleanupByUserId(user.getId());
-  }
-
-  @Test
-  public void passwordUpdateTest() throws Exception {
-    String oldPassword = RandomStringUtils.randomAlphanumeric(12);
-    String newPassword = RandomStringUtils.randomAlphanumeric(12);
-
-    // Create a new User
-    String username = faker.name().username();
-    String email = username + "@saltynote.com";
-    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
-
-    assertNotNull(vault.getId());
-    assertEquals(vault.getEmail(), email);
-
-    UserNewRequest userNewRequest = new UserNewRequest();
-
-    userNewRequest.setEmail(email);
-    userNewRequest.setPassword(oldPassword);
-    userNewRequest.setUsername(username);
-    userNewRequest.setToken(vault.getSecret());
-
-    MvcResult mvcResult =
+        // request password change
+        Email email = new Email(user.getEmail());
         this.mockMvc
-            .perform(
-                post("/signup")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userNewRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    String res = mvcResult.getResponse().getContentAsString();
-    JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
-    assertNotNull(jwtUser.getId());
+                .perform(
+                        post("/password/forget")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(email)))
+                .andExpect(status().isOk());
 
-    // Can login without problem
-    mvcResult =
+        List<Vault> vaults =
+                vaultService
+                        .getRepository()
+                        .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
+
+        assertEquals(vaults.size(), 1);
+        Vault vault = vaults.get(0);
+
+        // Can login without problem
+        UserCredential userRequest =
+                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userNewRequest)))
-            .andExpect(status().isOk())
-            .andReturn();
-    res = mvcResult.getResponse().getContentAsString();
-    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isOk());
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
-
-    PasswordUpdate pu = new PasswordUpdate().setOldPassword(oldPassword).setPassword(newPassword);
-
-    this.mockMvc
-        .perform(
-            post("/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(pu))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-        .andExpect(status().isOk());
-
-    // login with old password should fail
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userNewRequest)))
-        .andExpect(status().isUnauthorized());
-
-    // login with new password should success
-    UserCredential ur =
-        new UserCredential().setUsername(userNewRequest.getUsername()).setPassword(newPassword);
-    this.mockMvc
-        .perform(
-            post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ur)))
-        .andExpect(status().isOk());
-
-    userService.cleanupByUserId(jwtUser.getId());
-  }
-
-  @Test
-  public void accountDeletionTest() throws Exception {
-    // Create a new User
-    String username = faker.name().username();
-    String email = username + "@saltynote.com";
-    Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
-
-    assertNotNull(vault.getId());
-    assertEquals(vault.getEmail(), email);
-
-    UserNewRequest user = new UserNewRequest();
-
-    user.setEmail(email);
-    user.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    user.setUsername(username);
-    user.setToken(vault.getSecret());
-
-    MvcResult mvcResult =
+        PasswordReset pr = new PasswordReset();
+        pr.setToken(vaultService.encode(vault));
+        String newPassword = RandomStringUtils.randomAlphanumeric(10);
+        pr.setPassword(newPassword);
         this.mockMvc
-            .perform(
-                post("/signup")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(user)))
-            .andExpect(status().isOk())
-            .andReturn();
-    String res = mvcResult.getResponse().getContentAsString();
-    JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
-    assertNotNull(jwtUser.getId());
+                .perform(
+                        post("/password/reset")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(pr)))
+                .andExpect(status().isOk());
 
-    // Can login without problem
-    mvcResult =
+        // login with old password should fail
         this.mockMvc
-            .perform(
-                post("/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(user)))
-            .andExpect(status().isOk())
-            .andReturn();
-    res = mvcResult.getResponse().getContentAsString();
-    JwtToken token = objectMapper.readValue(res, JwtToken.class);
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isUnauthorized());
 
-    assertNotNull(token);
-    assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-    assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
-
-    Note note = NoteControllerTest.createTmpNote(jwtUser.getId());
-    mvcResult =
+        // login with new password should success
+        UserCredential ur = new UserCredential().setUsername(uc.getUsername()).setPassword(newPassword);
         this.mockMvc
-            .perform(
-                post("/note/")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(note))
-                    .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(containsString(note.getText())))
-            .andReturn();
-    res = mvcResult.getResponse().getContentAsString();
-    Note returnedNote = objectMapper.readValue(res, Note.class);
-    assertEquals(note.getNote(), returnedNote.getNote());
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(ur)))
+                .andExpect(status().isOk());
 
-    // deletion should fail due to invalid user id
-    this.mockMvc
-        .perform(
-            delete("/account/invalid-id")
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-        .andExpect(status().isBadRequest());
-    // deletion should fail due to missing user id
-    this.mockMvc
-        .perform(
-            delete("/account")
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-        .andExpect(status().isNotFound());
+        userService.cleanupByUserId(user.getId());
+    }
 
-    // deletion should fail due to no access token
-    this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
+    @Test
+    public void passwordUpdateTest() throws Exception {
+        String oldPassword = RandomStringUtils.randomAlphanumeric(12);
+        String newPassword = RandomStringUtils.randomAlphanumeric(12);
 
-    // deletion should success
-    this.mockMvc
-        .perform(
-            delete("/account/" + jwtUser.getId())
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-        .andExpect(status().isOk());
+        // Create a new User
+        String username = faker.name().username();
+        String email = username + "@saltynote.com";
+        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
 
-    assertTrue(userService.getRepository().findById(jwtUser.getId()).isEmpty());
-    assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
-    assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
-  }
+        assertNotNull(vault.getId());
+        assertEquals(vault.getEmail(), email);
+
+        UserNewRequest userNewRequest = new UserNewRequest();
+
+        userNewRequest.setEmail(email);
+        userNewRequest.setPassword(oldPassword);
+        userNewRequest.setUsername(username);
+        userNewRequest.setToken(vault.getSecret());
+
+        MvcResult mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/signup")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userNewRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String res = mvcResult.getResponse().getContentAsString();
+        JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
+        assertNotNull(jwtUser.getId());
+
+        // Can login without problem
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userNewRequest)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        res = mvcResult.getResponse().getContentAsString();
+        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+        PasswordUpdate pu = new PasswordUpdate().setOldPassword(oldPassword).setPassword(newPassword);
+
+        this.mockMvc
+                .perform(
+                        post("/password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(pu))
+                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .andExpect(status().isOk());
+
+        // login with old password should fail
+        this.mockMvc
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(userNewRequest)))
+                .andExpect(status().isUnauthorized());
+
+        // login with new password should success
+        UserCredential ur =
+                new UserCredential().setUsername(userNewRequest.getUsername()).setPassword(newPassword);
+        this.mockMvc
+                .perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(ur)))
+                .andExpect(status().isOk());
+
+        userService.cleanupByUserId(jwtUser.getId());
+    }
+
+    @Test
+    public void accountDeletionTest() throws Exception {
+        // Create a new User
+        String username = faker.name().username();
+        String email = username + "@saltynote.com";
+        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+
+        assertNotNull(vault.getId());
+        assertEquals(vault.getEmail(), email);
+
+        UserNewRequest user = new UserNewRequest();
+
+        user.setEmail(email);
+        user.setPassword(RandomStringUtils.randomAlphanumeric(12));
+        user.setUsername(username);
+        user.setToken(vault.getSecret());
+
+        MvcResult mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/signup")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(user)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String res = mvcResult.getResponse().getContentAsString();
+        JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
+        assertNotNull(jwtUser.getId());
+
+        // Can login without problem
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(user)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        res = mvcResult.getResponse().getContentAsString();
+        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+
+        assertNotNull(token);
+        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+
+        Note note = NoteControllerTest.createTmpNote(jwtUser.getId());
+        mvcResult =
+                this.mockMvc
+                        .perform(
+                                post("/note/")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(note))
+                                        .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                        .andExpect(content().string(containsString(note.getText())))
+                        .andReturn();
+        res = mvcResult.getResponse().getContentAsString();
+        Note returnedNote = objectMapper.readValue(res, Note.class);
+        assertEquals(note.getNote(), returnedNote.getNote());
+
+        // deletion should fail due to invalid user id
+        this.mockMvc
+                .perform(
+                        delete("/account/invalid-id")
+                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .andExpect(status().isBadRequest());
+        // deletion should fail due to missing user id
+        this.mockMvc
+                .perform(
+                        delete("/account")
+                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .andExpect(status().isNotFound());
+
+        // deletion should fail due to no access token
+        this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
+
+        // deletion should success
+        this.mockMvc
+                .perform(
+                        delete("/account/" + jwtUser.getId())
+                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .andExpect(status().isOk());
+
+        assertTrue(userService.getRepository().findById(jwtUser.getId()).isEmpty());
+        assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
+        assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
+    }
 }

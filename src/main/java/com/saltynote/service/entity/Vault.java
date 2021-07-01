@@ -19,30 +19,30 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Vault implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @Column(name = "id", nullable = false)
-  private String id;
+    @Id
+    @Column(name = "id", nullable = false)
+    private String id;
 
-  @Column(name = "user_id")
-  private String userId;
+    @Column(name = "user_id")
+    private String userId;
 
-  @Column(name = "secret", nullable = false)
-  private String secret;
+    @Column(name = "secret", nullable = false)
+    private String secret;
 
-  @Column(name = "type", nullable = false)
-  private String type;
+    @Column(name = "type", nullable = false)
+    private String type;
 
-  @Column(name = "email")
-  private String email;
+    @Column(name = "email")
+    private String email;
 
-  @Column(name = "created_time", nullable = false)
-  private Timestamp createdTime;
+    @Column(name = "created_time", nullable = false)
+    private Timestamp createdTime;
 
-  @PrePersist
-  private void beforeSave() {
-    this.id = FriendlyId.createFriendlyId();
-    this.createdTime = new Timestamp(System.currentTimeMillis());
-  }
+    @PrePersist
+    private void beforeSave() {
+        this.id = FriendlyId.createFriendlyId();
+        this.createdTime = new Timestamp(System.currentTimeMillis());
+    }
 }

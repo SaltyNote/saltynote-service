@@ -21,41 +21,41 @@ import freemarker.template.TemplateException;
 
 @Service
 public class EmailService {
-  private JavaMailSender mailSender;
+    private JavaMailSender mailSender;
 
-  @Value("${spring.mail.username}")
-  private String emailSender;
+    @Value("${spring.mail.username}")
+    private String emailSender;
 
-  private final Configuration freemarkerConfig;
+    private final Configuration freemarkerConfig;
 
-  public EmailService(JavaMailSender mailSender) {
-    this.mailSender = mailSender;
-    this.freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-    this.freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates/");
-  }
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+        this.freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        this.freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates/");
+    }
 
-  public void send(String receiver, String subject, String message) {
-    SimpleMailMessage mailMessage = new SimpleMailMessage();
-    mailMessage.setTo(receiver);
-    mailMessage.setSubject(subject);
-    mailMessage.setText(message);
-    mailMessage.setFrom(emailSender);
-    mailSender.send(mailMessage);
-  }
+    public void send(String receiver, String subject, String message) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(receiver);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
+        mailMessage.setFrom(emailSender);
+        mailSender.send(mailMessage);
+    }
 
-  public void sendAsHtml(String receiver, String subject, @NotNull EmailPayload emailPayload)
-      throws MessagingException, IOException, TemplateException {
-    MimeMessage message = mailSender.createMimeMessage();
-    MimeMessageHelper helper = new MimeMessageHelper(message, true);
-    helper.setTo(receiver);
-    helper.setSubject(subject);
-    helper.setFrom(emailSender);
-    // Use the true flag to indicate the text included is HTML
-    Template t = freemarkerConfig.getTemplate("email/general.ftlh");
-    String content =
-        FreeMarkerTemplateUtils.processTemplateIntoString(
-            t, Collections.singletonMap("payload", emailPayload));
-    helper.setText(content, true);
-    mailSender.send(message);
-  }
+    public void sendAsHtml(String receiver, String subject, @NotNull EmailPayload emailPayload)
+            throws MessagingException, IOException, TemplateException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(receiver);
+        helper.setSubject(subject);
+        helper.setFrom(emailSender);
+        // Use the true flag to indicate the text included is HTML
+        Template t = freemarkerConfig.getTemplate("email/general.ftlh");
+        String content =
+                FreeMarkerTemplateUtils.processTemplateIntoString(
+                        t, Collections.singletonMap("payload", emailPayload));
+        helper.setText(content, true);
+        mailSender.send(message);
+    }
 }

@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PasswordReset {
-  @NotBlank private String token;
-  @NotBlank private String password;
+    @NotBlank
+    private String token;
+    @NotBlank
+    private String password;
 }

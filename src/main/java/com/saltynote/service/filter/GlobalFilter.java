@@ -17,20 +17,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class GlobalFilter extends OncePerRequestFilter
-    implements ApplicationListener<ServletWebServerInitializedEvent> {
+        implements ApplicationListener<ServletWebServerInitializedEvent> {
 
-  private int port;
+    private int port;
 
-  @Override
-  public void onApplicationEvent(ServletWebServerInitializedEvent event) {
-    this.port = event.getWebServer().getPort();
-  }
+    @Override
+    public void onApplicationEvent(ServletWebServerInitializedEvent event) {
+        this.port = event.getWebServer().getPort();
+    }
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    response.addHeader("X-SaltyNote-Port", String.valueOf(port));
-    filterChain.doFilter(request, response);
-  }
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        response.addHeader("X-SaltyNote-Port", String.valueOf(port));
+        filterChain.doFilter(request, response);
+    }
 }

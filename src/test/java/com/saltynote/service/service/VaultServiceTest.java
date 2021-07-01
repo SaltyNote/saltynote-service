@@ -17,14 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 class VaultServiceTest {
 
-  @Autowired private VaultService vaultService;
+    @Autowired
+    private VaultService vaultService;
 
-  @Test
-  void encodeAndDecodeTest() throws IOException {
-    VaultEntity ve = new VaultEntity().setSecret("secret").setUserId("8888");
-    String encoded = vaultService.encode(ve);
-    Optional<VaultEntity> decoded = vaultService.decode(encoded);
-    assertTrue(decoded.isPresent());
-    assertEquals(ve, decoded.get());
-  }
+    @Test
+    void encodeAndDecodeTest() throws IOException {
+        VaultEntity ve = new VaultEntity().setSecret("secret").setUserId("8888");
+        String encoded = vaultService.encode(ve);
+        Optional<VaultEntity> decoded = vaultService.decode(encoded);
+        assertTrue(decoded.isPresent());
+        assertEquals(ve, decoded.get());
+    }
 }

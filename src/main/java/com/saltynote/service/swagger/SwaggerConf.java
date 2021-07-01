@@ -20,29 +20,29 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConf {
 
-  @Bean
-  public UiConfiguration tryItOutConfig() {
-    return UiConfigurationBuilder.builder().supportedSubmitMethods(new String[0]).build();
-  }
+    @Bean
+    public UiConfiguration tryItOutConfig() {
+        return UiConfigurationBuilder.builder().supportedSubmitMethods(new String[0]).build();
+    }
 
-  @Bean
-  public Docket api() {
+    @Bean
+    public Docket api() {
 
-    ApiInfo apiInfo =
-        new ApiInfo(
-            "SaltyNote Service API",
-            "A quick swagger doc for all endpoints",
-            "0.0.1",
-            "https://www.saltynote.com/terms",
-            new Contact("SaltyNote", "https://github.com/SaltyNote", "contact@saltynote.com"),
-            "MIT",
-            "https://github.com/SaltyNote/saltynote-service/blob/master/LICENSE",
-            Collections.emptyList());
-    return new Docket(DocumentationType.SWAGGER_2)
-        .apiInfo(apiInfo)
-        .select()
-        .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
-        .paths(PathSelectors.any())
-        .build();
-  }
+        ApiInfo apiInfo =
+                new ApiInfo(
+                        "SaltyNote Service API",
+                        "A quick swagger doc for all endpoints",
+                        "0.0.1",
+                        "https://www.saltynote.com/terms",
+                        new Contact("SaltyNote", "https://github.com/SaltyNote", "contact@saltynote.com"),
+                        "MIT",
+                        "https://github.com/SaltyNote/saltynote-service/blob/master/LICENSE",
+                        Collections.emptyList());
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo)
+                .select()
+                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                .paths(PathSelectors.any())
+                .build();
+    }
 }

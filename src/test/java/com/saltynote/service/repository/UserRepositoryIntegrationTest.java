@@ -21,27 +21,30 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 @AutoConfigureTestDatabase(replace = NONE)
 public class UserRepositoryIntegrationTest {
 
-  @Autowired private TestEntityManager entityManager;
-  @Autowired private UserRepository userRepository;
-  @Autowired private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private TestEntityManager entityManager;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-  private final Faker faker = new Faker();
+    private final Faker faker = new Faker();
 
-  @Test
-  public void whenFindByNameThenReturnUser() {
-    // given
-    String username = faker.name().username();
-    SiteUser user =
-        new SiteUser()
-            .setEmail(faker.internet().emailAddress())
-            .setUsername(username)
-            .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
-    entityManager.persist(user);
-    entityManager.flush();
+    @Test
+    public void whenFindByNameThenReturnUser() {
+        // given
+        String username = faker.name().username();
+        SiteUser user =
+                new SiteUser()
+                        .setEmail(faker.internet().emailAddress())
+                        .setUsername(username)
+                        .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
+        entityManager.persist(user);
+        entityManager.flush();
 
-    // when
-    SiteUser found = userRepository.findByUsername(username);
-    // then
-    assertThat(found.getEmail()).isEqualTo(user.getEmail());
-  }
+        // when
+        SiteUser found = userRepository.findByUsername(username);
+        // then
+        assertThat(found.getEmail()).isEqualTo(user.getEmail());
+    }
 }

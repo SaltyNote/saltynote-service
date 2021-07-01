@@ -23,48 +23,48 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Note implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @Column(name = "id", nullable = false)
-  private String id;
+    @Id
+    @Column(name = "id", nullable = false)
+    private String id;
 
-  @Column(name = "user_id", nullable = false)
-  private String userId;
+    @Column(name = "user_id", nullable = false)
+    private String userId;
 
-  @Column(name = "text", nullable = false)
-  @NotBlank
-  private String text;
+    @Column(name = "text", nullable = false)
+    @NotBlank
+    private String text;
 
-  @Column(name = "url", nullable = false)
-  @NotBlank
-  private String url;
+    @Column(name = "url", nullable = false)
+    @NotBlank
+    private String url;
 
-  @Column(name = "note")
-  private String note;
+    @Column(name = "note")
+    private String note;
 
-  @Column(name = "is_page_only")
-  @JsonProperty("is_page_only")
-  private Boolean pageOnly;
+    @Column(name = "is_page_only")
+    @JsonProperty("is_page_only")
+    private Boolean pageOnly;
 
-  @Column(name = "highlight_color")
-  private String highlightColor;
+    @Column(name = "highlight_color")
+    private String highlightColor;
 
-  @Column(name = "created_time", nullable = false)
-  private Timestamp createdTime;
+    @Column(name = "created_time", nullable = false)
+    private Timestamp createdTime;
 
-  @Column(name = "tags")
-  private String tags;
+    @Column(name = "tags")
+    private String tags;
 
-  @PrePersist
-  private void beforeSave() {
-    this.id = FriendlyId.createFriendlyId();
-    this.createdTime = new Timestamp(System.currentTimeMillis());
-    if (this.pageOnly == null) {
-      this.pageOnly = false;
+    @PrePersist
+    private void beforeSave() {
+        this.id = FriendlyId.createFriendlyId();
+        this.createdTime = new Timestamp(System.currentTimeMillis());
+        if (this.pageOnly == null) {
+            this.pageOnly = false;
+        }
+        if (!StringUtils.hasText(this.highlightColor)) {
+            this.highlightColor = "";
+        }
     }
-    if (!StringUtils.hasText(this.highlightColor)) {
-      this.highlightColor = "";
-    }
-  }
 }

@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class NoteQuery {
-  private String url;
+    private String url;
 }

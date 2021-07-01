@@ -15,18 +15,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class HttpRequestTest {
 
-  @LocalServerPort private int port;
+    @LocalServerPort
+    private int port;
 
-  @Autowired private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-  @Value("${app.welcome.message}")
-  private String welcomeMessage;
+    @Value("${app.welcome.message}")
+    private String welcomeMessage;
 
-  @Test
-  public void welcomePageShouldOK() {
-    ServiceResponse sr =
-        this.restTemplate.getForObject("http://localhost:" + port + "/", ServiceResponse.class);
-    assertEquals(sr.getStatus(), HttpStatus.OK);
-    assertEquals(sr.getMessage(), welcomeMessage);
-  }
+    @Test
+    public void welcomePageShouldOK() {
+        ServiceResponse sr =
+                this.restTemplate.getForObject("http://localhost:" + port + "/", ServiceResponse.class);
+        assertEquals(sr.getStatus(), HttpStatus.OK);
+        assertEquals(sr.getMessage(), welcomeMessage);
+    }
 }

@@ -25,71 +25,71 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtInstance {
 
-  @Value("${jwt.access_token.secret}")
-  private String accessTokenSecret;
+    @Value("${jwt.access_token.secret}")
+    private String accessTokenSecret;
 
-  @Value("${jwt.access_token.ttl}")
-  private long accessTokenTtl;
+    @Value("${jwt.access_token.ttl}")
+    private long accessTokenTtl;
 
-  @Value("${jwt.refresh_token.secret}")
-  private String refreshTokenSecret;
+    @Value("${jwt.refresh_token.secret}")
+    private String refreshTokenSecret;
 
-  @Value("${jwt.refresh_token.ttl}")
-  private long refreshTokenTtl;
+    @Value("${jwt.refresh_token.ttl}")
+    private long refreshTokenTtl;
 
-  private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-  private JWTVerifier accessTokenVerifier;
-  private JWTVerifier refreshTokenVerifier;
+    private JWTVerifier accessTokenVerifier;
+    private JWTVerifier refreshTokenVerifier;
 
-  public JwtInstance(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
+    public JwtInstance(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-  @PostConstruct
-  public void init() {
-    accessTokenVerifier = JWT.require(Algorithm.HMAC512(accessTokenSecret.getBytes())).build();
-    refreshTokenVerifier = JWT.require(Algorithm.HMAC512(refreshTokenSecret.getBytes())).build();
-  }
+    @PostConstruct
+    public void init() {
+        accessTokenVerifier = JWT.require(Algorithm.HMAC512(accessTokenSecret.getBytes())).build();
+        refreshTokenVerifier = JWT.require(Algorithm.HMAC512(refreshTokenSecret.getBytes())).build();
+    }
 
-  public String createAccessToken(IdentifiableUser user) {
-    return createToken(user, accessTokenTtl, accessTokenSecret);
-  }
+    public String createAccessToken(IdentifiableUser user) {
+        return createToken(user, accessTokenTtl, accessTokenSecret);
+    }
 
-  public String createRefreshToken(IdentifiableUser user) {
-    return createToken(user, refreshTokenTtl, refreshTokenSecret);
-  }
+    public String createRefreshToken(IdentifiableUser user) {
+        return createToken(user, refreshTokenTtl, refreshTokenSecret);
+    }
 
-  private String createToken(IdentifiableUser user, Long tokenTTL, String secret) {
-    return createToken(user.getUsername(), user.getId(), tokenTTL, secret);
-  }
+    private String createToken(IdentifiableUser user, Long tokenTTL, String secret) {
+        return createToken(user.getUsername(), user.getId(), tokenTTL, secret);
+    }
 
-  private String createToken(String subject, String userId, Long tokenTTL, String secret)
-      throws JWTCreationException {
-    return JWT.create()
-        .withSubject(subject)
-        .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)
-        .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))
-        .sign(Algorithm.HMAC512(secret.getBytes()));
-  }
+    private String createToken(String subject, String userId, Long tokenTTL, String secret)
+            throws JWTCreationException {
+        return JWT.create()
+                .withSubject(subject)
+                .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)
+                .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))
+                .sign(Algorithm.HMAC512(secret.getBytes()));
+    }
 
-  public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
-    // This will also handle token expiration exception
-    return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
-  }
+    public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
+        // This will also handle token expiration exception
+        return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
+    }
 
-  public DecodedJWT verifyRefreshToken(String token) throws JWTVerificationException {
-    // This will also handle token expiration exception
-    return refreshTokenVerifier.verify(token);
-  }
+    public DecodedJWT verifyRefreshToken(String token) throws JWTVerificationException {
+        // This will also handle token expiration exception
+        return refreshTokenVerifier.verify(token);
+    }
 
-  public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
-    DecodedJWT jwt = verifyRefreshToken(token);
-    return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
-  }
+    public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
+        DecodedJWT jwt = verifyRefreshToken(token);
+        return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
+    }
 
-  public String tokenToJson(String accessToken, String refreshToken)
-      throws JsonProcessingException {
-    return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));
-  }
+    public String tokenToJson(String accessToken, String refreshToken)
+            throws JsonProcessingException {
+        return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));
+    }
 }

@@ -2,7 +2,6 @@ package com.saltynote.service.security;
 
 import javax.annotation.Resource;
 
-import com.saltynote.service.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -21,35 +20,42 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.service.UserDetailsServiceImpl;
+import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import lombok.val;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-  private static final String[] PUBLIC_POST_ENDPOINTS = {
-    SecurityConstants.SIGN_UP_URL,
-    "/refresh_token",
-    "/password/forget",
-    "/password/reset",
-    "/email/verification"
-  };
+    private static final String[] PUBLIC_POST_ENDPOINTS = {
+            SecurityConstants.SIGN_UP_URL,
+            "/refresh_token",
+            "/password/forget",
+            "/password/reset",
+            "/email/verification"
+    };
 
-  private static final String[] PUBLIC_GET_ENDPOINTS = {"/"};
+    private static final String[] PUBLIC_GET_ENDPOINTS = {"/"};
 
-  private static final String[] SWAGGER_URLS = {
-    "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs", "/webjars/**"
-  };
+    private static final String[] SWAGGER_URLS = {
+            "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs", "/webjars/**"
+    };
 
-  @Resource private UserDetailsServiceImpl userDetailsService;
-  @Resource private BCryptPasswordEncoder bCryptPasswordEncoder;
-  @Resource private VaultService vaultService;
-  @Resource private JwtInstance jwtInstance;
-  @Resource private ObjectMapper objectMapper;
-  @Resource private UserService userService;
+    @Resource
+    private UserDetailsServiceImpl userDetailsService;
+    @Resource
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Resource
+    private VaultService vaultService;
+    @Resource
+    private JwtInstance jwtInstance;
+    @Resource
+    private ObjectMapper objectMapper;
+    @Resource
+    private UserService userService;
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    // @formatter:off
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        // @formatter:off
     http.cors()
         .and()
           .csrf()
@@ -76,17 +82,17 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
               response.getWriter().write(objectMapper.writeValueAsString(new ServiceResponse(HttpStatus.FORBIDDEN, "Access Denied")));
             });
     // @formatter:on
-  }
+    }
 
-  @Override
-  public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
-  }
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+    }
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    val source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-    return source;
-  }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        val source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        return source;
+    }
 }

@@ -15,10 +15,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JwtToken {
-  @JsonProperty("access_token")
-  private String accessToken;
+    @JsonProperty("access_token")
+    private String accessToken;
 
-  @JsonProperty("refresh_token")
-  @NotBlank
-  private String refreshToken;
+    @JsonProperty("refresh_token")
+    @NotBlank
+    private String refreshToken;
 }

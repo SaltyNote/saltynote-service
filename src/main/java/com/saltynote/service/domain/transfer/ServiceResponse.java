@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceResponse {
-  private HttpStatus status;
-  private String message;
+    private HttpStatus status;
+    private String message;
 
-  @JsonIgnore
-  public static ServiceResponse ok(String message) {
-    return new ServiceResponse(HttpStatus.OK, message);
-  }
+    @JsonIgnore
+    public static ServiceResponse ok(String message) {
+        return new ServiceResponse(HttpStatus.OK, message);
+    }
 }

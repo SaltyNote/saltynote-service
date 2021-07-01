@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Email {
-  @NotBlank @javax.validation.constraints.Email private String email;
+    @NotBlank
+    @javax.validation.constraints.Email
+    private String email;
 }

@@ -12,20 +12,23 @@ import com.saltynote.service.repository.VaultRepository;
 @Service
 public class UserService implements RepositoryService<UserRepository> {
 
-  @Resource private UserRepository userRepository;
-  @Resource private NoteRepository noteRepository;
-  @Resource private VaultRepository vaultRepository;
+    @Resource
+    private UserRepository userRepository;
+    @Resource
+    private NoteRepository noteRepository;
+    @Resource
+    private VaultRepository vaultRepository;
 
-  @Override
-  public UserRepository getRepository() {
-    return userRepository;
-  }
+    @Override
+    public UserRepository getRepository() {
+        return userRepository;
+    }
 
-  // This api will delete all database records with given user id, including the user itself.
-  @Transactional
-  public void cleanupByUserId(String userId) {
-    noteRepository.deleteByUserId(userId);
-    vaultRepository.deleteByUserId(userId);
-    userRepository.deleteById(userId);
-  }
+    // This api will delete all database records with given user id, including the user itself.
+    @Transactional
+    public void cleanupByUserId(String userId) {
+        noteRepository.deleteByUserId(userId);
+        vaultRepository.deleteByUserId(userId);
+        userRepository.deleteById(userId);
+    }
 }

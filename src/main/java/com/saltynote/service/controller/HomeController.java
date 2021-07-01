@@ -13,12 +13,12 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "Home Endpoint", description = "Home endpoint for saltynote service")
 public class HomeController {
 
-  @Value("${app.welcome.message}")
-  private String welcomeMessage;
+    @Value("${app.welcome.message}")
+    private String welcomeMessage;
 
-  @ApiOperation("Display a greeting message")
-  @GetMapping("/")
-  public ResponseEntity<ServiceResponse> home() {
-    return ResponseEntity.ok(ServiceResponse.ok(welcomeMessage));
-  }
+    @ApiOperation("Display a greeting message")
+    @GetMapping("/")
+    public ResponseEntity<ServiceResponse> home() {
+        return ResponseEntity.ok(ServiceResponse.ok(welcomeMessage));
+    }
 }
