@@ -11,7 +11,10 @@ for:
 1.  User (signup, login, token refresh, token cleanup, password reset)
 2.  Note (create, update, fetch and delete)
 
-For more information about the endpoints, please refer the [readonly swagger ui](https://api.dev.saltynote.com/swagger-ui/) for more details.
+For more information about the endpoints, please refer the [readonly swagger ui](https://api.saltynote.com/swagger-ui/) for more details.
+
+**Note:** Why `POST /note/id/delete`? 
+> Because, I find inside Chrome Extension, the `DELETE` requests are blocked(not sure whether it is resolved now). As a workaround, `POST /note/id/delete` is used to delete a note.
 
 ![Swagger UI](./docs/images/swagger-ui.png)
 
