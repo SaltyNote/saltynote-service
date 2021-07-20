@@ -1,6 +1,6 @@
 # SaltyNote Service
 
-[![Java CI with Maven](https://github.com/zhouhao/saltynote-service/actions/workflows/maven.yml/badge.svg)](https://github.com/zhouhao/saltynote-service/actions/workflows/maven.yml)
+[![Java CI with Maven](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml/badge.svg)](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml)
 
 ## Overview
 
