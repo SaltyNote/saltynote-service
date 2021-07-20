@@ -28,15 +28,13 @@ quickest way is to run [`./start.sh`](./start.sh).
 1.  JDK 11
 2.  Docker (docker-compose) for development database
 3.  IDE ([Eclipse](https://www.eclipse.org/) or [Intellij](https://www.jetbrains.com/idea/))
-4.  Code format is using [google-java-format](https://github.com/google/google-java-format)
 
 ### Configuration
 
 1.  The service relies on database to store `user/note` information. In development env, you can run `docker-compose up`
    to start mariadb (*add `-d` if you want start it as “detached” mode*).
 2.  This service also need smtp service to send email(*Note: this is optional now, if not setup, the email payload will
-   be logged.*). In development env, you can configure it with your gmail account. See more details
-   here； https://git.io/JLP6q
+   be logged.*). In development env, you can configure it with your gmail account. 
 
 ## License
 
