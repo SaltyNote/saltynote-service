@@ -32,9 +32,9 @@ quickest way is to run [`./start.sh`](./start.sh).
 ### Configuration
 
 1.  The service relies on database to store `user/note` information. In development env, you can run `docker-compose up`
-   to start mariadb (*add `-d` if you want start it as “detached” mode*).
+   to start mariadb locally(*add `-d` if you want start it as “detached” mode*).
 2.  This service also need smtp service to send email(*Note: this is optional now, if not setup, the email payload will
-   be logged.*). In development env, you can configure it with your gmail account. 
+   be logged([code](src/main/java/com/saltynote/service/event/EmailEventListener.java#L50-L55)).*). 
 
 ## License
 
