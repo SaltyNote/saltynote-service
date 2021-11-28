@@ -1,0 +1,1 @@
+alter table note modify tags JSON default '' not null;
