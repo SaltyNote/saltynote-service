@@ -117,7 +117,7 @@ public class NoteController {
                 .split(keyword);
 
         return allNotes.stream().filter(n -> StringUtils.isNotBlank(n.getNote()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries) ||
-                        StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries))
+                        StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getText(), queries))
                 .collect(Collectors.toList());
     }
     @PostMapping("/notes")
