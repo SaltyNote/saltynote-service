@@ -2,13 +2,14 @@ package com.saltynote.service.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,14 +17,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Splitter;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.NoteQuery;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.NoteService;
+import com.saltynote.service.utils.BaseUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -60,15 +64,15 @@ public class NoteController {
         Optional<Note> queryNote = noteService.getRepository().findById(id);
         checkNoteOwner(queryNote, auth);
         Note noteTobeUpdate = queryNote.get();
-        if (StringUtils.hasText(note.getNote())) {
+        if (StringUtils.isNotBlank(note.getNote())) {
             noteTobeUpdate.setNote(note.getNote());
         }
 
-        if (StringUtils.hasText(note.getTags())) {
+        if (StringUtils.isNotBlank(note.getTags())) {
             noteTobeUpdate.setTags(note.getTags());
         }
 
-        if (StringUtils.hasText(note.getHighlightColor())) {
+        if (StringUtils.isNotBlank(note.getHighlightColor())) {
             noteTobeUpdate.setHighlightColor(note.getHighlightColor());
         }
         noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);
@@ -100,12 +104,22 @@ public class NoteController {
     }
 
     @GetMapping("/notes")
-    @ApiOperation("Get all your notes")
-    public List<Note> getNotes(Authentication auth) {
+    @ApiOperation("Get all your notes with keywords match, if keyword query string is empty, return all")
+    public List<Note> getNotes(Authentication auth, @RequestParam(required = false) String keyword) {
         JwtUser user = (JwtUser) auth.getPrincipal();
-        return noteService.getRepository().findAllByUserId(user.getId());
-    }
+        List<Note> allNotes = noteService.getRepository().findAllByUserId(user.getId());
+        if (allNotes == null || allNotes.isEmpty() || StringUtils.isBlank(keyword)) {
+            return allNotes;
+        }
+        Iterable<String> queries = Splitter.on(" ")
+                .trimResults()
+                .omitEmptyStrings()
+                .split(keyword);
 
+        return allNotes.stream().filter(n -> StringUtils.isNotBlank(n.getNote()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries) ||
+                        StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries))
+                .collect(Collectors.toList());
+    }
     @PostMapping("/notes")
     @ApiOperation("Get your notes with query conditions")
     public List<Note> getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
@@ -119,7 +133,7 @@ public class NoteController {
         JwtUser user = (JwtUser) auth.getPrincipal();
         note.setUserId(user.getId());
         note = noteService.getRepository().save(note);
-        if (StringUtils.hasText(note.getId())) {
+        if (StringUtils.isNotBlank(note.getId())) {
             return ResponseEntity.ok(note);
         }
         throw new WebAppRuntimeException(

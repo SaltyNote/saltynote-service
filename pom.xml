@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.saltynote</groupId>
     <artifactId>service</artifactId>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
     <name>saltynote-service</name>
     <description>Backend service for saltynote</description>
 
@@ -92,6 +92,16 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
         </dependency>
 
         <dependency>

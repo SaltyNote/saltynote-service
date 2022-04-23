@@ -2,7 +2,7 @@ package com.saltynote.service.utils;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class BaseUtils {
     private static String baseUrl = "https://saltynote.com";
@@ -20,5 +20,17 @@ public class BaseUtils {
 
     public static String getPasswordResetUrl(@NotNull String secret) {
         return baseUrl + "/password/reset?token=" + secret;
+    }
+
+    public static boolean containsAllIgnoreCase(String src, Iterable<String> queries) {
+        if (StringUtils.isBlank(src)) {
+            return false;
+        }
+        for (String q : queries) {
+            if (StringUtils.isNotBlank(q) && !StringUtils.containsIgnoreCase(src, q.trim())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

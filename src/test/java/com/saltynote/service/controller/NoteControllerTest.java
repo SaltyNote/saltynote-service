@@ -316,6 +316,8 @@ public class NoteControllerTest {
     @Test
     public void getNotes() throws Exception {
         Note note = createTmpNote(null);
+        String randKeyword = RandomStringUtils.randomAlphanumeric(10);
+        note.setNote(note.getNote() + " " + randKeyword);
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
@@ -337,6 +339,25 @@ public class NoteControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(content().string(containsString(note.getText())))
                 .andExpect(jsonPath("$", hasSize(equalTo(2))))
+                .andReturn();
+
+        // search has result
+        this.mockMvc
+                .perform(
+                        get("/notes?keyword=" + randKeyword).header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(containsString(randKeyword)))
+                .andExpect(jsonPath("$", hasSize(equalTo(1))))
+                .andReturn();
+
+        // search has no result
+        this.mockMvc
+                .perform(
+                        get("/notes?keyword=" + randKeyword + RandomStringUtils.randomAlphanumeric(6)).header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(equalTo(0))))
                 .andReturn();
     }
 
