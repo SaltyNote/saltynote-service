@@ -81,10 +81,7 @@ public class NoteController {
     @PostMapping("/note/{id}/delete")
     public ResponseEntity<ServiceResponse> postDeleteNoteById(
             @PathVariable("id") String id, Authentication auth) {
-        Optional<Note> note = noteService.getRepository().findById(id);
-        checkNoteOwner(note, auth);
-        noteService.getRepository().deleteById(id);
-        return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
+        return deleteNoteById(id, auth);
     }
 
     @GetMapping("/notes")
