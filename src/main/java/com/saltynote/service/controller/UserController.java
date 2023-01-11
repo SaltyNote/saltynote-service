@@ -1,27 +1,5 @@
 package com.saltynote.service.controller;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Resource;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.transfer.Email;
@@ -38,16 +16,31 @@ import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import javax.validation.Valid;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @Slf4j
-@Api(
-        value = "User Endpoint",
-        description = "Everything about User operation, e.g. login, signup, etc")
 public class UserController {
 
     @Value("${password.minimal.length}")
@@ -64,7 +57,6 @@ public class UserController {
     @Resource
     private VaultService vaultService;
 
-    @ApiOperation("Get a verification code for email signup")
     @PostMapping("/email/verification")
     public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
         // check whether this email is already signed up or not.
@@ -79,7 +71,6 @@ public class UserController {
                 ServiceResponse.ok("A verification code for signup is sent to you email now"));
     }
 
-    @ApiOperation("Create a new user with email, username and password")
     @PostMapping("/signup")
     public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
         if (userNewRequest.getPassword().length() < passwordMinimalLength) {
@@ -113,7 +104,6 @@ public class UserController {
     }
 
     @PostMapping("/refresh_token")
-    @ApiOperation("Get a new access token with refresh_token.")
     public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
         // 1. No expiry, and valid.
         JwtUser user = jwtInstance.parseRefreshToken(jwtToken.getRefreshToken());
@@ -130,8 +120,6 @@ public class UserController {
     }
 
     @Transactional
-    @ApiOperation(
-            "Clean all your refresh tokens, so no one can use any of them to refresh and obtain access token")
     @DeleteMapping("/refresh_tokens")
     public ResponseEntity<ServiceResponse> cleanRefreshTokens(Authentication auth) {
         JwtUser user = (JwtUser) auth.getPrincipal();
@@ -140,7 +128,6 @@ public class UserController {
         return ResponseEntity.ok(ServiceResponse.ok("All your refresh tokens are cleaned."));
     }
 
-    @ApiOperation("Request password reset email")
     @PostMapping("/password/forget")
     public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
         Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
@@ -156,7 +143,6 @@ public class UserController {
                         "Password reset email will be sent to your email, please reset your email with link there."));
     }
 
-    @ApiOperation("Reset Password from email link")
     @PostMapping("/password/reset")
     public ResponseEntity<ServiceResponse> resetPassword(
             @Valid @RequestBody PasswordReset passwordReset) {
@@ -183,7 +169,6 @@ public class UserController {
         }
     }
 
-    @ApiOperation("Update Password after login")
     @RequestMapping(
             value = "/password",
             method = {RequestMethod.POST, RequestMethod.PUT})
@@ -215,8 +200,7 @@ public class UserController {
         return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
     }
 
-    @ApiOperation(
-            "Account deletion, all resource owned by the user will also be deleted, and this action cannot be undone.")
+
     @DeleteMapping("/account/{id}")
     public ResponseEntity<ServiceResponse> accountDeletion(
             @PathVariable("id") String userId, Authentication auth) {
@@ -228,11 +212,4 @@ public class UserController {
         return ResponseEntity.ok(ServiceResponse.ok("Account deletion is successful."));
     }
 
-    // Note: this is not a valid endpoint, it is only used for swagger doc.
-    @ApiOperation(
-            "Please user '/login' instead, as login is managed by spring security. Here is just a placeholder for swagger doc")
-    @PostMapping("/login-placeholder-for-swagger-doc")
-    public ResponseEntity<JwtUser> login(@Valid @RequestBody UserCredential userCredential) {
-        return ResponseEntity.ok(new JwtUser("swagger-ui-user-id", "swagger-ui-username"));
-    }
 }
