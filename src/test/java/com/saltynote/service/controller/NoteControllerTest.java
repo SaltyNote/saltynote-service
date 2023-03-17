@@ -1,9 +1,20 @@
 package com.saltynote.service.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javafaker.Faker;
+import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.transfer.JwtToken;
+import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.domain.transfer.UserNewRequest;
+import com.saltynote.service.entity.Note;
+import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.entity.Vault;
+import com.saltynote.service.security.SecurityConstants;
+import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.NoteService;
+import com.saltynote.service.service.UserService;
+import com.saltynote.service.service.VaultService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,21 +32,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
-import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.JwtToken;
-import com.saltynote.service.domain.transfer.UserCredential;
-import com.saltynote.service.domain.transfer.UserNewRequest;
-import com.saltynote.service.entity.Note;
-import com.saltynote.service.entity.SiteUser;
-import com.saltynote.service.entity.Vault;
-import com.saltynote.service.security.SecurityConstants;
-import com.saltynote.service.service.EmailService;
-import com.saltynote.service.service.NoteService;
-import com.saltynote.service.service.UserService;
-import com.saltynote.service.service.VaultService;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -141,7 +140,7 @@ public class NoteControllerTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         Pair<SiteUser, String> pair = signupTestUser();
         this.accessToken = pair.getRight();
         this.siteUser = pair.getLeft();
@@ -154,13 +153,13 @@ public class NoteControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         userService.cleanupByUserId(this.siteUser.getId());
         noteService.getRepository().deleteAll(this.notesToCleaned);
     }
 
     @Test
-    public void getNoteByIdShouldSuccess() throws Exception {
+    void getNoteByIdShouldSuccess() throws Exception {
         // Suppress codacy warning
         assertNotNull(this.savedNote.getId());
         this.mockMvc
@@ -173,14 +172,14 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void getNoteByIdNoAccessTokenReturnException() throws Exception {
+    void getNoteByIdNoAccessTokenReturnException() throws Exception {
         // Suppress codacy warning
         assertNotNull(this.savedNote.getId());
         this.mockMvc.perform(get("/note/" + this.savedNote.getId())).andExpect(status().isForbidden());
     }
 
     @Test
-    public void getNoteByIdFromNonOwnerShouldFail() throws Exception {
+    void getNoteByIdFromNonOwnerShouldFail() throws Exception {
         Pair<SiteUser, String> pair = signupTestUser();
         assertNotNull(pair.getRight());
         this.mockMvc
@@ -193,7 +192,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void updateNoteByIdShouldSuccess() throws Exception {
+    void updateNoteByIdShouldSuccess() throws Exception {
         String newNoteContent = "I am the new note";
         Note noteToUpdate = SerializationUtils.clone(this.savedNote);
         noteToUpdate.setNote(newNoteContent);
@@ -213,7 +212,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void updateTagsByIdShouldSuccess() throws Exception {
+    void updateTagsByIdShouldSuccess() throws Exception {
         String newTagsContent = "java,python,spring-boot";
         Note tagToUpdate = SerializationUtils.clone(this.savedNote);
         tagToUpdate.setTags(newTagsContent);
@@ -233,7 +232,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void updateNoteByIdFromNonOwnerShouldFail() throws Exception {
+    void updateNoteByIdFromNonOwnerShouldFail() throws Exception {
 
         Pair<SiteUser, String> pair = signupTestUser();
 
@@ -257,7 +256,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void deleteNoteByIdShouldSuccess() throws Exception {
+    void deleteNoteByIdShouldSuccess() throws Exception {
         Note note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc
@@ -283,7 +282,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void deleteNoteByIdFromNonOwnerShouldFail() throws Exception {
+    void deleteNoteByIdFromNonOwnerShouldFail() throws Exception {
         Note note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc
@@ -314,7 +313,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void getNotes() throws Exception {
+    void getNotes() throws Exception {
         Note note = createTmpNote(null);
         String randKeyword = RandomStringUtils.randomAlphanumeric(10);
         note.setNote(note.getNote() + " " + randKeyword);
@@ -362,7 +361,7 @@ public class NoteControllerTest {
     }
 
     @Test
-    public void createNote() throws Exception {
+    void createNote() throws Exception {
         Note note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc

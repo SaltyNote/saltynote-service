@@ -1,26 +1,5 @@
 package com.saltynote.service.controller;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.mail.MessagingException;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.component.JwtInstance;
@@ -42,6 +21,25 @@ import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import javax.mail.MessagingException;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -94,7 +92,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void emailVerifyTest() throws Exception {
+    void emailVerifyTest() throws Exception {
         String username = faker.name().username();
         String emailStr = username + "@saltynote.com";
         String alreadyUsedEmail = "example@exmaple.com";
@@ -119,13 +117,13 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
 
         List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
-        assertEquals(vaults.size(), 1);
+        assertEquals(1, vaults.size());
         vaultService.getRepository().delete(vaults.get(0));
         userService.cleanupByUserId(user.getId());
     }
 
     @Test
-    public void signupShouldFailIfNoToken() throws Exception {
+    void signupShouldFailIfNoToken() throws Exception {
         String username = faker.name().username();
         String email = username + "@saltynote.com";
 
@@ -145,7 +143,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signupShouldReturnSuccess() throws Exception {
+    void signupShouldReturnSuccess() throws Exception {
         String username = faker.name().username();
         String email = username + "@saltynote.com";
         Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
@@ -175,7 +173,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void loginAndRefreshTokenShouldSuccess() throws Exception {
+    void loginAndRefreshTokenShouldSuccess() throws Exception {
 
         UserCredential uc =
                 new UserCredential()
@@ -230,7 +228,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
+    void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
 
         UserCredential uc =
                 new UserCredential()
@@ -301,7 +299,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void loginShouldFail() throws Exception {
+    void loginShouldFail() throws Exception {
 
         UserCredential uc =
                 new UserCredential()
@@ -329,7 +327,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void passwordResetTest() throws Exception {
+    void passwordResetTest() throws Exception {
         // Create a new User
         UserCredential uc =
                 new UserCredential()
@@ -354,10 +352,10 @@ public class UserControllerTest {
                         .getRepository()
                         .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
 
-        assertEquals(vaults.size(), 1);
+        assertEquals(1, vaults.size());
         Vault vault = vaults.get(0);
 
-        // Can login without problem
+        // Can log in without problem
         UserCredential userRequest =
                 new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         this.mockMvc
@@ -399,7 +397,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void passwordUpdateTest() throws Exception {
+    void passwordUpdateTest() throws Exception {
         String oldPassword = RandomStringUtils.randomAlphanumeric(12);
         String newPassword = RandomStringUtils.randomAlphanumeric(12);
 
@@ -478,7 +476,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void accountDeletionTest() throws Exception {
+    void accountDeletionTest() throws Exception {
         // Create a new User
         String username = faker.name().username();
         String email = username + "@saltynote.com";
@@ -554,7 +552,7 @@ public class UserControllerTest {
         // deletion should fail due to no access token
         this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
 
-        // deletion should success
+        // deletion should succeed
         this.mockMvc
                 .perform(
                         delete("/account/" + jwtUser.getId())

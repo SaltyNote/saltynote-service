@@ -1,16 +1,21 @@
 package com.saltynote.service.utils;
 
-import javax.validation.constraints.NotNull;
-
+import com.saltynote.service.exception.IllegalInitialException;
 import org.apache.commons.lang3.StringUtils;
+
+import javax.validation.constraints.NotNull;
 
 public class BaseUtils {
     private static String baseUrl = "https://saltynote.com";
 
+    private BaseUtils() {
+        throw new IllegalInitialException("Do not instantiate me.");
+    }
+
     // This is used for test or dev usage, do not call it in prod.
-    public static void setBaseUrl(String _baseUrl) {
-        if (StringUtils.startsWithIgnoreCase(_baseUrl, "http")) {
-            baseUrl = _baseUrl;
+    public static void setBaseUrl(String baseUrl) {
+        if (StringUtils.startsWithIgnoreCase(baseUrl, "http")) {
+            BaseUtils.baseUrl = baseUrl;
         }
     }
 
