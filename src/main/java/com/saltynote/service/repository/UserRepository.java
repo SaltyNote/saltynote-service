@@ -1,11 +1,10 @@
 package com.saltynote.service.repository;
 
-import java.util.Optional;
-
+import com.saltynote.service.entity.SiteUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.saltynote.service.entity.SiteUser;
+import java.util.Optional;
 
 public interface UserRepository
         extends JpaRepository<SiteUser, String>, JpaSpecificationExecutor<SiteUser> {

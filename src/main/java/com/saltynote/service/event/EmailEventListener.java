@@ -1,20 +1,18 @@
 package com.saltynote.service.event;
 
-import java.io.IOException;
-
-import javax.mail.MessagingException;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.saltynote.service.domain.EmailPayload;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.service.EmailService;
 import com.saltynote.service.service.VaultService;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.mail.MessagingException;
+import java.io.IOException;
 
 @Component
 @Slf4j

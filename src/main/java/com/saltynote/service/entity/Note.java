@@ -1,7 +1,10 @@
 package com.saltynote.service.entity;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+import com.devskiller.friendly_id.FriendlyId;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,13 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-
-import org.springframework.util.StringUtils;
-
-import com.devskiller.friendly_id.FriendlyId;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "note")

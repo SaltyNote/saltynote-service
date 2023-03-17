@@ -1,13 +1,12 @@
 package com.saltynote.service.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import com.saltynote.service.domain.EmailPayload;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.utils.BaseUtils;
 import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class EmailEvent extends ApplicationEvent {

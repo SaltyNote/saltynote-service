@@ -1,11 +1,10 @@
 package com.saltynote.service.domain;
 
-import java.util.Collections;
-
-import org.springframework.security.core.userdetails.User;
-
 import com.saltynote.service.entity.SiteUser;
 import lombok.Getter;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collections;
 
 public class LoginUser extends User implements IdentifiableUser {
     @Getter
