@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Email {
+public class Payload {
     @NotBlank
     @javax.validation.constraints.Email
     private String email;

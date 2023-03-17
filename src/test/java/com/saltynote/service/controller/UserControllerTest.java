@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.Email;
+import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
@@ -106,14 +106,14 @@ class UserControllerTest {
                 .perform(
                         post("/email/verification")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(new Email(alreadyUsedEmail))))
+                                .content(objectMapper.writeValueAsString(new Payload(alreadyUsedEmail))))
                 .andExpect(status().isBadRequest());
 
         this.mockMvc
                 .perform(
                         post("/email/verification")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(new Email(emailStr))))
+                                .content(objectMapper.writeValueAsString(new Payload(emailStr))))
                 .andExpect(status().isOk());
 
         List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
@@ -339,12 +339,12 @@ class UserControllerTest {
         user = userService.getRepository().save(user);
 
         // request password change
-        Email email = new Email(user.getEmail());
+        Payload payload = new Payload(user.getEmail());
         this.mockMvc
                 .perform(
                         post("/password/forget")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(email)))
+                                .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
         List<Vault> vaults =
