@@ -1,11 +1,10 @@
 package com.saltynote.service.repository;
 
-import java.util.List;
-
+import com.saltynote.service.entity.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.saltynote.service.entity.Note;
+import java.util.List;
 
 public interface NoteRepository
         extends JpaRepository<Note, String>, JpaSpecificationExecutor<Note> {

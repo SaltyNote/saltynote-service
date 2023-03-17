@@ -1,7 +1,12 @@
 package com.saltynote.service.security;
 
-import javax.annotation.Resource;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saltynote.service.component.JwtInstance;
+import com.saltynote.service.domain.transfer.ServiceResponse;
+import com.saltynote.service.service.UserDetailsServiceImpl;
+import com.saltynote.service.service.UserService;
+import com.saltynote.service.service.VaultService;
+import lombok.val;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -16,13 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saltynote.service.component.JwtInstance;
-import com.saltynote.service.domain.transfer.ServiceResponse;
-import com.saltynote.service.service.UserDetailsServiceImpl;
-import com.saltynote.service.service.UserService;
-import com.saltynote.service.service.VaultService;
-import lombok.val;
+import javax.annotation.Resource;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
@@ -56,32 +55,32 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
-    http.cors()
-        .and()
-          .csrf()
-            .disable()
-          .authorizeRequests()
-            .antMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
-              .permitAll()
-            .antMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
-              .permitAll()
-            .antMatchers(SWAGGER_URLS)
-              .permitAll()
-            .anyRequest()
-              .authenticated()
-        .and()
-          .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance, userService))
-          .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
-          // this disables session creation on Spring Security
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and().exceptionHandling()
-          .authenticationEntryPoint((request, response, e) -> {
-              response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-              response.setStatus(HttpStatus.FORBIDDEN.value());
-              response.getWriter().write(objectMapper.writeValueAsString(new ServiceResponse(HttpStatus.FORBIDDEN, "Access Denied")));
-            });
-    // @formatter:on
+        http.cors()
+                .and()
+                .csrf()
+                .disable()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                .permitAll()
+                .antMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
+                .permitAll()
+                .antMatchers(SWAGGER_URLS)
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance, userService))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
+                // this disables session creation on Spring Security
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().exceptionHandling()
+                .authenticationEntryPoint((request, response, e) -> {
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.getWriter().write(objectMapper.writeValueAsString(new ServiceResponse(HttpStatus.FORBIDDEN, "Access Denied")));
+                });
+        // @formatter:on
     }
 
     @Override

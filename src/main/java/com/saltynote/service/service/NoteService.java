@@ -1,8 +1,7 @@
 package com.saltynote.service.service;
 
-import org.springframework.stereotype.Service;
-
 import com.saltynote.service.repository.NoteRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 public class NoteService implements RepositoryService<NoteRepository> {

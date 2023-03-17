@@ -1,16 +1,5 @@
 package com.saltynote.service.service;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
-
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.devskiller.friendly_id.FriendlyId;
@@ -23,6 +12,15 @@ import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.repository.VaultRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
+
+import javax.annotation.Resource;
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Slf4j

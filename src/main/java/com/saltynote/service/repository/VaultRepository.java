@@ -1,14 +1,12 @@
 package com.saltynote.service.repository;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.validation.constraints.NotBlank;
-
+import com.saltynote.service.entity.Vault;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.saltynote.service.entity.Vault;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.Optional;
 
 public interface VaultRepository
         extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {

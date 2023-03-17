@@ -2,13 +2,12 @@ package com.saltynote.service.controller;
 
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.Email;
+import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.ServiceResponse;
-import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
@@ -58,14 +57,14 @@ public class UserController {
     private VaultService vaultService;
 
     @PostMapping("/email/verification")
-    public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Email email) {
+    public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Payload payload) {
         // check whether this email is already signed up or not.
-        if (userService.getRepository().findByEmail(email.getEmail()).isPresent()) {
+        if (userService.getRepository().findByEmail(payload.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
         }
 
-        SiteUser user = new SiteUser().setEmail(email.getEmail()).setUsername("there");
+        SiteUser user = new SiteUser().setEmail(payload.getEmail()).setUsername("there");
         eventPublisher.publishEvent(new EmailEvent(this, user, EmailEvent.Type.NEW_USER));
         return ResponseEntity.ok(
                 ServiceResponse.ok("A verification code for signup is sent to you email now"));
@@ -129,10 +128,10 @@ public class UserController {
     }
 
     @PostMapping("/password/forget")
-    public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Email email) {
-        Optional<SiteUser> usero = userService.getRepository().findByEmail(email.getEmail());
+    public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Payload payload) {
+        Optional<SiteUser> usero = userService.getRepository().findByEmail(payload.getEmail());
         if (usero.isEmpty()) {
-            log.warn("User is not found for email = {}", email.getEmail());
+            log.warn("User is not found for email = {}", payload.getEmail());
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
                     .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
         }
