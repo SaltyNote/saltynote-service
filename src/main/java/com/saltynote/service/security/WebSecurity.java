@@ -6,25 +6,25 @@ import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.service.UserDetailsServiceImpl;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import jakarta.annotation.Resource;
 import lombok.val;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.annotation.Resource;
-
 @EnableWebSecurity
-public class WebSecurity extends WebSecurityConfigurerAdapter {
+public class WebSecurity {
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             SecurityConstants.SIGN_UP_URL,
             "/refresh_token",
@@ -52,25 +52,23 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Resource
     private UserService userService;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // @formatter:off
         http.cors()
                 .and()
                 .csrf()
                 .disable()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
-                .permitAll()
-                .antMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
-                .permitAll()
-                .antMatchers(SWAGGER_URLS)
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .addFilter(new JWTAuthenticationFilter(authenticationManager(), vaultService, jwtInstance, userService))
-                .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtInstance))
+                .authorizeHttpRequests(req -> req.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
+                        .permitAll()
+                        .requestMatchers(SWAGGER_URLS)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .addFilter(new JWTAuthenticationFilter(authenticationManager(http), vaultService, jwtInstance, userService))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager(http), jwtInstance))
                 // this disables session creation on Spring Security
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -81,11 +79,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                     response.getWriter().write(objectMapper.writeValueAsString(new ServiceResponse(HttpStatus.FORBIDDEN, "Access Denied")));
                 });
         // @formatter:on
+        return http.build();
     }
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(bCryptPasswordEncoder)
+                .and()
+                .build();
     }
 
     @Bean

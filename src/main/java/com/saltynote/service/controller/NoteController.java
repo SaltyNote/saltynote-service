@@ -10,6 +10,7 @@ import com.saltynote.service.entity.Note;
 import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.NoteService;
 import com.saltynote.service.utils.BaseUtils;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

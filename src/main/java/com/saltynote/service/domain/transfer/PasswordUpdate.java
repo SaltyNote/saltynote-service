@@ -1,11 +1,10 @@
 package com.saltynote.service.domain.transfer;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor

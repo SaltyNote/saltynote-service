@@ -3,10 +3,9 @@ package com.saltynote.service.domain.transfer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.saltynote.service.entity.SiteUser;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 @Accessors(chain = true)

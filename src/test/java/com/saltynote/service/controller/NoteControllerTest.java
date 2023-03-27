@@ -16,6 +16,7 @@ import com.saltynote.service.service.EmailService;
 import com.saltynote.service.service.NoteService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -34,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -15,6 +15,8 @@ import com.saltynote.service.event.EmailEvent;
 import com.saltynote.service.exception.WebAppRuntimeException;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
 import java.util.Objects;
 import java.util.Optional;
 

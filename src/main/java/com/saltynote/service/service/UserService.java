@@ -3,10 +3,9 @@ package com.saltynote.service.service;
 import com.saltynote.service.repository.NoteRepository;
 import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.repository.VaultRepository;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 
 @Service
 public class UserService implements RepositoryService<UserRepository> {
