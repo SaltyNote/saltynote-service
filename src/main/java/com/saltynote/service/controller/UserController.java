@@ -2,11 +2,11 @@ package com.saltynote.service.controller;
 
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
+import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.SiteUser;
@@ -86,7 +86,7 @@ public class UserController {
                                 userNewRequest.getToken(),
                                 VaultType.NEW_ACCOUNT.getValue());
 
-        if (vaultOp.isEmpty()) {
+        if (!vaultOp.isPresent()) {
             throw new WebAppRuntimeException(
                     HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
         }
@@ -130,7 +130,7 @@ public class UserController {
     @PostMapping("/password/forget")
     public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Payload payload) {
         Optional<SiteUser> usero = userService.getRepository().findByEmail(payload.getEmail());
-        if (usero.isEmpty()) {
+        if (!usero.isPresent()) {
             log.warn("User is not found for email = {}", payload.getEmail());
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
                     .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
@@ -152,7 +152,7 @@ public class UserController {
                     "Password should be at least " + passwordMinimalLength + " characters.");
         }
         Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
-        if (vo.isEmpty()) {
+        if (!vo.isPresent()) {
             throw wre;
         }
 
@@ -183,7 +183,7 @@ public class UserController {
 
         // Validate old password
         Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
-        if (usero.isEmpty()) {
+        if (!usero.isPresent()) {
             throw new WebAppRuntimeException(
                     HttpStatus.BAD_REQUEST,
                     "Something goes wrong when fetching your info, please try later again.");

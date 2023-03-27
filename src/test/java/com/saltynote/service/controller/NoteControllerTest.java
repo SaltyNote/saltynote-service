@@ -3,7 +3,9 @@ package com.saltynote.service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.converter.NoteConverter;
 import com.saltynote.service.domain.transfer.JwtToken;
+import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
@@ -32,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -71,6 +74,10 @@ public class NoteControllerTest {
     private UserService userService;
     @Autowired
     private VaultService vaultService;
+
+    @Resource
+    private NoteConverter noteConverter;
+
     @MockBean
     private EmailService emailService;
 
@@ -80,8 +87,8 @@ public class NoteControllerTest {
     private String accessToken;
     private Note savedNote;
 
-    public static Note createTmpNote(String userId) {
-        return new Note()
+    public static NoteDto createTmpNote(String userId) {
+        return new NoteDto()
                 .setUserId(userId)
                 .setNote(faker.lorem().characters(50, 100))
                 .setUrl(faker.internet().url())
@@ -147,8 +154,8 @@ public class NoteControllerTest {
 
         this.notesToCleaned = new ArrayList<>();
         // Create a temp note for current user.
-        Note note = createTmpNote(siteUser.getId());
-        this.savedNote = noteService.getRepository().save(note);
+        NoteDto note = createTmpNote(siteUser.getId());
+        this.savedNote = noteService.getRepository().save(noteConverter.toEntity(note));
         this.notesToCleaned.add(this.savedNote);
     }
 
@@ -257,7 +264,7 @@ public class NoteControllerTest {
 
     @Test
     void deleteNoteByIdShouldSuccess() throws Exception {
-        Note note = createTmpNote(null);
+        NoteDto note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
@@ -283,7 +290,7 @@ public class NoteControllerTest {
 
     @Test
     void deleteNoteByIdFromNonOwnerShouldFail() throws Exception {
-        Note note = createTmpNote(null);
+        NoteDto note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
@@ -314,7 +321,7 @@ public class NoteControllerTest {
 
     @Test
     void getNotes() throws Exception {
-        Note note = createTmpNote(null);
+        NoteDto note = createTmpNote(null);
         String randKeyword = RandomStringUtils.randomAlphanumeric(10);
         note.setNote(note.getNote() + " " + randKeyword);
         MvcResult mvcResult =
@@ -362,7 +369,7 @@ public class NoteControllerTest {
 
     @Test
     void createNote() throws Exception {
-        Note note = createTmpNote(null);
+        NoteDto note = createTmpNote(null);
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
