@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -520,7 +522,7 @@ class UserControllerTest {
         assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
         assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
 
-        Note note = NoteControllerTest.createTmpNote(jwtUser.getId());
+        NoteDto note = NoteControllerTest.createTmpNote(jwtUser.getId());
         mvcResult =
                 this.mockMvc
                         .perform(
@@ -559,7 +561,7 @@ class UserControllerTest {
                                 .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
                 .andExpect(status().isOk());
 
-        assertTrue(userService.getRepository().findById(jwtUser.getId()).isEmpty());
+        assertFalse(userService.getRepository().findById(jwtUser.getId()).isPresent());
         assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
         assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
     }

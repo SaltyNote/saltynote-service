@@ -11,5 +11,11 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql/data
 
+  redis:
+    image: 'redis:7.0-alpine'
+    command: redis-server --requirepass 88888888
+    ports:
+      - '6379:6379'
+
 volumes:
   mysql_data:

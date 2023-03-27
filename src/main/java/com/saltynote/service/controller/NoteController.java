@@ -1,7 +1,9 @@
 package com.saltynote.service.controller;
 
 import com.google.common.base.Splitter;
+import com.saltynote.service.domain.converter.NoteConverter;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.NoteQuery;
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.entity.Note;
@@ -32,9 +34,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NoteController {
     private final NoteService noteService;
+    private final NoteConverter noteConverter;
 
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, NoteConverter noteConverter) {
         this.noteService = noteService;
+        this.noteConverter = noteConverter;
     }
 
     @GetMapping("/note/{id}")
@@ -48,20 +52,20 @@ public class NoteController {
             value = "/note/{id}",
             method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<Note> updateNoteById(
-            @PathVariable("id") String id, @RequestBody Note note, Authentication auth) {
+            @PathVariable("id") String id, @RequestBody NoteDto noteDto, Authentication auth) {
         Optional<Note> queryNote = noteService.getRepository().findById(id);
         checkNoteOwner(queryNote, auth);
         Note noteTobeUpdate = queryNote.get();
-        if (StringUtils.isNotBlank(note.getNote())) {
-            noteTobeUpdate.setNote(note.getNote());
+        if (StringUtils.isNotBlank(noteDto.getNote())) {
+            noteTobeUpdate.setNote(noteDto.getNote());
         }
 
-        if (StringUtils.isNotBlank(note.getTags())) {
-            noteTobeUpdate.setTags(note.getTags());
+        if (StringUtils.isNotBlank(noteDto.getTags())) {
+            noteTobeUpdate.setTags(noteDto.getTags());
         }
 
-        if (StringUtils.isNotBlank(note.getHighlightColor())) {
-            noteTobeUpdate.setHighlightColor(note.getHighlightColor());
+        if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {
+            noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());
         }
         noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);
         return ResponseEntity.ok(noteTobeUpdate);
@@ -108,9 +112,10 @@ public class NoteController {
     }
 
     @PostMapping("/note")
-    public ResponseEntity<Note> createNote(@Valid @RequestBody Note note, Authentication auth) {
+    public ResponseEntity<Note> createNote(@Valid @RequestBody NoteDto noteDto, Authentication auth) {
         JwtUser user = (JwtUser) auth.getPrincipal();
-        note.setUserId(user.getId());
+        noteDto.setUserId(user.getId());
+        Note note = noteConverter.toEntity(noteDto);
         note = noteService.getRepository().save(note);
         if (StringUtils.isNotBlank(note.getId())) {
             return ResponseEntity.ok(note);

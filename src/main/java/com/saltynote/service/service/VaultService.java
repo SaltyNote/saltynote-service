@@ -106,7 +106,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
      */
     public Optional<Vault> findByToken(String token) {
         Optional<VaultEntity> veo = decode(token);
-        if (veo.isEmpty()) {
+        if (!veo.isPresent()) {
             return Optional.empty();
         }
         VaultEntity ve = veo.get();
