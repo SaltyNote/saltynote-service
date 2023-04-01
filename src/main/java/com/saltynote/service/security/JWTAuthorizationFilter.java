@@ -1,32 +1,31 @@
 package com.saltynote.service.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.AuthenticationManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
 
-public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+@Component
+@RequiredArgsConstructor
+public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtInstance jwtInstance;
-
-    public JWTAuthorizationFilter(AuthenticationManager authManager, JwtInstance jwtInstance) {
-        super(authManager);
-        this.jwtInstance = jwtInstance;
-    }
+    private final JwtService jwtService;
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            @NonNull HttpServletRequest req, @NonNull HttpServletResponse res, @NonNull FilterChain chain)
             throws IOException, ServletException {
         String header = req.getHeader(SecurityConstants.HEADER_STRING);
 
@@ -43,20 +42,18 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(SecurityConstants.HEADER_STRING);
-        if (token != null) {
-            // parse the token.
-            DecodedJWT decodedJWT = jwtInstance.verifyAccessToken(token);
+        if (token == null) return null;
+        // parse the token.
+        DecodedJWT decodedJWT = jwtService.verifyAccessToken(token);
+        if (decodedJWT == null) return null;
 
-            if (decodedJWT != null) {
-                return new UsernamePasswordAuthenticationToken(
-                        new JwtUser(
-                                decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
-                                decodedJWT.getSubject()),
-                        null,
-                        Collections.emptyList());
-            }
-            return null;
-        }
-        return null;
+        return new UsernamePasswordAuthenticationToken(
+                new JwtUser(
+                        decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
+                        decodedJWT.getSubject()),
+                null,
+                Collections.emptyList());
+
+
     }
 }
