@@ -60,28 +60,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // Overwrite refresh token ttl to 8 seconds
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"jwt.refresh_token.ttl=8000"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = { "jwt.refresh_token.ttl=8000" })
 @AutoConfigureMockMvc
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = NONE)
 @Slf4j
 class UserControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Autowired
     private JwtService jwtService;
+
     @Autowired
     private VaultService vaultService;
+
     @Autowired
     private NoteService noteService;
+
     @MockBean
     private EmailService emailService;
 
@@ -105,18 +112,14 @@ class UserControllerTest {
         assertNotNull(user.getId());
 
         this.mockMvc
-                .perform(
-                        post("/email/verification")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(new Payload(alreadyUsedEmail))))
-                .andExpect(status().isBadRequest());
+            .perform(post("/email/verification").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Payload(alreadyUsedEmail))))
+            .andExpect(status().isBadRequest());
 
         this.mockMvc
-                .perform(
-                        post("/email/verification")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(new Payload(emailStr))))
-                .andExpect(status().isOk());
+            .perform(post("/email/verification").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Payload(emailStr))))
+            .andExpect(status().isOk());
 
         List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
         assertEquals(1, vaults.size());
@@ -137,11 +140,9 @@ class UserControllerTest {
         assertNull(userNewRequest.getToken());
 
         this.mockMvc
-                .perform(
-                        post("/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userNewRequest)))
-                .andExpect(status().isInternalServerError());
+            .perform(post("/signup").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -161,12 +162,10 @@ class UserControllerTest {
         userNewRequest.setToken(vault.getSecret());
 
         this.mockMvc
-                .perform(
-                        post("/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userNewRequest)))
-                .andDo(print())
-                .andExpect(status().isOk());
+            .perform(post("/signup").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+            .andDo(print())
+            .andExpect(status().isOk());
 
         SiteUser queryUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
         assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
@@ -177,25 +176,19 @@ class UserControllerTest {
     @Test
     void loginAndRefreshTokenShouldSuccess() throws Exception {
 
-        UserCredential uc =
-                new UserCredential()
-                        .setUsername(faker.name().username())
-                        .setEmail(faker.internet().emailAddress())
-                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        UserCredential uc = new UserCredential().setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.getRepository().save(user);
 
-        UserCredential userRequest =
-                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
-        MvcResult mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        MvcResult mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
@@ -208,14 +201,11 @@ class UserControllerTest {
 
         // try refresh token
         JwtToken tokenRequest = new JwtToken(null, token.getRefreshToken());
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/refresh_token")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(tokenRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/refresh_token").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tokenRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
 
         res = mvcResult.getResponse().getContentAsString();
         JwtToken newToken = objectMapper.readValue(res, JwtToken.class);
@@ -232,25 +222,19 @@ class UserControllerTest {
     @Test
     void loginAndRefreshTokenReUsageShouldSuccess() throws Exception {
 
-        UserCredential uc =
-                new UserCredential()
-                        .setUsername(faker.name().username())
-                        .setEmail(faker.internet().emailAddress())
-                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        UserCredential uc = new UserCredential().setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.getRepository().save(user);
 
-        UserCredential userRequest =
-                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
-        MvcResult mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        MvcResult mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
@@ -260,14 +244,11 @@ class UserControllerTest {
 
         String oldRefreshToken = token.getRefreshToken();
 
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         res = mvcResult.getResponse().getContentAsString();
         token = objectMapper.readValue(res, JwtToken.class);
 
@@ -277,17 +258,15 @@ class UserControllerTest {
         // No new refresh token is generated.
         assertEquals(oldRefreshToken, token.getRefreshToken());
 
-        // Sleep 2 second, so refresh token will age 20%+, then new refresh token should be generated.
+        // Sleep 2 second, so refresh token will age 20%+, then new refresh token should
+        // be generated.
         TimeUnit.SECONDS.sleep(2);
 
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         res = mvcResult.getResponse().getContentAsString();
         token = objectMapper.readValue(res, JwtToken.class);
 
@@ -303,27 +282,21 @@ class UserControllerTest {
     @Test
     void loginShouldFail() throws Exception {
 
-        UserCredential uc =
-                new UserCredential()
-                        .setUsername(faker.name().username())
-                        .setEmail(faker.internet().emailAddress())
-                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        UserCredential uc = new UserCredential().setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.getRepository().save(user);
 
         assertNotNull(user.getId());
 
-        UserCredential userRequest =
-                new UserCredential()
-                        .setUsername(uc.getUsername())
-                        .setPassword(uc.getPassword() + "not valid");
+        UserCredential userRequest = new UserCredential().setUsername(uc.getUsername())
+            .setPassword(uc.getPassword() + "not valid");
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isUnauthorized());
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isUnauthorized());
 
         userService.cleanupByUserId(user.getId());
     }
@@ -331,11 +304,9 @@ class UserControllerTest {
     @Test
     void passwordResetTest() throws Exception {
         // Create a new User
-        UserCredential uc =
-                new UserCredential()
-                        .setUsername(faker.name().username())
-                        .setEmail(faker.internet().emailAddress())
-                        .setPassword(RandomStringUtils.randomAlphanumeric(12));
+        UserCredential uc = new UserCredential().setUsername(faker.name().username())
+            .setEmail(faker.internet().emailAddress())
+            .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.getRepository().save(user);
@@ -343,57 +314,44 @@ class UserControllerTest {
         // request password change
         Payload payload = new Payload(user.getEmail());
         this.mockMvc
-                .perform(
-                        post("/password/forget")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk());
+            .perform(post("/password/forget").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isOk());
 
-        List<Vault> vaults =
-                vaultService
-                        .getRepository()
-                        .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
+        List<Vault> vaults = vaultService.getRepository()
+            .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
 
         assertEquals(1, vaults.size());
         Vault vault = vaults.get(0);
 
         // Can log in without problem
-        UserCredential userRequest =
-                new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
+        UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isOk());
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isOk());
 
         PasswordReset pr = new PasswordReset();
         pr.setToken(vaultService.encode(vault));
         String newPassword = RandomStringUtils.randomAlphanumeric(10);
         pr.setPassword(newPassword);
         this.mockMvc
-                .perform(
-                        post("/password/reset")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(pr)))
-                .andExpect(status().isOk());
+            .perform(post("/password/reset").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pr)))
+            .andExpect(status().isOk());
 
         // login with old password should fail
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isUnauthorized());
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRequest)))
+            .andExpect(status().isUnauthorized());
 
         // login with new password should success
         UserCredential ur = new UserCredential().setUsername(uc.getUsername()).setPassword(newPassword);
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(ur)))
-                .andExpect(status().isOk());
+            .perform(
+                    post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ur)))
+            .andExpect(status().isOk());
 
         userService.cleanupByUserId(user.getId());
     }
@@ -418,28 +376,22 @@ class UserControllerTest {
         userNewRequest.setUsername(username);
         userNewRequest.setToken(vault.getSecret());
 
-        MvcResult mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/signup")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userNewRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        MvcResult mvcResult = this.mockMvc
+            .perform(post("/signup").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         log.info(res);
         JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
         assertNotNull(jwtUser.getId());
 
         // Can login without problem
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(userNewRequest)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+            .andExpect(status().isOk())
+            .andReturn();
         res = mvcResult.getResponse().getContentAsString();
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
@@ -450,30 +402,23 @@ class UserControllerTest {
         PasswordUpdate pu = new PasswordUpdate().setOldPassword(oldPassword).setPassword(newPassword);
 
         this.mockMvc
-                .perform(
-                        post("/password")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(pu))
-                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-                .andExpect(status().isOk());
+            .perform(post("/password").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pu))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+            .andExpect(status().isOk());
 
         // login with old password should fail
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userNewRequest)))
-                .andExpect(status().isUnauthorized());
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userNewRequest)))
+            .andExpect(status().isUnauthorized());
 
         // login with new password should success
-        UserCredential ur =
-                new UserCredential().setUsername(userNewRequest.getUsername()).setPassword(newPassword);
+        UserCredential ur = new UserCredential().setUsername(userNewRequest.getUsername()).setPassword(newPassword);
         this.mockMvc
-                .perform(
-                        post("/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(ur)))
-                .andExpect(status().isOk());
+            .perform(
+                    post("/login").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ur)))
+            .andExpect(status().isOk());
 
         userService.cleanupByUserId(jwtUser.getId());
     }
@@ -495,27 +440,21 @@ class UserControllerTest {
         user.setUsername(username);
         user.setToken(vault.getSecret());
 
-        MvcResult mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/signup")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(user)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        MvcResult mvcResult = this.mockMvc
+            .perform(post("/signup").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
         assertNotNull(jwtUser.getId());
 
         // Can login without problem
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(user)))
-                        .andExpect(status().isOk())
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk())
+            .andReturn();
         res = mvcResult.getResponse().getContentAsString();
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
@@ -524,46 +463,39 @@ class UserControllerTest {
         assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
 
         NoteDto note = NoteControllerTest.createTmpNote(jwtUser.getId());
-        mvcResult =
-                this.mockMvc
-                        .perform(
-                                post("/note")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(note))
-                                        .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                        .andExpect(content().string(containsString(note.getText())))
-                        .andReturn();
+        mvcResult = this.mockMvc
+            .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(note))
+                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(content().string(containsString(note.getText())))
+            .andReturn();
         res = mvcResult.getResponse().getContentAsString();
         Note returnedNote = objectMapper.readValue(res, Note.class);
         assertEquals(note.getNote(), returnedNote.getNote());
 
         // deletion should fail due to invalid user id
         this.mockMvc
-                .perform(
-                        delete("/account/invalid-id")
-                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-                .andExpect(status().isBadRequest());
+            .perform(delete("/account/invalid-id").header(SecurityConstants.HEADER_STRING,
+                    "Bearer " + token.getAccessToken()))
+            .andExpect(status().isBadRequest());
         // deletion should fail due to missing user id
         this.mockMvc
-                .perform(
-                        delete("/account")
-                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-                .andExpect(status().isNotFound());
+            .perform(delete("/account").header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+            .andExpect(status().isNotFound());
 
         // deletion should fail due to no access token
         this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
 
         // deletion should succeed
-        this.mockMvc
-                .perform(
-                        delete("/account/" + jwtUser.getId())
-                                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/account/" + jwtUser.getId()).header(SecurityConstants.HEADER_STRING,
+                "Bearer " + token.getAccessToken()))
+            .andExpect(status().isOk());
 
         assertFalse(userService.getRepository().findById(jwtUser.getId()).isPresent());
         assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
         assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
     }
+
 }

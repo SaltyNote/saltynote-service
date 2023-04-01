@@ -9,6 +9,8 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 public class UserNewRequest extends UserCredential {
+
     @NotBlank
     private String token;
+
 }

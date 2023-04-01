@@ -23,8 +23,10 @@ public class UserRepositoryIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -34,11 +36,9 @@ public class UserRepositoryIntegrationTest {
     public void whenFindByNameThenReturnUser() {
         // given
         String username = faker.name().username();
-        SiteUser user =
-                new SiteUser()
-                        .setEmail(faker.internet().emailAddress())
-                        .setUsername(username)
-                        .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
+        SiteUser user = new SiteUser().setEmail(faker.internet().emailAddress())
+            .setUsername(username)
+            .setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
         entityManager.persist(user);
         entityManager.flush();
 
@@ -47,4 +47,5 @@ public class UserRepositoryIntegrationTest {
         // then
         assertThat(found.getEmail()).isEqualTo(user.getEmail());
     }
+
 }

@@ -19,6 +19,7 @@ import java.util.Collections;
 
 @Service
 public class EmailService {
+
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
@@ -50,10 +51,10 @@ public class EmailService {
         helper.setFrom(emailSender);
         // Use the true flag to indicate the text included is HTML
         Template t = freemarkerConfig.getTemplate("email/general.ftlh");
-        String content =
-                FreeMarkerTemplateUtils.processTemplateIntoString(
-                        t, Collections.singletonMap("payload", emailPayload));
+        String content = FreeMarkerTemplateUtils.processTemplateIntoString(t,
+                Collections.singletonMap("payload", emailPayload));
         helper.setText(content, true);
         mailSender.send(message);
     }
+
 }

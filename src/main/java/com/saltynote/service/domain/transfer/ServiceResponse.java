@@ -10,11 +10,14 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceResponse {
+
     private HttpStatus status;
+
     private String message;
 
     @JsonIgnore
     public static ServiceResponse ok(String message) {
         return new ServiceResponse(HttpStatus.OK, message);
     }
+
 }

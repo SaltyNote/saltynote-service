@@ -28,4 +28,5 @@ class VaultServiceTest {
         assertTrue(decoded.isPresent());
         assertEquals(ve, decoded.get());
     }
+
 }

@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NoteDto {
+
     private String userId;
 
     @NotBlank
@@ -26,4 +27,5 @@ public class NoteDto {
     private String highlightColor;
 
     private String tags;
+
 }

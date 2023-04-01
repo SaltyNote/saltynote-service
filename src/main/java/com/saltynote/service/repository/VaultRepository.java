@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 import java.util.Optional;
 
-public interface VaultRepository
-        extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {
+public interface VaultRepository extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {
+
     Optional<Vault> findBySecret(String secret);
 
     void deleteByUserId(String userId);
@@ -27,4 +27,5 @@ public interface VaultRepository
     List<Vault> findByEmail(@NotBlank String email);
 
     Optional<Vault> findByEmailAndSecretAndType(String email, String token, String value);
+
 }

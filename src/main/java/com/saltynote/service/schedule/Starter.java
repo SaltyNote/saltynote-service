@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"dev", "test", "local", "default"})
+@Profile({ "dev", "test", "local", "default" })
 @Slf4j
 public class Starter implements CommandLineRunner {
 
@@ -24,4 +24,5 @@ public class Starter implements CommandLineRunner {
         BaseUtils.setBaseUrl(baseUrl);
         log.info("Set base url to {}", baseUrl);
     }
+
 }

@@ -12,8 +12,8 @@ import org.springframework.context.ApplicationEvent;
 public class EmailEvent extends ApplicationEvent {
 
     public enum Type {
-        NEW_USER(
-                "Signup Code to SaltyNote!",
+
+        NEW_USER("Signup Code to SaltyNote!",
                 new EmailPayload().setMessage("Below is the code you will use for signup.")) {
             @Override
             public Type loadVault(Vault vault, String encodedVault) {
@@ -26,12 +26,10 @@ public class EmailEvent extends ApplicationEvent {
                 return VaultType.NEW_ACCOUNT;
             }
         },
-        PASSWORD_FORGET(
-                "Password Reset from SaltyNote!",
-                new EmailPayload()
-                        .setLink("")
-                        .setLinkText("Reset Your Password")
-                        .setMessage("Below is the link for you to reset your password.")) {
+        PASSWORD_FORGET("Password Reset from SaltyNote!",
+                new EmailPayload().setLink("")
+                    .setLinkText("Reset Your Password")
+                    .setMessage("Below is the link for you to reset your password.")) {
             @Override
             public Type loadVault(Vault vault, String encodedVault) {
                 this.getPayload().setLink(BaseUtils.getPasswordResetUrl(encodedVault));
@@ -46,6 +44,7 @@ public class EmailEvent extends ApplicationEvent {
 
         @Getter
         private final String subject;
+
         @Getter
         private final EmailPayload payload;
 
@@ -62,9 +61,11 @@ public class EmailEvent extends ApplicationEvent {
         public abstract Type loadVault(Vault vault, String encodedVault);
 
         public abstract VaultType getVaultType();
+
     }
 
     private final SiteUser user;
+
     private final Type type;
 
     public EmailEvent(Object source, SiteUser user, Type type) {
@@ -72,4 +73,5 @@ public class EmailEvent extends ApplicationEvent {
         this.user = user;
         this.type = type;
     }
+
 }

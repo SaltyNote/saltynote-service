@@ -11,10 +11,13 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserCredential {
+
     @NotBlank
     private String username;
+
     @NotBlank
     private String password;
+
     @NotBlank
     private String email;
 
@@ -24,4 +27,5 @@ public class UserCredential {
         user.setEmail(this.email).setUsername(this.username).setPassword(this.password);
         return user;
     }
+
 }

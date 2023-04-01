@@ -11,8 +11,11 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class PasswordUpdate {
+
     @NotBlank
     private String oldPassword;
+
     @NotBlank
     private String password;
+
 }

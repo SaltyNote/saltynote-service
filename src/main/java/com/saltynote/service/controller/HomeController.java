@@ -16,4 +16,5 @@ public class HomeController {
     public ResponseEntity<ServiceResponse> home() {
         return ResponseEntity.ok(ServiceResponse.ok(welcomeMessage));
     }
+
 }

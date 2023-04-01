@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService implements RepositoryService<UserRepository> {
 
     private final UserRepository userRepository;
+
     private final NoteRepository noteRepository;
+
     private final VaultRepository vaultRepository;
 
     @Override
@@ -20,11 +22,13 @@ public class UserService implements RepositoryService<UserRepository> {
         return userRepository;
     }
 
-    // This api will delete all database records with given user id, including the user itself.
+    // This api will delete all database records with given user id, including the user
+    // itself.
     @Transactional
     public void cleanupByUserId(String userId) {
         noteRepository.deleteByUserId(userId);
         vaultRepository.deleteByUserId(userId);
         userRepository.deleteById(userId);
     }
+
 }

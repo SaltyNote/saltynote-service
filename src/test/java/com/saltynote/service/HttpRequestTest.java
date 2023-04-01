@@ -25,9 +25,9 @@ class HttpRequestTest {
 
     @Test
     void welcomePageShouldOK() {
-        ServiceResponse sr =
-                this.restTemplate.getForObject("http://localhost:" + port + "/", ServiceResponse.class);
+        ServiceResponse sr = this.restTemplate.getForObject("http://localhost:" + port + "/", ServiceResponse.class);
         assertEquals(HttpStatus.OK, sr.getStatus());
         assertEquals(welcomeMessage, sr.getMessage());
     }
+
 }

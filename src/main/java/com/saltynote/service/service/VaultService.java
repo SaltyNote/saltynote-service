@@ -25,8 +25,11 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class VaultService implements RepositoryService<VaultRepository> {
+
     private final VaultRepository vaultRepository;
+
     private final ObjectMapper objectMapper;
+
     private final JwtService jwtService;
 
     // TTL in milliseconds
@@ -38,16 +41,12 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
 
     public Vault createForEmail(@NotNull String email, VaultType type) {
-        return vaultRepository.save(
-                new Vault()
-                        .setEmail(email)
-                        .setType(type.getValue())
-                        .setSecret(FriendlyId.createFriendlyId()));
+        return vaultRepository
+            .save(new Vault().setEmail(email).setType(type.getValue()).setSecret(FriendlyId.createFriendlyId()));
     }
 
     public Vault create(@NotNull String userId, VaultType type, String secret) {
-        return vaultRepository.save(
-                new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));
+        return vaultRepository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));
     }
 
     public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
@@ -60,9 +59,9 @@ public class VaultService implements RepositoryService<VaultRepository> {
 
     public Optional<VaultEntity> decode(@NotNull String encodedValue) {
         try {
-            return Optional.of(
-                    objectMapper.readValue(Base64.getDecoder().decode(encodedValue), VaultEntity.class));
-        } catch (IOException e) {
+            return Optional.of(objectMapper.readValue(Base64.getDecoder().decode(encodedValue), VaultEntity.class));
+        }
+        catch (IOException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
         }
@@ -75,29 +74,27 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
 
     /**
-     * This is try to find the latest refresh token for given user id. If the refresh token ages below
-     * 20%, we will return this refresh token. Otherwise, a new refresh token will be generated and
-     * returned.
-     *
+     * This is try to find the latest refresh token for given user id. If the refresh
+     * token ages below 20%, we will return this refresh token. Otherwise, a new refresh
+     * token will be generated and returned.
      * @param user the target user
      * @return the refresh token value
      */
     public String fetchOrCreateRefreshToken(IdentifiableUser user) {
-        Optional<Vault> vaultOp =
-                vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(
-                        user.getId(), VaultType.REFRESH_TOKEN.getValue());
+        Optional<Vault> vaultOp = vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),
+                VaultType.REFRESH_TOKEN.getValue());
         // If refresh token is young enough, then just return it.
         if (vaultOp.isPresent() && isRefreshTokenAsKid(vaultOp.get().getSecret())) {
             return vaultOp.get().getSecret();
         }
-        // Refresh token is not a kid anymore or no existing refresh token found, a new one should be
+        // Refresh token is not a kid anymore or no existing refresh token found, a new
+        // one should be
         // created.
         return createRefreshToken(user);
     }
 
     /**
      * Validate given token and return the vault.
-     *
      * @param token token
      * @return vault for the token
      */
@@ -109,9 +106,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
         VaultEntity ve = veo.get();
         Optional<Vault> vault = getRepository().findBySecret(ve.getSecret());
         if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
-            log.error(
-                    "User id are not match from decoded token {} and database {}",
-                    ve.getUserId(),
+            log.error("User id are not match from decoded token {} and database {}", ve.getUserId(),
                     vault.get().getUserId());
             return Optional.empty();
         }
@@ -135,11 +130,11 @@ public class VaultService implements RepositoryService<VaultRepository> {
     private boolean isRefreshTokenAsKid(String refreshToken) {
         try {
             DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);
-            return decodedJWT
-                    .getExpiresAt()
-                    .after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));
-        } catch (JWTVerificationException e) {
+            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));
+        }
+        catch (JWTVerificationException e) {
             return false;
         }
     }
+
 }

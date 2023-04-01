@@ -51,4 +51,5 @@ public class SiteUser implements Serializable, IdentifiableUser {
         this.id = FriendlyId.createFriendlyId();
         this.registerTime = new Timestamp(System.currentTimeMillis());
     }
+
 }
