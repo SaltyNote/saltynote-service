@@ -3,19 +3,17 @@ package com.saltynote.service.service;
 import com.saltynote.service.repository.NoteRepository;
 import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.repository.VaultRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements RepositoryService<UserRepository> {
 
-    @Resource
-    private UserRepository userRepository;
-    @Resource
-    private NoteRepository noteRepository;
-    @Resource
-    private VaultRepository vaultRepository;
+    private final UserRepository userRepository;
+    private final NoteRepository noteRepository;
+    private final VaultRepository vaultRepository;
 
     @Override
     public UserRepository getRepository() {

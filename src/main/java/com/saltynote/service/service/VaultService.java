@@ -5,14 +5,13 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.IdentifiableUser;
 import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.repository.VaultRepository;
-import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,13 +23,11 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class VaultService implements RepositoryService<VaultRepository> {
-    @Resource
-    private VaultRepository vaultRepository;
-    @Resource
-    private ObjectMapper objectMapper;
-    @Resource
-    private JwtInstance jwtInstance;
+    private final VaultRepository vaultRepository;
+    private final ObjectMapper objectMapper;
+    private final JwtService jwtService;
 
     // TTL in milliseconds
     @Value("${jwt.refresh_token.ttl}")
@@ -72,7 +69,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
 
     public String createRefreshToken(IdentifiableUser user) {
-        String refreshToken = jwtInstance.createRefreshToken(user);
+        String refreshToken = jwtService.createRefreshToken(user);
         Vault v = create(user.getId(), VaultType.REFRESH_TOKEN, refreshToken);
         return v.getSecret();
     }
@@ -106,7 +103,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
      */
     public Optional<Vault> findByToken(String token) {
         Optional<VaultEntity> veo = decode(token);
-        if (!veo.isPresent()) {
+        if (veo.isEmpty()) {
             return Optional.empty();
         }
         VaultEntity ve = veo.get();
@@ -137,7 +134,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
 
     private boolean isRefreshTokenAsKid(String refreshToken) {
         try {
-            DecodedJWT decodedJWT = jwtInstance.verifyRefreshToken(refreshToken);
+            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);
             return decodedJWT
                     .getExpiresAt()
                     .after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));
