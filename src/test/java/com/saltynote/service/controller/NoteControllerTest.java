@@ -268,7 +268,7 @@ public class NoteControllerTest {
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
-                                post("/note/")
+                                post("/note")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(note))
                                         .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
@@ -294,7 +294,7 @@ public class NoteControllerTest {
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
-                                post("/note/")
+                                post("/note")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(note))
                                         .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
@@ -373,7 +373,7 @@ public class NoteControllerTest {
         MvcResult mvcResult =
                 this.mockMvc
                         .perform(
-                                post("/note/")
+                                post("/note")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(note))
                                         .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))

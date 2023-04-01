@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -102,7 +101,7 @@ public class NoteController {
 
         return allNotes.stream().filter(n -> StringUtils.isNotBlank(n.getNote()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries) ||
                         StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getText(), queries))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @PostMapping("/notes")
