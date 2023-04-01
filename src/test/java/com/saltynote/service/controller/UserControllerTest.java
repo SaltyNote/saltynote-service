@@ -2,14 +2,14 @@ package com.saltynote.service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.saltynote.service.component.JwtInstance;
+import com.saltynote.service.service.JwtService;
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.NoteDto;
-import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
+import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
@@ -21,6 +21,7 @@ import com.saltynote.service.service.NoteService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import freemarker.template.TemplateException;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +77,7 @@ class UserControllerTest {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
-    private JwtInstance jwtInstance;
+    private JwtService jwtService;
     @Autowired
     private VaultService vaultService;
     @Autowired
@@ -200,8 +200,8 @@ class UserControllerTest {
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
 
         // Note: have to sleep 1 second to have different expire time for new access token
         TimeUnit.SECONDS.sleep(1);
@@ -220,7 +220,7 @@ class UserControllerTest {
         res = mvcResult.getResponse().getContentAsString();
         JwtToken newToken = objectMapper.readValue(res, JwtToken.class);
         assertNotNull(newToken.getAccessToken());
-        assertNotNull(jwtInstance.verifyAccessToken(newToken.getAccessToken()));
+        assertNotNull(jwtService.verifyAccessToken(newToken.getAccessToken()));
         log.info("old token = {}", token.getAccessToken());
         log.info("new token = {}", newToken.getAccessToken());
         assertNotEquals(token.getAccessToken(), newToken.getAccessToken());
@@ -255,8 +255,8 @@ class UserControllerTest {
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
 
         String oldRefreshToken = token.getRefreshToken();
 
@@ -272,8 +272,8 @@ class UserControllerTest {
         token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
         // No new refresh token is generated.
         assertEquals(oldRefreshToken, token.getRefreshToken());
 
@@ -292,8 +292,8 @@ class UserControllerTest {
         token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
         // New refresh token is generated.
         assertNotEquals(oldRefreshToken, token.getRefreshToken());
 
@@ -427,6 +427,7 @@ class UserControllerTest {
                         .andExpect(status().isOk())
                         .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
+        log.info(res);
         JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
         assertNotNull(jwtUser.getId());
 
@@ -443,8 +444,8 @@ class UserControllerTest {
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
 
         PasswordUpdate pu = new PasswordUpdate().setOldPassword(oldPassword).setPassword(newPassword);
 
@@ -519,14 +520,14 @@ class UserControllerTest {
         JwtToken token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
-        assertNotNull(jwtInstance.parseRefreshToken(token.getRefreshToken()));
-        assertNotNull(jwtInstance.verifyAccessToken(token.getAccessToken()));
+        assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
+        assertNotNull(jwtService.verifyAccessToken(token.getAccessToken()));
 
         NoteDto note = NoteControllerTest.createTmpNote(jwtUser.getId());
         mvcResult =
                 this.mockMvc
                         .perform(
-                                post("/note/")
+                                post("/note")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(note))
                                         .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
