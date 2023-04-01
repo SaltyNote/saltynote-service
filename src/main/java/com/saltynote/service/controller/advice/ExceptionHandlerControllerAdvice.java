@@ -5,12 +5,20 @@ import com.saltynote.service.exception.WebAppRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @Slf4j
 public class ExceptionHandlerControllerAdvice {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ServiceResponse> handleAuthenticationException(
+            AuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ServiceResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));
+    }
 
     @ExceptionHandler(WebAppRuntimeException.class)
     public ResponseEntity<ServiceResponse> handleWebClientRuntimeException(

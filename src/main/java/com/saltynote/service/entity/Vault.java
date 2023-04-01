@@ -1,14 +1,14 @@
 package com.saltynote.service.entity;
 
 import com.devskiller.friendly_id.FriendlyId;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 

@@ -1,4 +1,4 @@
-package com.saltynote.service.component;
+package com.saltynote.service.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -12,16 +12,18 @@ import com.saltynote.service.domain.IdentifiableUser;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.security.SecurityConstants;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 
 @Component
 @Slf4j
-public class JwtInstance {
+@RequiredArgsConstructor
+public class JwtService {
 
     @Value("${jwt.access_token.secret}")
     private String accessTokenSecret;
@@ -36,13 +38,8 @@ public class JwtInstance {
     private long refreshTokenTtl;
 
     private final ObjectMapper objectMapper;
-
     private JWTVerifier accessTokenVerifier;
     private JWTVerifier refreshTokenVerifier;
-
-    public JwtInstance(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
 
     @PostConstruct
     public void init() {

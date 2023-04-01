@@ -5,32 +5,29 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saltynote.service.component.JwtInstance;
 import com.saltynote.service.domain.IdentifiableUser;
 import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.repository.VaultRepository;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 
-import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class VaultService implements RepositoryService<VaultRepository> {
-    @Resource
-    private VaultRepository vaultRepository;
-    @Resource
-    private ObjectMapper objectMapper;
-    @Resource
-    private JwtInstance jwtInstance;
+    private final VaultRepository vaultRepository;
+    private final ObjectMapper objectMapper;
+    private final JwtService jwtService;
 
     // TTL in milliseconds
     @Value("${jwt.refresh_token.ttl}")
@@ -54,7 +51,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
 
     public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
-        return Base64Utils.encodeToString(objectMapper.writeValueAsBytes(entity));
+        return Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(entity));
     }
 
     public String encode(@NotNull Vault vault) throws JsonProcessingException {
@@ -64,7 +61,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
     public Optional<VaultEntity> decode(@NotNull String encodedValue) {
         try {
             return Optional.of(
-                    objectMapper.readValue(Base64Utils.decodeFromString(encodedValue), VaultEntity.class));
+                    objectMapper.readValue(Base64.getDecoder().decode(encodedValue), VaultEntity.class));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
@@ -72,7 +69,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
     }
 
     public String createRefreshToken(IdentifiableUser user) {
-        String refreshToken = jwtInstance.createRefreshToken(user);
+        String refreshToken = jwtService.createRefreshToken(user);
         Vault v = create(user.getId(), VaultType.REFRESH_TOKEN, refreshToken);
         return v.getSecret();
     }
@@ -106,7 +103,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
      */
     public Optional<Vault> findByToken(String token) {
         Optional<VaultEntity> veo = decode(token);
-        if (!veo.isPresent()) {
+        if (veo.isEmpty()) {
             return Optional.empty();
         }
         VaultEntity ve = veo.get();
@@ -137,7 +134,7 @@ public class VaultService implements RepositoryService<VaultRepository> {
 
     private boolean isRefreshTokenAsKid(String refreshToken) {
         try {
-            DecodedJWT decodedJWT = jwtInstance.verifyRefreshToken(refreshToken);
+            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);
             return decodedJWT
                     .getExpiresAt()
                     .after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));

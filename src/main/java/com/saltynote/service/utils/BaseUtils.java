@@ -1,9 +1,8 @@
 package com.saltynote.service.utils;
 
 import com.saltynote.service.exception.IllegalInitialException;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotNull;
 
 public class BaseUtils {
     private static String baseUrl = "https://saltynote.com";

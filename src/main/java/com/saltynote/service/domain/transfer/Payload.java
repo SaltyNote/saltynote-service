@@ -1,16 +1,16 @@
 package com.saltynote.service.domain.transfer;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Payload {
     @NotBlank
-    @javax.validation.constraints.Email
+    @Email
     private String email;
 }
