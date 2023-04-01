@@ -17,6 +17,8 @@ import com.saltynote.service.security.JWTAuthenticationService;
 import com.saltynote.service.service.JwtService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Objects;
 import java.util.Optional;
 
+@Tag(name = "UserController", description = "User related APIs")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -73,6 +76,7 @@ public class UserController {
         return ResponseEntity.ok(ServiceResponse.ok("A verification code for signup is sent to you email now"));
     }
 
+    @Operation(summary = "User Signup", description = "Verification token is needed for signup.")
     @PostMapping("/signup")
     public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
         if (userNewRequest.getPassword().length() < passwordMinimalLength) {

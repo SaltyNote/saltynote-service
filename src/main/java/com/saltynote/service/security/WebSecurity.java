@@ -33,8 +33,8 @@ public class WebSecurity {
 
     private static final String[] PUBLIC_GET_ENDPOINTS = { "/", "/login", "/error", "/favicon.ico" };
 
-    private static final String[] SWAGGER_URLS = { "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs",
-            "/webjars/**" };
+    private static final String[] SWAGGER_URLS = { "/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**",
+            "/v3/api-docs/**" };
 
     private final UserDetailsServiceImpl userDetailsService;
 
