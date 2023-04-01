@@ -49,17 +49,23 @@ public class UserController {
     private int passwordMinimalLength;
 
     private final UserService userService;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final JwtService jwtService;
+
     private final ApplicationEventPublisher eventPublisher;
+
     private final VaultService vaultService;
+
     private final JWTAuthenticationService authenticationService;
 
     @PostMapping("/email/verification")
     public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Payload payload) {
         // check whether this email is already signed up or not.
         if (userService.getRepository().findByEmail(payload.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
         }
 
         SiteUser user = new SiteUser().setEmail(payload.getEmail()).setUsername("there");
@@ -70,20 +76,16 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<JwtUser> signup(@Valid @RequestBody UserNewRequest userNewRequest) {
         if (userNewRequest.getPassword().length() < passwordMinimalLength) {
-            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Password should be at least " + passwordMinimalLength + " characters.");
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,
+                    "Password should be at least " + passwordMinimalLength + " characters.");
         }
         // Check token
-        Optional<Vault> vaultOp =
-                vaultService
-                        .getRepository()
-                        .findByEmailAndSecretAndType(
-                                userNewRequest.getEmail(),
-                                userNewRequest.getToken(),
-                                VaultType.NEW_ACCOUNT.getValue());
+        Optional<Vault> vaultOp = vaultService.getRepository()
+            .findByEmailAndSecretAndType(userNewRequest.getEmail(), userNewRequest.getToken(),
+                    VaultType.NEW_ACCOUNT.getValue());
 
         if (vaultOp.isEmpty()) {
-            throw new WebAppRuntimeException(
-                    HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
+            throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
         }
         SiteUser user = userNewRequest.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
@@ -91,8 +93,10 @@ public class UserController {
         if (StringUtils.hasText(user.getId())) {
             vaultService.getRepository().delete(vaultOp.get());
             return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
-        } else {
-            throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to signup, please try again later.");
+        }
+        else {
+            throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to signup, please try again later.");
         }
     }
 
@@ -106,11 +110,13 @@ public class UserController {
         // 1. No expiry, and valid.
         JwtUser user = jwtService.parseRefreshToken(jwtToken.getRefreshToken());
         // 2. Not deleted from database.
-        Optional<Vault> token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN, jwtToken.getRefreshToken());
+        Optional<Vault> token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN,
+                jwtToken.getRefreshToken());
         if (token.isPresent()) {
             String newToken = jwtService.createAccessToken(user);
             return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
-        } else {
+        }
+        else {
             throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");
         }
     }
@@ -129,18 +135,21 @@ public class UserController {
         Optional<SiteUser> usero = userService.getRepository().findByEmail(payload.getEmail());
         if (usero.isEmpty()) {
             log.warn("User is not found for email = {}", payload.getEmail());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+                .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, "Invalid email"));
         }
 
         eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));
-        return ResponseEntity.ok(ServiceResponse.ok("Password reset email will be sent to your email, please reset your email with link there."));
+        return ResponseEntity.ok(ServiceResponse
+            .ok("Password reset email will be sent to your email, please reset your email with link there."));
     }
 
     @PostMapping("/password/reset")
     public ResponseEntity<ServiceResponse> resetPassword(@Valid @RequestBody PasswordReset passwordReset) {
         val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid payload provided.");
         if (passwordReset.getPassword().length() < passwordMinimalLength) {
-            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Password should be at least " + passwordMinimalLength + " characters.");
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,
+                    "Password should be at least " + passwordMinimalLength + " characters.");
         }
         Optional<Vault> vo = vaultService.findByToken(passwordReset.getToken());
         if (vo.isEmpty()) {
@@ -154,23 +163,27 @@ public class UserController {
             userService.getRepository().save(user);
             vaultService.getRepository().delete(vo.get());
             return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
-        } else {
+        }
+        else {
             throw wre;
         }
     }
 
-    @RequestMapping(value = "/password", method = {RequestMethod.POST, RequestMethod.PUT})
-    public ResponseEntity<ServiceResponse> updatePassword(@Valid @RequestBody PasswordUpdate passwordUpdate, Authentication auth) {
+    @RequestMapping(value = "/password", method = { RequestMethod.POST, RequestMethod.PUT })
+    public ResponseEntity<ServiceResponse> updatePassword(@Valid @RequestBody PasswordUpdate passwordUpdate,
+            Authentication auth) {
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         // Validate new password
         if (passwordUpdate.getPassword().length() < passwordMinimalLength) {
-            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "New password should be at least " + passwordMinimalLength + " characters.");
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,
+                    "New password should be at least " + passwordMinimalLength + " characters.");
         }
 
         // Validate old password
         Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
         if (usero.isEmpty()) {
-            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Something goes wrong when fetching your info, please try later again.");
+            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,
+                    "Something goes wrong when fetching your info, please try later again.");
         }
         SiteUser user = usero.get();
         if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {
@@ -181,7 +194,6 @@ public class UserController {
         userService.getRepository().save(user);
         return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
     }
-
 
     @DeleteMapping("/account/{id}")
     public ResponseEntity<ServiceResponse> accountDeletion(@PathVariable("id") String userId, Authentication auth) {

@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.User;
 import java.util.Collections;
 
 public class LoginUser extends User implements IdentifiableUser {
+
     @Getter
     private final String id;
 
@@ -14,4 +15,5 @@ public class LoginUser extends User implements IdentifiableUser {
         super(user.getUsername(), user.getPassword(), Collections.emptyList());
         this.id = user.getId();
     }
+
 }

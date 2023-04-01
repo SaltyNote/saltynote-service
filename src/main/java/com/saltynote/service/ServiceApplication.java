@@ -17,4 +17,5 @@ public class ServiceApplication {
     public ObjectMapper objectMapper() {
         return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
+
 }

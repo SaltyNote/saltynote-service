@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 
 public class BaseUtils {
+
     private static String baseUrl = "https://saltynote.com";
 
     private BaseUtils() {
@@ -37,4 +38,5 @@ public class BaseUtils {
         }
         return true;
     }
+
 }

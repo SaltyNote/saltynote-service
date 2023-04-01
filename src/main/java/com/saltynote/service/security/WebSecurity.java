@@ -27,25 +27,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurity {
-    private static final String[] PUBLIC_POST_ENDPOINTS = {
-            SecurityConstants.SIGN_UP_URL,
-            "/refresh_token",
-            "/password/forget",
-            "/password/reset",
-            "/email/verification",
-            "/login",
-    };
 
-    private static final String[] PUBLIC_GET_ENDPOINTS = {"/", "/login", "/error", "/favicon.ico"};
+    private static final String[] PUBLIC_POST_ENDPOINTS = { SecurityConstants.SIGN_UP_URL, "/refresh_token",
+            "/password/forget", "/password/reset", "/email/verification", "/login", };
 
-    private static final String[] SWAGGER_URLS = {
-            "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs", "/webjars/**"
-    };
+    private static final String[] PUBLIC_GET_ENDPOINTS = { "/", "/login", "/error", "/favicon.ico" };
+
+    private static final String[] SWAGGER_URLS = { "/swagger-resources/**", "/swagger-ui/**", "/v2/api-docs",
+            "/webjars/**" };
 
     private final UserDetailsServiceImpl userDetailsService;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final ObjectMapper objectMapper;
+
     private final JWTAuthorizationFilter jwtAuthorizationFilter;
+
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
@@ -83,10 +81,10 @@ public class WebSecurity {
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder)
-                .and()
-                .build();
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(bCryptPasswordEncoder)
+            .and()
+            .build();
     }
 
     @Bean
@@ -95,4 +93,5 @@ public class WebSecurity {
         source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
         return source;
     }
+
 }

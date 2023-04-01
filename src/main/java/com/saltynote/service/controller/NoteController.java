@@ -32,7 +32,9 @@ import java.util.Optional;
 @RestController
 @Slf4j
 public class NoteController {
+
     private final NoteService noteService;
+
     private final NoteConverter noteConverter;
 
     public NoteController(NoteService noteService, NoteConverter noteConverter) {
@@ -47,11 +49,9 @@ public class NoteController {
         return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @RequestMapping(
-            value = "/note/{id}",
-            method = {RequestMethod.POST, RequestMethod.PUT})
-    public ResponseEntity<Note> updateNoteById(
-            @PathVariable("id") String id, @RequestBody NoteDto noteDto, Authentication auth) {
+    @RequestMapping(value = "/note/{id}", method = { RequestMethod.POST, RequestMethod.PUT })
+    public ResponseEntity<Note> updateNoteById(@PathVariable("id") String id, @RequestBody NoteDto noteDto,
+            Authentication auth) {
         Optional<Note> queryNote = noteService.getRepository().findById(id);
         checkNoteOwner(queryNote, auth);
         Note noteTobeUpdate = queryNote.get();
@@ -71,19 +71,18 @@ public class NoteController {
     }
 
     @DeleteMapping("/note/{id}")
-    public ResponseEntity<ServiceResponse> deleteNoteById(
-            @PathVariable("id") String id, Authentication auth) {
+    public ResponseEntity<ServiceResponse> deleteNoteById(@PathVariable("id") String id, Authentication auth) {
         Optional<Note> note = noteService.getRepository().findById(id);
         checkNoteOwner(note, auth);
         noteService.getRepository().deleteById(id);
         return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
     }
 
-    // TODO: this POST is required for chrome extension, as I find the PUT or DELETE requests will be
+    // TODO: this POST is required for chrome extension, as I find the PUT or DELETE
+    // requests will be
     // blocked by Chrome. Further investigation is required from me for this issue.
     @PostMapping("/note/{id}/delete")
-    public ResponseEntity<ServiceResponse> postDeleteNoteById(
-            @PathVariable("id") String id, Authentication auth) {
+    public ResponseEntity<ServiceResponse> postDeleteNoteById(@PathVariable("id") String id, Authentication auth) {
         return deleteNoteById(id, auth);
     }
 
@@ -94,14 +93,12 @@ public class NoteController {
         if (allNotes == null || allNotes.isEmpty() || StringUtils.isBlank(keyword)) {
             return allNotes;
         }
-        Iterable<String> queries = Splitter.on(" ")
-                .trimResults()
-                .omitEmptyStrings()
-                .split(keyword);
+        Iterable<String> queries = Splitter.on(" ").trimResults().omitEmptyStrings().split(keyword);
 
-        return allNotes.stream().filter(n -> StringUtils.isNotBlank(n.getNote()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries) ||
-                        StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getText(), queries))
-                .toList();
+        return allNotes.stream()
+            .filter(n -> StringUtils.isNotBlank(n.getNote()) && BaseUtils.containsAllIgnoreCase(n.getNote(), queries)
+                    || StringUtils.isNotBlank(n.getText()) && BaseUtils.containsAllIgnoreCase(n.getText(), queries))
+            .toList();
     }
 
     @PostMapping("/notes")
@@ -119,8 +116,8 @@ public class NoteController {
         if (StringUtils.isNotBlank(note.getId())) {
             return ResponseEntity.ok(note);
         }
-        throw new WebAppRuntimeException(
-                HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save note into database: " + note);
+        throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Failed to save note into database: " + note);
     }
 
     private void checkNoteOwner(Optional<Note> note, Authentication auth) {
@@ -128,7 +125,7 @@ public class NoteController {
         if (note.isPresent() && user.getId().equals(note.get().getUserId())) {
             return;
         }
-        throw new WebAppRuntimeException(
-                HttpStatus.FORBIDDEN, "Permission Error: You are not the owner of the note.");
+        throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, "Permission Error: You are not the owner of the note.");
     }
+
 }

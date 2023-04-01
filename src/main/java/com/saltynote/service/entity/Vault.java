@@ -44,4 +44,5 @@ public class Vault implements Serializable {
         this.id = FriendlyId.createFriendlyId();
         this.createdTime = new Timestamp(System.currentTimeMillis());
     }
+
 }

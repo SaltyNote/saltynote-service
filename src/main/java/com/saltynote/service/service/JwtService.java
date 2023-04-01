@@ -38,7 +38,9 @@ public class JwtService {
     private long refreshTokenTtl;
 
     private final ObjectMapper objectMapper;
+
     private JWTVerifier accessTokenVerifier;
+
     private JWTVerifier refreshTokenVerifier;
 
     @PostConstruct
@@ -62,10 +64,10 @@ public class JwtService {
     private String createToken(String subject, String userId, Long tokenTTL, String secret)
             throws JWTCreationException {
         return JWT.create()
-                .withSubject(subject)
-                .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)
-                .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))
-                .sign(Algorithm.HMAC512(secret.getBytes()));
+            .withSubject(subject)
+            .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)
+            .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))
+            .sign(Algorithm.HMAC512(secret.getBytes()));
     }
 
     public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
@@ -83,8 +85,8 @@ public class JwtService {
         return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
     }
 
-    public String tokenToJson(String accessToken, String refreshToken)
-            throws JsonProcessingException {
+    public String tokenToJson(String accessToken, String refreshToken) throws JsonProcessingException {
         return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));
     }
+
 }

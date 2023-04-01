@@ -21,14 +21,19 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Service
 public class JWTAuthenticationService {
+
     private final AuthenticationManager authenticationManager;
+
     private final VaultService vaultService;
+
     private final JwtService jwtService;
+
     private final UserService userService;
 
     public JwtToken authenticate(UserCredential credential) {
 
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(credential.getUsername(), credential.getPassword(), Collections.emptyList()));
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                credential.getUsername(), credential.getPassword(), Collections.emptyList()));
 
         LoginUser user = (LoginUser) auth.getPrincipal();
         String accessToken = jwtService.createAccessToken(user);
@@ -40,4 +45,5 @@ public class JWTAuthenticationService {
         return new JwtToken(accessToken, refreshToken);
 
     }
+
 }

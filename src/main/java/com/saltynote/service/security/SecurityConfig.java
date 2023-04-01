@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
@@ -25,4 +26,5 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(bCryptPasswordEncoder());
         return authProvider;
     }
+
 }

@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Payload {
+
     @NotBlank
     @Email
     private String email;
+
 }

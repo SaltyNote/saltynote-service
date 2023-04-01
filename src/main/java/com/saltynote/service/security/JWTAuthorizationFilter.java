@@ -24,9 +24,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest req, @NonNull HttpServletResponse res, @NonNull FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse res,
+            @NonNull FilterChain chain) throws IOException, ServletException {
         String header = req.getHeader(SecurityConstants.HEADER_STRING);
 
         if (header == null || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
@@ -42,18 +41,18 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(SecurityConstants.HEADER_STRING);
-        if (token == null) return null;
+        if (token == null)
+            return null;
         // parse the token.
         DecodedJWT decodedJWT = jwtService.verifyAccessToken(token);
-        if (decodedJWT == null) return null;
+        if (decodedJWT == null)
+            return null;
 
         return new UsernamePasswordAuthenticationToken(
-                new JwtUser(
-                        decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
+                new JwtUser(decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
                         decodedJWT.getSubject()),
-                null,
-                Collections.emptyList());
-
+                null, Collections.emptyList());
 
     }
+
 }

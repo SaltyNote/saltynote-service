@@ -7,4 +7,5 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface NoteConverter extends BaseConverter<NoteDto, Note> {
+
 }

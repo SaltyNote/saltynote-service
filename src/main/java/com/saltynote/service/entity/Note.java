@@ -65,4 +65,5 @@ public class Note implements Serializable {
             this.highlightColor = "";
         }
     }
+
 }

@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JwtUser implements IdentifiableUser {
+
     private String id;
+
     private String username;
+
 }
