@@ -16,6 +16,8 @@ for:
 This is a standard spring boot project with Maven, so you can use generic maven command to run it. While the simplest &
 quickest way is to run [`./start.sh`](./start.sh).
 
+Swagger UI will be available at http://localhost:8888/swagger-ui.html
+
 ### Prerequisite
 
 1.  Java 17 (due to Spring Boot V3)
