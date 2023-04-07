@@ -11,6 +11,8 @@ for:
 1.  User (signup, login, token refresh, token cleanup, password reset)
 2.  Note (create, update, fetch and delete)
 
+Unit Test Coverage report: https://saltynote.github.io/saltynote-service/
+
 ## Get Started
 
 This is a standard spring boot project with Maven, so you can use generic maven command to run it. While the simplest &
