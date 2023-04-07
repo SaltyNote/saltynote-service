@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWTAuthorizationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.security</a> &gt; <span class="el_source">JWTAuthorizationFilter.java</span></div><h1>JWTAuthorizationFilter.java</h1><pre class="source lang-java linenums">package com.saltynote.service.security;
+
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.service.JwtService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Collections;
+
+@Component
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
+public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse res,
+            @NonNull FilterChain chain) throws IOException, ServletException {
+<span class="fc" id="L29">        String header = req.getHeader(SecurityConstants.HEADER_STRING);</span>
+
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">        if (header == null || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {</span>
+<span class="fc" id="L32">            chain.doFilter(req, res);</span>
+<span class="fc" id="L33">            return;</span>
+        }
+
+<span class="fc" id="L36">        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);</span>
+
+<span class="fc" id="L38">        SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="fc" id="L39">        chain.doFilter(req, res);</span>
+<span class="fc" id="L40">    }</span>
+
+    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+<span class="fc" id="L43">        String token = request.getHeader(SecurityConstants.HEADER_STRING);</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (token == null)</span>
+<span class="nc" id="L45">            return null;</span>
+        // parse the token.
+<span class="fc" id="L47">        DecodedJWT decodedJWT = jwtService.verifyAccessToken(token);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (decodedJWT == null)</span>
+<span class="nc" id="L49">            return null;</span>
+
+<span class="fc" id="L51">        return new UsernamePasswordAuthenticationToken(</span>
+<span class="fc" id="L52">                new JwtUser(decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),</span>
+<span class="fc" id="L53">                        decodedJWT.getSubject()),</span>
+<span class="fc" id="L54">                null, Collections.emptyList());</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoteController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.controller</a> &gt; <span class="el_source">NoteController.java</span></div><h1>NoteController.java</h1><pre class="source lang-java linenums">package com.saltynote.service.controller;
+
+import com.google.common.base.Splitter;
+import com.saltynote.service.domain.converter.NoteConverter;
+import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.NoteDto;
+import com.saltynote.service.domain.transfer.NoteQuery;
+import com.saltynote.service.domain.transfer.ServiceResponse;
+import com.saltynote.service.entity.Note;
+import com.saltynote.service.exception.WebAppRuntimeException;
+import com.saltynote.service.service.NoteService;
+import com.saltynote.service.utils.BaseUtils;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+<span class="fc" id="L33">@Slf4j</span>
+public class NoteController {
+
+    private final NoteService noteService;
+
+    private final NoteConverter noteConverter;
+
+<span class="fc" id="L40">    public NoteController(NoteService noteService, NoteConverter noteConverter) {</span>
+<span class="fc" id="L41">        this.noteService = noteService;</span>
+<span class="fc" id="L42">        this.noteConverter = noteConverter;</span>
+<span class="fc" id="L43">    }</span>
+
+    @GetMapping(&quot;/note/{id}&quot;)
+    public ResponseEntity&lt;Note&gt; getNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+<span class="fc" id="L47">        Optional&lt;Note&gt; note = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L48">        checkNoteOwner(note, auth);</span>
+<span class="pc" id="L49">        return note.map(ResponseEntity::ok).orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
+    }
+
+    @RequestMapping(value = &quot;/note/{id}&quot;, method = { RequestMethod.POST, RequestMethod.PUT })
+    public ResponseEntity&lt;Note&gt; updateNoteById(@PathVariable(&quot;id&quot;) String id, @RequestBody NoteDto noteDto,
+            Authentication auth) {
+<span class="fc" id="L55">        Optional&lt;Note&gt; queryNote = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L56">        checkNoteOwner(queryNote, auth);</span>
+<span class="fc" id="L57">        Note noteTobeUpdate = queryNote.get();</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getNote())) {</span>
+<span class="fc" id="L59">            noteTobeUpdate.setNote(noteDto.getNote());</span>
+        }
+
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getTags())) {</span>
+<span class="fc" id="L63">            noteTobeUpdate.setTags(noteDto.getTags());</span>
+        }
+
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {</span>
+<span class="nc" id="L67">            noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());</span>
+        }
+<span class="fc" id="L69">        noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);</span>
+<span class="fc" id="L70">        return ResponseEntity.ok(noteTobeUpdate);</span>
+    }
+
+    @DeleteMapping(&quot;/note/{id}&quot;)
+    public ResponseEntity&lt;ServiceResponse&gt; deleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+<span class="fc" id="L75">        Optional&lt;Note&gt; note = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L76">        checkNoteOwner(note, auth);</span>
+<span class="fc" id="L77">        noteService.getRepository().deleteById(id);</span>
+<span class="fc" id="L78">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Delete Successfully!&quot;));</span>
+    }
+
+    // TODO: this POST is required for chrome extension, as I find the PUT or DELETE
+    // requests will be
+    // blocked by Chrome. Further investigation is required from me for this issue.
+    @PostMapping(&quot;/note/{id}/delete&quot;)
+    public ResponseEntity&lt;ServiceResponse&gt; postDeleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+<span class="nc" id="L86">        return deleteNoteById(id, auth);</span>
+    }
+
+    @GetMapping(&quot;/notes&quot;)
+    public List&lt;Note&gt; getNotes(Authentication auth, @RequestParam(required = false) String keyword) {
+<span class="fc" id="L91">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
+<span class="fc" id="L92">        List&lt;Note&gt; allNotes = noteService.getRepository().findAllByUserId(user.getId());</span>
+<span class="pc bpc" id="L93" title="2 of 6 branches missed.">        if (allNotes == null || allNotes.isEmpty() || StringUtils.isBlank(keyword)) {</span>
+<span class="fc" id="L94">            return allNotes;</span>
+        }
+<span class="fc" id="L96">        Iterable&lt;String&gt; queries = Splitter.on(&quot; &quot;).trimResults().omitEmptyStrings().split(keyword);</span>
+
+<span class="fc" id="L98">        return allNotes.stream()</span>
+<span class="pc bpc" id="L99" title="1 of 4 branches missed.">            .filter(n -&gt; StringUtils.isNotBlank(n.getNote()) &amp;&amp; BaseUtils.containsAllIgnoreCase(n.getNote(), queries)</span>
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">                    || StringUtils.isNotBlank(n.getText()) &amp;&amp; BaseUtils.containsAllIgnoreCase(n.getText(), queries))</span>
+<span class="fc" id="L101">            .toList();</span>
+    }
+
+    @PostMapping(&quot;/notes&quot;)
+    public List&lt;Note&gt; getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
+<span class="nc" id="L106">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
+<span class="nc" id="L107">        return noteService.getRepository().findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());</span>
+    }
+
+    @PostMapping(&quot;/note&quot;)
+    public ResponseEntity&lt;Note&gt; createNote(@Valid @RequestBody NoteDto noteDto, Authentication auth) {
+<span class="fc" id="L112">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
+<span class="fc" id="L113">        noteDto.setUserId(user.getId());</span>
+<span class="fc" id="L114">        Note note = noteConverter.toEntity(noteDto);</span>
+<span class="fc" id="L115">        note = noteService.getRepository().save(note);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(note.getId())) {</span>
+<span class="fc" id="L117">            return ResponseEntity.ok(note);</span>
+        }
+<span class="nc" id="L119">        throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,</span>
+                &quot;Failed to save note into database: &quot; + note);
+    }
+
+    private void checkNoteOwner(Optional&lt;Note&gt; note, Authentication auth) {
+<span class="fc" id="L124">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
+<span class="pc bpc" id="L125" title="1 of 4 branches missed.">        if (note.isPresent() &amp;&amp; user.getId().equals(note.get().getUserId())) {</span>
+<span class="fc" id="L126">            return;</span>
+        }
+<span class="fc" id="L128">        throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, &quot;Permission Error: You are not the owner of the note.&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

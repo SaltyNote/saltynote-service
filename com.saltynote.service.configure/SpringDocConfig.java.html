@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringDocConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.configure</a> &gt; <span class="el_source">SpringDocConfig.java</span></div><h1>SpringDocConfig.java</h1><pre class="source lang-java linenums">package com.saltynote.service.configure;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+<span class="fc" id="L11">public class SpringDocConfig {</span>
+
+    @Bean
+    public OpenAPI saltyNoteOpenAPI() {
+<span class="fc" id="L15">        return new OpenAPI().info(new Info().title(&quot;SaltyNote API&quot;)</span>
+<span class="fc" id="L16">            .description(&quot;SpringDoc for SaltyNote API&quot;)</span>
+<span class="fc" id="L17">            .version(&quot;v0.3.0&quot;)</span>
+<span class="fc" id="L18">            .license(new License().name(&quot;MIT&quot;)</span>
+<span class="fc" id="L19">                .url(&quot;https://github.com/SaltyNote/saltynote-service/blob/master/LICENSE&quot;)));</span>
+    }
+
+    @Bean
+    public GroupedOpenApi homeApi() {
+<span class="fc" id="L24">        return GroupedOpenApi.builder().group(&quot;HomeController&quot;).pathsToMatch(&quot;/&quot;).build();</span>
+    }
+
+    @Bean
+    public GroupedOpenApi userApi() {
+<span class="fc" id="L29">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L30">            .group(&quot;UserController&quot;)</span>
+<span class="fc" id="L31">            .pathsToMatch(&quot;/password/**&quot;, &quot;/password&quot;, &quot;/signup&quot;, &quot;/login&quot;, &quot;/email/verification&quot;, &quot;/refresh_token&quot;,</span>
+                    &quot;/account/**&quot;)
+<span class="fc" id="L33">            .build();</span>
+    }
+
+    @Bean
+    public GroupedOpenApi noteApi() {
+<span class="fc" id="L38">        return GroupedOpenApi.builder().group(&quot;NoteController&quot;).pathsToMatch(&quot;/note/**&quot;, &quot;/notes&quot;, &quot;/note&quot;).build();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

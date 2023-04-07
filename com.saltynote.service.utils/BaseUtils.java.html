@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.utils</a> &gt; <span class="el_source">BaseUtils.java</span></div><h1>BaseUtils.java</h1><pre class="source lang-java linenums">package com.saltynote.service.utils;
+
+import com.saltynote.service.exception.IllegalInitialException;
+import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
+
+public class BaseUtils {
+
+<span class="fc" id="L9">    private static String baseUrl = &quot;https://saltynote.com&quot;;</span>
+
+<span class="nc" id="L11">    private BaseUtils() {</span>
+<span class="nc" id="L12">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
+    }
+
+    // This is used for test or dev usage, do not call it in prod.
+    public static void setBaseUrl(String baseUrl) {
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (StringUtils.startsWithIgnoreCase(baseUrl, &quot;http&quot;)) {</span>
+<span class="fc" id="L18">            BaseUtils.baseUrl = baseUrl;</span>
+        }
+<span class="fc" id="L20">    }</span>
+
+    public static String getConfirmationUrl(@NotNull String secret) {
+<span class="nc" id="L23">        return baseUrl + &quot;/email/verification?confirmation=&quot; + secret;</span>
+    }
+
+    public static String getPasswordResetUrl(@NotNull String secret) {
+<span class="fc" id="L27">        return baseUrl + &quot;/password/reset?token=&quot; + secret;</span>
+    }
+
+    public static boolean containsAllIgnoreCase(String src, Iterable&lt;String&gt; queries) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (StringUtils.isBlank(src)) {</span>
+<span class="nc" id="L32">            return false;</span>
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        for (String q : queries) {</span>
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">            if (StringUtils.isNotBlank(q) &amp;&amp; !StringUtils.containsIgnoreCase(src, q.trim())) {</span>
+<span class="fc" id="L36">                return false;</span>
+            }
+<span class="fc" id="L38">        }</span>
+<span class="fc" id="L39">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailEventListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.event</a> &gt; <span class="el_source">EmailEventListener.java</span></div><h1>EmailEventListener.java</h1><pre class="source lang-java linenums">package com.saltynote.service.event;
+
+import com.saltynote.service.domain.EmailPayload;
+import com.saltynote.service.entity.Vault;
+import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.VaultService;
+import freemarker.template.TemplateException;
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+
+@Component
+<span class="fc" id="L18">@Slf4j</span>
+public class EmailEventListener {
+
+    private final EmailService emailService;
+
+    private final VaultService vaultService;
+
+    @Value(&quot;${spring.mail.username}&quot;)
+    private String mailUser;
+
+<span class="fc" id="L28">    public EmailEventListener(EmailService emailService, VaultService vaultService) {</span>
+<span class="fc" id="L29">        this.emailService = emailService;</span>
+<span class="fc" id="L30">        this.vaultService = vaultService;</span>
+<span class="fc" id="L31">    }</span>
+
+    @EventListener
+    public void handleEvent(EmailEvent event) throws MessagingException, IOException, TemplateException {
+<span class="fc" id="L35">        log.info(&quot;Event is received for {}&quot;, event.getType());</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        Vault vault = event.getType() == EmailEvent.Type.NEW_USER</span>
+<span class="fc" id="L37">                ? vaultService.createForEmail(event.getUser().getEmail(), event.getType().getVaultType())</span>
+<span class="fc" id="L38">                : vaultService.create(event.getUser().getId(), event.getType().getVaultType());</span>
+<span class="fc" id="L39">        EmailPayload payload = event.getType()</span>
+<span class="fc" id="L40">            .loadUser(event.getUser())</span>
+<span class="fc" id="L41">            .loadVault(vault, vaultService.encode(vault))</span>
+<span class="fc" id="L42">            .getPayload();</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (StringUtils.hasText(mailUser)) {</span>
+<span class="nc" id="L45">            emailService.sendAsHtml(event.getUser().getEmail(), event.getType().getSubject(), payload);</span>
+        }
+        else {
+<span class="fc" id="L48">            log.info(&quot;============================================&quot;);</span>
+<span class="fc" id="L49">            log.info(&quot;Email Payload Info = {}&quot;, payload);</span>
+<span class="fc" id="L50">            log.info(&quot;============================================&quot;);</span>
+        }
+<span class="fc" id="L52">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

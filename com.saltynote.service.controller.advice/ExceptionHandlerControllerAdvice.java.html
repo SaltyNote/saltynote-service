@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExceptionHandlerControllerAdvice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.controller.advice</a> &gt; <span class="el_source">ExceptionHandlerControllerAdvice.java</span></div><h1>ExceptionHandlerControllerAdvice.java</h1><pre class="source lang-java linenums">package com.saltynote.service.controller.advice;
+
+import com.saltynote.service.domain.transfer.ServiceResponse;
+import com.saltynote.service.exception.WebAppRuntimeException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L14">public class ExceptionHandlerControllerAdvice {</span>
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;ServiceResponse&gt; handleAuthenticationException(AuthenticationException e) {
+<span class="fc" id="L18">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L19">            .body(new ServiceResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));</span>
+    }
+
+    @ExceptionHandler(WebAppRuntimeException.class)
+    public ResponseEntity&lt;ServiceResponse&gt; handleWebClientRuntimeException(WebAppRuntimeException e) {
+<span class="fc" id="L24">        return ResponseEntity.status(e.getStatus()).body(new ServiceResponse(e.getStatus(), e.getMessage()));</span>
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity&lt;ServiceResponse&gt; handleRuntimeException(RuntimeException e) {
+<span class="nc" id="L29">        log.error(e.getMessage());</span>
+<span class="nc" id="L30">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L31">            .body(new ServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR,</span>
+                    &quot;Something is going wrong with the server, please try again later.&quot;));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ServiceResponse&gt; handleRuntimeException(Exception e) {
+<span class="fc" id="L37">        log.error(e.getMessage());</span>
+<span class="fc" id="L38">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L39">            .body(new ServiceResponse(HttpStatus.BAD_REQUEST,</span>
+                    &quot;Something is going wrong with your request, please try again later.&quot;));
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

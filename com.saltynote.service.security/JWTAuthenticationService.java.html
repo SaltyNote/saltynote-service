@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWTAuthenticationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.security</a> &gt; <span class="el_source">JWTAuthenticationService.java</span></div><h1>JWTAuthenticationService.java</h1><pre class="source lang-java linenums">package com.saltynote.service.security;
+
+import com.saltynote.service.domain.LoginUser;
+import com.saltynote.service.domain.transfer.JwtToken;
+import com.saltynote.service.domain.transfer.UserCredential;
+import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.service.JwtService;
+import com.saltynote.service.service.UserService;
+import com.saltynote.service.service.VaultService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.util.Collections;
+
+<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
+@Service
+public class JWTAuthenticationService {
+
+    private final AuthenticationManager authenticationManager;
+
+    private final VaultService vaultService;
+
+    private final JwtService jwtService;
+
+    private final UserService userService;
+
+    public JwtToken authenticate(UserCredential credential) {
+
+<span class="fc" id="L35">        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(</span>
+<span class="fc" id="L36">                credential.getUsername(), credential.getPassword(), Collections.emptyList()));</span>
+
+<span class="fc" id="L38">        LoginUser user = (LoginUser) auth.getPrincipal();</span>
+<span class="fc" id="L39">        String accessToken = jwtService.createAccessToken(user);</span>
+<span class="fc" id="L40">        String refreshToken = vaultService.fetchOrCreateRefreshToken(user);</span>
+        // update current user's lastLoginTime, after user logged in successfully
+<span class="fc" id="L42">        SiteUser curtUser = userService.getRepository().findByUsername(user.getUsername());</span>
+<span class="fc" id="L43">        curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));</span>
+<span class="fc" id="L44">        userService.getRepository().save(curtUser);</span>
+<span class="fc" id="L45">        return new JwtToken(accessToken, refreshToken);</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

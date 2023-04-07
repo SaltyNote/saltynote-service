@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailEvent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.event</a> &gt; <span class="el_source">EmailEvent.java</span></div><h1>EmailEvent.java</h1><pre class="source lang-java linenums">package com.saltynote.service.event;
+
+import com.saltynote.service.domain.EmailPayload;
+import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.entity.SiteUser;
+import com.saltynote.service.entity.Vault;
+import com.saltynote.service.utils.BaseUtils;
+import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
+
+@Getter
+public class EmailEvent extends ApplicationEvent {
+
+<span class="fc" id="L14">    public enum Type {</span>
+
+<span class="fc" id="L16">        NEW_USER(&quot;Signup Code to SaltyNote!&quot;,</span>
+<span class="fc" id="L17">                new EmailPayload().setMessage(&quot;Below is the code you will use for signup.&quot;)) {</span>
+            @Override
+            public Type loadVault(Vault vault, String encodedVault) {
+<span class="fc" id="L20">                this.getPayload().setLinkText(vault.getSecret());</span>
+<span class="fc" id="L21">                return this;</span>
+            }
+
+            @Override
+            public VaultType getVaultType() {
+<span class="fc" id="L26">                return VaultType.NEW_ACCOUNT;</span>
+            }
+        },
+<span class="fc" id="L29">        PASSWORD_FORGET(&quot;Password Reset from SaltyNote!&quot;,</span>
+<span class="fc" id="L30">                new EmailPayload().setLink(&quot;&quot;)</span>
+<span class="fc" id="L31">                    .setLinkText(&quot;Reset Your Password&quot;)</span>
+<span class="fc" id="L32">                    .setMessage(&quot;Below is the link for you to reset your password.&quot;)) {</span>
+            @Override
+            public Type loadVault(Vault vault, String encodedVault) {
+<span class="fc" id="L35">                this.getPayload().setLink(BaseUtils.getPasswordResetUrl(encodedVault));</span>
+<span class="fc" id="L36">                return this;</span>
+            }
+
+            @Override
+            public VaultType getVaultType() {
+<span class="fc" id="L41">                return VaultType.PASSWORD;</span>
+            }
+        };
+
+<span class="nc" id="L45">        @Getter</span>
+        private final String subject;
+
+<span class="fc" id="L48">        @Getter</span>
+        private final EmailPayload payload;
+
+<span class="fc" id="L51">        Type(String subject, EmailPayload payload) {</span>
+<span class="fc" id="L52">            this.subject = subject;</span>
+<span class="fc" id="L53">            this.payload = payload;</span>
+<span class="fc" id="L54">        }</span>
+
+        public Type loadUser(SiteUser user) {
+<span class="fc" id="L57">            this.payload.setUsername(user.getUsername());</span>
+<span class="fc" id="L58">            return this;</span>
+        }
+
+        public abstract Type loadVault(Vault vault, String encodedVault);
+
+        public abstract VaultType getVaultType();
+
+    }
+
+<span class="fc" id="L67">    private final SiteUser user;</span>
+
+<span class="fc" id="L69">    private final Type type;</span>
+
+    public EmailEvent(Object source, SiteUser user, Type type) {
+<span class="fc" id="L72">        super(source);</span>
+<span class="fc" id="L73">        this.user = user;</span>
+<span class="fc" id="L74">        this.type = type;</span>
+<span class="fc" id="L75">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

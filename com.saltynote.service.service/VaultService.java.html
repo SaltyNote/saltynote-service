@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VaultService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.service</a> &gt; <span class="el_source">VaultService.java</span></div><h1>VaultService.java</h1><pre class="source lang-java linenums">package com.saltynote.service.service;
+
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.devskiller.friendly_id.FriendlyId;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saltynote.service.domain.IdentifiableUser;
+import com.saltynote.service.domain.VaultEntity;
+import com.saltynote.service.domain.VaultType;
+import com.saltynote.service.entity.Vault;
+import com.saltynote.service.repository.VaultRepository;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L26">@RequiredArgsConstructor</span>
+public class VaultService implements RepositoryService&lt;VaultRepository&gt; {
+
+    private final VaultRepository vaultRepository;
+
+    private final ObjectMapper objectMapper;
+
+    private final JwtService jwtService;
+
+    // TTL in milliseconds
+    @Value(&quot;${jwt.refresh_token.ttl}&quot;)
+    private long refreshTokenTTL;
+
+    public Vault create(@NotNull String userId, VaultType type) {
+<span class="fc" id="L40">        return create(userId, type, FriendlyId.createFriendlyId());</span>
+    }
+
+    public Vault createForEmail(@NotNull String email, VaultType type) {
+<span class="fc" id="L44">        return vaultRepository</span>
+<span class="fc" id="L45">            .save(new Vault().setEmail(email).setType(type.getValue()).setSecret(FriendlyId.createFriendlyId()));</span>
+    }
+
+    public Vault create(@NotNull String userId, VaultType type, String secret) {
+<span class="fc" id="L49">        return vaultRepository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));</span>
+    }
+
+    public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
+<span class="fc" id="L53">        return Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(entity));</span>
+    }
+
+    public String encode(@NotNull Vault vault) throws JsonProcessingException {
+<span class="fc" id="L57">        return encode(VaultEntity.from(vault));</span>
+    }
+
+    public Optional&lt;VaultEntity&gt; decode(@NotNull String encodedValue) {
+        try {
+<span class="fc" id="L62">            return Optional.of(objectMapper.readValue(Base64.getDecoder().decode(encodedValue), VaultEntity.class));</span>
+        }
+<span class="nc" id="L64">        catch (IOException e) {</span>
+<span class="nc" id="L65">            log.error(e.getMessage(), e);</span>
+<span class="nc" id="L66">            return Optional.empty();</span>
+        }
+    }
+
+    public String createRefreshToken(IdentifiableUser user) {
+<span class="fc" id="L71">        String refreshToken = jwtService.createRefreshToken(user);</span>
+<span class="fc" id="L72">        Vault v = create(user.getId(), VaultType.REFRESH_TOKEN, refreshToken);</span>
+<span class="fc" id="L73">        return v.getSecret();</span>
+    }
+
+    /**
+     * This is try to find the latest refresh token for given user id. If the refresh
+     * token ages below 20%, we will return this refresh token. Otherwise, a new refresh
+     * token will be generated and returned.
+     * @param user the target user
+     * @return the refresh token value
+     */
+    public String fetchOrCreateRefreshToken(IdentifiableUser user) {
+<span class="fc" id="L84">        Optional&lt;Vault&gt; vaultOp = vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),</span>
+<span class="fc" id="L85">                VaultType.REFRESH_TOKEN.getValue());</span>
+        // If refresh token is young enough, then just return it.
+<span class="fc bfc" id="L87" title="All 4 branches covered.">        if (vaultOp.isPresent() &amp;&amp; isRefreshTokenAsKid(vaultOp.get().getSecret())) {</span>
+<span class="fc" id="L88">            return vaultOp.get().getSecret();</span>
+        }
+        // Refresh token is not a kid anymore or no existing refresh token found, a new
+        // one should be
+        // created.
+<span class="fc" id="L93">        return createRefreshToken(user);</span>
+    }
+
+    /**
+     * Validate given token and return the vault.
+     * @param token token
+     * @return vault for the token
+     */
+    public Optional&lt;Vault&gt; findByToken(String token) {
+<span class="fc" id="L102">        Optional&lt;VaultEntity&gt; veo = decode(token);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (veo.isEmpty()) {</span>
+<span class="nc" id="L104">            return Optional.empty();</span>
+        }
+<span class="fc" id="L106">        VaultEntity ve = veo.get();</span>
+<span class="fc" id="L107">        Optional&lt;Vault&gt; vault = getRepository().findBySecret(ve.getSecret());</span>
+<span class="pc bpc" id="L108" title="2 of 4 branches missed.">        if (vault.isPresent() &amp;&amp; !vault.get().getUserId().equals(ve.getUserId())) {</span>
+<span class="nc" id="L109">            log.error(&quot;User id are not match from decoded token {} and database {}&quot;, ve.getUserId(),</span>
+<span class="nc" id="L110">                    vault.get().getUserId());</span>
+<span class="nc" id="L111">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L114">        return vault;</span>
+    }
+
+    @Override
+    public VaultRepository getRepository() {
+<span class="fc" id="L119">        return vaultRepository;</span>
+    }
+
+    public Optional&lt;Vault&gt; findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
+<span class="fc" id="L123">        return vaultRepository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);</span>
+    }
+
+    public void cleanRefreshTokenByUserId(String userId) {
+<span class="nc" id="L127">        vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());</span>
+<span class="nc" id="L128">    }</span>
+
+    private boolean isRefreshTokenAsKid(String refreshToken) {
+        try {
+<span class="fc" id="L132">            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);</span>
+<span class="fc" id="L133">            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));</span>
+        }
+<span class="nc" id="L135">        catch (JWTVerificationException e) {</span>
+<span class="nc" id="L136">            return false;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
