@@ -4,10 +4,6 @@ import com.saltynote.service.exception.IllegalInitialException;
 
 public class SecurityConstants {
 
-<span class="nc" id="L7">    private SecurityConstants() {</span>
-<span class="nc" id="L8">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
-    }
-
     public static final String TOKEN_PREFIX = &quot;Bearer &quot;;
 
     public static final String HEADER_STRING = &quot;Authorization&quot;;
@@ -15,6 +11,10 @@ public class SecurityConstants {
     public static final String SIGN_UP_URL = &quot;/signup&quot;;
 
     public static final String CLAIM_KEY_USER_ID = &quot;user_id&quot;;
+
+<span class="nc" id="L15">    private SecurityConstants() {</span>
+<span class="nc" id="L16">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
