@@ -22,6 +22,7 @@ This is a standard spring boot project with Maven, so you can use generic maven 
 quickest way is to run [`./start.sh`](./start.sh).
 
 Swagger UI will be available at http://localhost:8888/swagger-ui.html
+![swagger-ui](./docs/images/swagger-ui.png)
 
 ### Prerequisite
 
