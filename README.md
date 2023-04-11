@@ -32,7 +32,7 @@ Swagger UI will be available at http://localhost:8888/swagger-ui.html
 
 ### Configuration
 
-1.  The service relies on database to store `user` and `note` information. In development env, you can run `docker-compose up`
+1.  The service relies on database to store `user` and `note` information. In development env, you can run `docker compose up`
    to start mariadb locally(*add `-d` if you want start it as “detached” mode*). 
    > *No need to manually patch the DB schemas, during service startup, these [DB migration scripts](src/main/resources/db/migration) will be executed automatically by [flyway](https://github.com/flyway/flyway).*
 2.  This service also need smtp service to send email(*Note: this is optional now, if not setup, the email payload will
@@ -41,5 +41,3 @@ Swagger UI will be available at http://localhost:8888/swagger-ui.html
 ## License
 
 saltynote service is licensed under MIT - [LICENSE](./LICENSE)
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSaltyNote%2Fsaltynote-service?ref=badge_large)
