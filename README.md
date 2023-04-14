@@ -1,6 +1,8 @@
 # SaltyNote Service
 
-[![Java CI with Maven](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml/badge.svg)](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml)
+[![Maven](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml/badge.svg)](https://github.com/SaltyNote/saltynote-service/actions/workflows/maven.yml)
+[![Report](https://github.com/SaltyNote/saltynote-service/actions/workflows/report.yml/badge.svg)](https://github.com/SaltyNote/saltynote-service/actions/workflows/report.yml)
+[![Deploy](https://github.com/SaltyNote/saltynote-service/actions/workflows/deploy-prod.yml/badge.svg)](https://github.com/SaltyNote/saltynote-service/actions/workflows/deploy-prod.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/saltynote/saltynote-service/badge)](https://www.codefactor.io/repository/github/saltynote/saltynote-service)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/406f90655dd44f12a6107bbfbf4c2c45)](https://app.codacy.com/gh/SaltyNote/saltynote-service/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
@@ -22,7 +24,7 @@ This is a standard spring boot project with Maven, so you can use generic maven 
 quickest way is to run [`./start.sh`](./start.sh).
 
 Swagger UI will be available at http://localhost:8888/swagger-ui.html
-![swagger-ui](./docs/images/swagger-ui.png)
+![swagger-ui](./docs/images/swagger-ui.jpg)
 
 ### Prerequisite
 
