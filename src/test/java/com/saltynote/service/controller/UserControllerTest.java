@@ -2,7 +2,6 @@ package com.saltynote.service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.saltynote.service.service.JwtService;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
@@ -17,6 +16,7 @@ import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.security.SecurityConstants;
 import com.saltynote.service.service.EmailService;
+import com.saltynote.service.service.JwtService;
 import com.saltynote.service.service.NoteService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
@@ -103,7 +103,7 @@ class UserControllerTest {
     @Test
     void emailVerifyTest() throws Exception {
         String username = faker.name().username();
-        String emailStr = username + "@saltynote.com";
+        String emailStr = getEmail(username);
         String alreadyUsedEmail = "example@exmaple.com";
 
         SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
@@ -130,7 +130,7 @@ class UserControllerTest {
     @Test
     void signupShouldFailIfNoToken() throws Exception {
         String username = faker.name().username();
-        String email = username + "@saltynote.com";
+        String email = getEmail(username);
 
         UserNewRequest userNewRequest = new UserNewRequest();
 
@@ -148,7 +148,7 @@ class UserControllerTest {
     @Test
     void signupShouldReturnSuccess() throws Exception {
         String username = faker.name().username();
-        String email = username + "@saltynote.com";
+        String email = getEmail(username);
         Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
 
         assertNotNull(vault.getId());
@@ -176,7 +176,7 @@ class UserControllerTest {
     @Test
     void loginAndRefreshTokenShouldSuccess() throws Exception {
 
-        UserCredential uc = new UserCredential().setUsername(faker.name().username())
+        var uc = new UserCredential().setUsername(faker.name().username())
             .setEmail(faker.internet().emailAddress())
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
@@ -190,7 +190,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
-        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+        var token = objectMapper.readValue(res, JwtToken.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -363,7 +363,7 @@ class UserControllerTest {
 
         // Create a new User
         String username = faker.name().username();
-        String email = username + "@saltynote.com";
+        String email = getEmail(username);
         Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
 
         assertNotNull(vault.getId());
@@ -427,7 +427,7 @@ class UserControllerTest {
     void accountDeletionTest() throws Exception {
         // Create a new User
         String username = faker.name().username();
-        String email = username + "@saltynote.com";
+        String email = getEmail(username);
         Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
 
         assertNotNull(vault.getId());
@@ -449,7 +449,7 @@ class UserControllerTest {
         JwtUser jwtUser = objectMapper.readValue(res, JwtUser.class);
         assertNotNull(jwtUser.getId());
 
-        // Can login without problem
+        // Can log in without problem
         mvcResult = this.mockMvc
             .perform(post("/login").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user)))
@@ -496,6 +496,10 @@ class UserControllerTest {
         assertFalse(userService.getRepository().findById(jwtUser.getId()).isPresent());
         assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
         assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
+    }
+
+    private String getEmail(String username) {
+        return username + "@saltynote.com";
     }
 
 }

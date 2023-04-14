@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class VaultService implements RepositoryService<VaultRepository> {
+public class VaultService implements RepositoryService<Vault, VaultRepository> {
 
     private final VaultRepository vaultRepository;
 
@@ -117,6 +117,11 @@ public class VaultService implements RepositoryService<VaultRepository> {
     @Override
     public VaultRepository getRepository() {
         return vaultRepository;
+    }
+
+    @Override
+    public Optional<Vault> getById(String id) {
+        return vaultRepository.findById(id);
     }
 
     public Optional<Vault> findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
