@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2023-04-14T01:02:51+0000&quot;,
+    date = &quot;2023-04-14T04:09:45+0000&quot;,
     comments = &quot;version: 1.5.3.Final, compiler: javac, environment: Java 17.0.6 (Eclipse Adoptium)&quot;
 )
 @Component
@@ -35,36 +35,36 @@ import org.springframework.stereotype.Component;
     }
 
     @Override
-    public Note toEntity(NoteDto dto) {
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( dto == null ) {</span>
+    public List&lt;NoteDto&gt; toDto(List&lt;Note&gt; entityList) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if ( entityList == null ) {</span>
 <span class="nc" id="L40">            return null;</span>
         }
 
-<span class="fc" id="L43">        Note note = new Note();</span>
+<span class="nc" id="L43">        List&lt;NoteDto&gt; list = new ArrayList&lt;NoteDto&gt;( entityList.size() );</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        for ( Note note : entityList ) {</span>
+<span class="nc" id="L45">            list.add( toDto( note ) );</span>
+<span class="nc" id="L46">        }</span>
 
-<span class="fc" id="L45">        note.setUserId( dto.getUserId() );</span>
-<span class="fc" id="L46">        note.setText( dto.getText() );</span>
-<span class="fc" id="L47">        note.setUrl( dto.getUrl() );</span>
-<span class="fc" id="L48">        note.setNote( dto.getNote() );</span>
-<span class="fc" id="L49">        note.setPageOnly( dto.getPageOnly() );</span>
-<span class="fc" id="L50">        note.setHighlightColor( dto.getHighlightColor() );</span>
-<span class="fc" id="L51">        note.setTags( dto.getTags() );</span>
-
-<span class="fc" id="L53">        return note;</span>
+<span class="nc" id="L48">        return list;</span>
     }
 
     @Override
-    public List&lt;NoteDto&gt; toDto(List&lt;Note&gt; entityList) {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if ( entityList == null ) {</span>
-<span class="nc" id="L59">            return null;</span>
+    public Note toEntity(NoteDto dto) {
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if ( dto == null ) {</span>
+<span class="nc" id="L54">            return null;</span>
         }
 
-<span class="nc" id="L62">        List&lt;NoteDto&gt; list = new ArrayList&lt;NoteDto&gt;( entityList.size() );</span>
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        for ( Note note : entityList ) {</span>
-<span class="nc" id="L64">            list.add( toDto( note ) );</span>
-<span class="nc" id="L65">        }</span>
+<span class="fc" id="L57">        Note note = new Note();</span>
 
-<span class="nc" id="L67">        return list;</span>
+<span class="fc" id="L59">        note.setUserId( dto.getUserId() );</span>
+<span class="fc" id="L60">        note.setText( dto.getText() );</span>
+<span class="fc" id="L61">        note.setUrl( dto.getUrl() );</span>
+<span class="fc" id="L62">        note.setNote( dto.getNote() );</span>
+<span class="fc" id="L63">        note.setPageOnly( dto.getPageOnly() );</span>
+<span class="fc" id="L64">        note.setHighlightColor( dto.getHighlightColor() );</span>
+<span class="fc" id="L65">        note.setTags( dto.getTags() );</span>
+
+<span class="fc" id="L67">        return note;</span>
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 <span class="fc" id="L25">@Slf4j</span>
 <span class="fc" id="L26">@RequiredArgsConstructor</span>
-public class VaultService implements RepositoryService&lt;VaultRepository&gt; {
+public class VaultService implements RepositoryService&lt;Vault, VaultRepository&gt; {
 
     private final VaultRepository vaultRepository;
 
@@ -119,21 +119,26 @@ public class VaultService implements RepositoryService&lt;VaultRepository&gt; {
 <span class="fc" id="L119">        return vaultRepository;</span>
     }
 
+    @Override
+    public Optional&lt;Vault&gt; getById(String id) {
+<span class="nc" id="L124">        return vaultRepository.findById(id);</span>
+    }
+
     public Optional&lt;Vault&gt; findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
-<span class="fc" id="L123">        return vaultRepository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);</span>
+<span class="fc" id="L128">        return vaultRepository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);</span>
     }
 
     public void cleanRefreshTokenByUserId(String userId) {
-<span class="nc" id="L127">        vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());</span>
-<span class="nc" id="L128">    }</span>
+<span class="nc" id="L132">        vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());</span>
+<span class="nc" id="L133">    }</span>
 
     private boolean isRefreshTokenAsKid(String refreshToken) {
         try {
-<span class="fc" id="L132">            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);</span>
-<span class="fc" id="L133">            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));</span>
+<span class="fc" id="L137">            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);</span>
+<span class="fc" id="L138">            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));</span>
         }
-<span class="nc" id="L135">        catch (JWTVerificationException e) {</span>
-<span class="nc" id="L136">            return false;</span>
+<span class="nc" id="L140">        catch (JWTVerificationException e) {</span>
+<span class="nc" id="L141">            return false;</span>
         }
     }
 

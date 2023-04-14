@@ -13,6 +13,7 @@ import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.security.SecurityConstants;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +22,8 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 @Component
-<span class="fc" id="L24">@Slf4j</span>
-<span class="fc" id="L25">@RequiredArgsConstructor</span>
+<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L26">@RequiredArgsConstructor</span>
 public class JwtService {
 
     @Value(&quot;${jwt.access_token.secret}&quot;)
@@ -45,48 +46,48 @@ public class JwtService {
 
     @PostConstruct
     public void init() {
-<span class="fc" id="L48">        accessTokenVerifier = JWT.require(Algorithm.HMAC512(accessTokenSecret.getBytes())).build();</span>
-<span class="fc" id="L49">        refreshTokenVerifier = JWT.require(Algorithm.HMAC512(refreshTokenSecret.getBytes())).build();</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L49">        accessTokenVerifier = JWT.require(Algorithm.HMAC512(accessTokenSecret.getBytes())).build();</span>
+<span class="fc" id="L50">        refreshTokenVerifier = JWT.require(Algorithm.HMAC512(refreshTokenSecret.getBytes())).build();</span>
+<span class="fc" id="L51">    }</span>
 
     public String createAccessToken(IdentifiableUser user) {
-<span class="fc" id="L53">        return createToken(user, accessTokenTtl, accessTokenSecret);</span>
+<span class="fc" id="L54">        return createToken(user, accessTokenTtl, accessTokenSecret);</span>
     }
 
     public String createRefreshToken(IdentifiableUser user) {
-<span class="fc" id="L57">        return createToken(user, refreshTokenTtl, refreshTokenSecret);</span>
+<span class="fc" id="L58">        return createToken(user, refreshTokenTtl, refreshTokenSecret);</span>
     }
 
-    private String createToken(IdentifiableUser user, Long tokenTTL, String secret) {
-<span class="fc" id="L61">        return createToken(user.getUsername(), user.getId(), tokenTTL, secret);</span>
+<span class="pc bpc" id="L61" title="3 of 6 branches missed.">    private String createToken(@NonNull IdentifiableUser user, @NonNull Long tokenTTL, @NonNull String secret) {</span>
+<span class="fc" id="L62">        return createToken(user.getUsername(), user.getId(), tokenTTL, secret);</span>
     }
 
-    private String createToken(String subject, String userId, Long tokenTTL, String secret)
-            throws JWTCreationException {
-<span class="fc" id="L66">        return JWT.create()</span>
-<span class="fc" id="L67">            .withSubject(subject)</span>
-<span class="fc" id="L68">            .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)</span>
-<span class="fc" id="L69">            .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))</span>
-<span class="fc" id="L70">            .sign(Algorithm.HMAC512(secret.getBytes()));</span>
+<span class="pc bpc" id="L65" title="3 of 6 branches missed.">    private String createToken(final @NonNull String subject, @NonNull String userId, @NonNull Long tokenTTL,</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            @NonNull String secret) throws JWTCreationException {</span>
+<span class="fc" id="L67">        return JWT.create()</span>
+<span class="fc" id="L68">            .withSubject(subject)</span>
+<span class="fc" id="L69">            .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)</span>
+<span class="fc" id="L70">            .withExpiresAt(new Date(System.currentTimeMillis() + tokenTTL))</span>
+<span class="fc" id="L71">            .sign(Algorithm.HMAC512(secret.getBytes()));</span>
     }
 
-    public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">    public DecodedJWT verifyAccessToken(@NonNull String token) throws JWTVerificationException {</span>
         // This will also handle token expiration exception
-<span class="fc" id="L75">        return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, &quot;&quot;));</span>
+<span class="fc" id="L76">        return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, &quot;&quot;));</span>
     }
 
-    public DecodedJWT verifyRefreshToken(String token) throws JWTVerificationException {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">    public DecodedJWT verifyRefreshToken(@NonNull String token) throws JWTVerificationException {</span>
         // This will also handle token expiration exception
-<span class="fc" id="L80">        return refreshTokenVerifier.verify(token);</span>
+<span class="fc" id="L81">        return refreshTokenVerifier.verify(token);</span>
     }
 
     public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
-<span class="fc" id="L84">        DecodedJWT jwt = verifyRefreshToken(token);</span>
-<span class="fc" id="L85">        return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());</span>
+<span class="fc" id="L85">        DecodedJWT jwt = verifyRefreshToken(token);</span>
+<span class="fc" id="L86">        return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());</span>
     }
 
     public String tokenToJson(String accessToken, String refreshToken) throws JsonProcessingException {
-<span class="nc" id="L89">        return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));</span>
+<span class="nc" id="L90">        return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));</span>
     }
 
 }
