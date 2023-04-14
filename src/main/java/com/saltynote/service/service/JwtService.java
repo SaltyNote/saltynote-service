@@ -13,6 +13,7 @@ import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.security.SecurityConstants;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,12 +58,12 @@ public class JwtService {
         return createToken(user, refreshTokenTtl, refreshTokenSecret);
     }
 
-    private String createToken(IdentifiableUser user, Long tokenTTL, String secret) {
+    private String createToken(@NonNull IdentifiableUser user, @NonNull Long tokenTTL, @NonNull String secret) {
         return createToken(user.getUsername(), user.getId(), tokenTTL, secret);
     }
 
-    private String createToken(String subject, String userId, Long tokenTTL, String secret)
-            throws JWTCreationException {
+    private String createToken(final @NonNull String subject, @NonNull String userId, @NonNull Long tokenTTL,
+            @NonNull String secret) throws JWTCreationException {
         return JWT.create()
             .withSubject(subject)
             .withClaim(SecurityConstants.CLAIM_KEY_USER_ID, userId)
@@ -70,12 +71,12 @@ public class JwtService {
             .sign(Algorithm.HMAC512(secret.getBytes()));
     }
 
-    public DecodedJWT verifyAccessToken(String token) throws JWTVerificationException {
+    public DecodedJWT verifyAccessToken(@NonNull String token) throws JWTVerificationException {
         // This will also handle token expiration exception
         return accessTokenVerifier.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
     }
 
-    public DecodedJWT verifyRefreshToken(String token) throws JWTVerificationException {
+    public DecodedJWT verifyRefreshToken(@NonNull String token) throws JWTVerificationException {
         // This will also handle token expiration exception
         return refreshTokenVerifier.verify(token);
     }

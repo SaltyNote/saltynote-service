@@ -6,9 +6,9 @@ public interface BaseConverter<D, E> {
 
     D toDto(E entity);
 
-    E toEntity(D dto);
-
     List<D> toDto(List<E> entityList);
+
+    E toEntity(D dto);
 
     List<E> toEntity(List<D> dtoList);
 
