@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +25,8 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class VaultService implements RepositoryService<Vault, VaultRepository> {
+@CacheConfig(cacheNames = "vault")
+public class VaultService implements RepositoryService<String, Vault, VaultRepository> {
 
     private final VaultRepository vaultRepository;
 
@@ -120,8 +122,18 @@ public class VaultService implements RepositoryService<Vault, VaultRepository> {
     }
 
     @Override
+    public Vault save(Vault entity) {
+        return getRepository().save(entity);
+    }
+
+    @Override
     public Optional<Vault> getById(String id) {
         return vaultRepository.findById(id);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        getRepository().deleteById(id);
     }
 
     public Optional<Vault> findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
@@ -140,6 +152,10 @@ public class VaultService implements RepositoryService<Vault, VaultRepository> {
         catch (JWTVerificationException e) {
             return false;
         }
+    }
+
+    public Optional<Vault> getByEmailAndSecretAndType(String email, String token, VaultType type) {
+        return vaultRepository.findByEmailAndSecretAndType(email, token, type.getValue());
     }
 
 }
