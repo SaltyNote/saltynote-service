@@ -26,7 +26,17 @@ public class UserService implements RepositoryService<String, SiteUser> {
     private final VaultRepository vaultRepository;
 
     @Override
-    public SiteUser save(SiteUser entity) {
+    public SiteUser create(SiteUser entity) {
+        if (hasValidId(entity)) {
+            log.warn("Note id must be empty: {}", entity);
+            entity.setId(null);
+        }
+        return userRepository.save(entity);
+    }
+
+    @Override
+    public SiteUser update(SiteUser entity) {
+        checkIdExists(entity);
         return userRepository.save(entity);
     }
 

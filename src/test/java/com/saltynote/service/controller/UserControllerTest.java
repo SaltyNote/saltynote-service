@@ -108,7 +108,7 @@ class UserControllerTest {
 
         SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
         user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
-        user = userService.save(user);
+        user = userService.create(user);
         assertNotNull(user.getId());
 
         this.mockMvc
@@ -181,7 +181,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -227,7 +227,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -287,7 +287,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         assertNotNull(user.getId());
 
@@ -309,7 +309,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         // request password change
         Payload payload = new Payload(user.getEmail());

@@ -3,6 +3,7 @@ package com.saltynote.service.service;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.repository.NoteRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "note")
 public class NoteService implements RepositoryService<String, Note> {
@@ -18,7 +20,17 @@ public class NoteService implements RepositoryService<String, Note> {
     private final NoteRepository repository;
 
     @Override
-    public Note save(Note entity) {
+    public Note create(Note entity) {
+        if (hasValidId(entity)) {
+            log.warn("Note id must be empty: {}", entity);
+            entity.setId(null);
+        }
+        return repository.save(entity);
+    }
+
+    @Override
+    public Note update(Note entity) {
+        checkIdExists(entity);
         return repository.save(entity);
     }
 

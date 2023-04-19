@@ -155,7 +155,7 @@ public class NoteControllerTest {
         this.notesToCleaned = new ArrayList<>();
         // Create a temp note for current user.
         NoteDto note = createTmpNote(siteUser.getId());
-        this.savedNote = noteService.save(noteConverter.toEntity(note));
+        this.savedNote = noteService.create(noteConverter.toEntity(note));
         this.notesToCleaned.add(this.savedNote);
     }
 

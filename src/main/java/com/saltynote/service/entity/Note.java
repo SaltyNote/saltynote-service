@@ -2,6 +2,7 @@ package com.saltynote.service.entity;
 
 import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,7 +28,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Accessors(chain = true)
-public class Note implements Serializable {
+public class Note implements Serializable, Identifiable {
 
     @Serial
     private static final long serialVersionUID = 1L;

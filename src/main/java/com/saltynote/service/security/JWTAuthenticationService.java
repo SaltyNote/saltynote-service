@@ -41,7 +41,7 @@ public class JWTAuthenticationService {
         // update current user's lastLoginTime, after user logged in successfully
         SiteUser curtUser = userService.getByUsername(user.getUsername());
         curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));
-        userService.save(curtUser);
+        userService.update(curtUser);
         return new TokenPair(accessToken, refreshToken);
 
     }

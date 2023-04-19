@@ -29,7 +29,7 @@ import java.util.Optional;
 @CacheConfig(cacheNames = "vault")
 public class VaultService implements RepositoryService<String, Vault> {
 
-    private final VaultRepository vaultRepository;
+    private final VaultRepository repository;
 
     private final ObjectMapper objectMapper;
 
@@ -44,12 +44,12 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     public Vault createForEmail(@NotNull String email, VaultType type) {
-        return vaultRepository
+        return repository
             .save(new Vault().setEmail(email).setType(type.getValue()).setSecret(FriendlyId.createFriendlyId()));
     }
 
     public Vault create(@NotNull String userId, VaultType type, String secret) {
-        return vaultRepository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));
+        return repository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));
     }
 
     public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
@@ -84,7 +84,7 @@ public class VaultService implements RepositoryService<String, Vault> {
      * @return the refresh token value
      */
     public String fetchOrCreateRefreshToken(IdentifiableUser user) {
-        Optional<Vault> vaultOp = vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),
+        Optional<Vault> vaultOp = repository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),
                 VaultType.REFRESH_TOKEN.getValue());
         // If refresh token is young enough, then just return it.
         if (vaultOp.isPresent() && isRefreshTokenReusable(vaultOp.get().getSecret())) {
@@ -107,7 +107,7 @@ public class VaultService implements RepositoryService<String, Vault> {
             return Optional.empty();
         }
         VaultEntity ve = veo.get();
-        Optional<Vault> vault = vaultRepository.findBySecret(ve.getSecret());
+        Optional<Vault> vault = repository.findBySecret(ve.getSecret());
         if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
             log.error("User id are not match from decoded token {} and database {}", ve.getUserId(),
                     vault.get().getUserId());
@@ -118,26 +118,36 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     @Override
-    public Vault save(Vault entity) {
-        return vaultRepository.save(entity);
+    public Vault create(Vault entity) {
+        if (hasValidId(entity)) {
+            log.warn("Note id must be empty: {}", entity);
+            entity.setId(null);
+        }
+        return repository.save(entity);
+    }
+
+    @Override
+    public Vault update(Vault entity) {
+        checkIdExists(entity);
+        return repository.save(entity);
     }
 
     @Override
     public Optional<Vault> getById(String id) {
-        return vaultRepository.findById(id);
+        return repository.findById(id);
     }
 
     @Override
     public void deleteById(String id) {
-        vaultRepository.deleteById(id);
+        repository.deleteById(id);
     }
 
     public Optional<Vault> findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
-        return vaultRepository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);
+        return repository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);
     }
 
     public void cleanRefreshTokenByUserId(String userId) {
-        vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());
+        repository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());
     }
 
     private boolean isRefreshTokenReusable(String refreshToken) {
@@ -151,19 +161,19 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     public Optional<Vault> getByEmailAndSecretAndType(String email, String token, VaultType type) {
-        return vaultRepository.findByEmailAndSecretAndType(email, token, type.getValue());
+        return repository.findByEmailAndSecretAndType(email, token, type.getValue());
     }
 
     public List<Vault> getByEmail(String email) {
-        return vaultRepository.findByEmail(email);
+        return repository.findByEmail(email);
     }
 
     public List<Vault> getByUserIdAndType(String userId, VaultType vaultType) {
-        return vaultRepository.findByUserIdAndType(userId, vaultType.getValue());
+        return repository.findByUserIdAndType(userId, vaultType.getValue());
     }
 
     public List<Vault> getByUserId(String userId) {
-        return vaultRepository.findByUserId(userId);
+        return repository.findByUserId(userId);
     }
 
 }

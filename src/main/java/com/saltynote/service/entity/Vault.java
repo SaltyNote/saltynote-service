@@ -1,6 +1,7 @@
 package com.saltynote.service.entity;
 
 import com.devskiller.friendly_id.FriendlyId;
+import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,7 +25,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Accessors(chain = true)
-public class Vault implements Serializable {
+public class Vault implements Serializable, Identifiable {
 
     @Serial
     private static final long serialVersionUID = 1L;

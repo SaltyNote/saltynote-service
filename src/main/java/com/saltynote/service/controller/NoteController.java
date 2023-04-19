@@ -66,7 +66,7 @@ public class NoteController {
         if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {
             noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());
         }
-        noteTobeUpdate = noteService.save(noteTobeUpdate);
+        noteTobeUpdate = noteService.update(noteTobeUpdate);
         return ResponseEntity.ok(noteTobeUpdate);
     }
 
@@ -112,7 +112,7 @@ public class NoteController {
         JwtUser user = (JwtUser) auth.getPrincipal();
         noteDto.setUserId(user.getId());
         Note note = noteConverter.toEntity(noteDto);
-        note = noteService.save(note);
+        note = noteService.create(note);
         if (StringUtils.isNotBlank(note.getId())) {
             return ResponseEntity.ok(note);
         }

@@ -92,7 +92,7 @@ public class UserController {
         }
         SiteUser user = userNewRequest.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
         if (StringUtils.hasText(user.getId())) {
             vaultService.deleteById(vaultOp.get().getId());
             return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
@@ -163,7 +163,7 @@ public class UserController {
         if (usero.isPresent()) {
             SiteUser user = usero.get();
             user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
-            userService.save(user);
+            userService.update(user);
             vaultService.deleteById(vo.get().getId());
             return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
         }
@@ -194,7 +194,7 @@ public class UserController {
         }
 
         user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
-        userService.save(user);
+        userService.update(user);
         return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
     }
 
