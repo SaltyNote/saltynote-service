@@ -9,7 +9,10 @@ import com.saltynote.service.repository.VaultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,8 @@ public class UserService implements RepositoryService<String, SiteUser> {
     private final LoginHistoryRepository loginHistoryRepository;
 
     @Override
+    @Caching(put = { @CachePut(key = "#entity.id"), @CachePut(key = "#entity.username"),
+            @CachePut(key = "#entity.email") })
     public SiteUser create(SiteUser entity) {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
@@ -39,6 +44,8 @@ public class UserService implements RepositoryService<String, SiteUser> {
     }
 
     @Override
+    @Caching(put = { @CachePut(key = "#entity.id"), @CachePut(key = "#entity.username"),
+            @CachePut(key = "#entity.email") })
     public SiteUser update(SiteUser entity) {
         checkIdExists(entity);
         return repository.save(entity);
@@ -47,18 +54,20 @@ public class UserService implements RepositoryService<String, SiteUser> {
     @Override
     @Cacheable(key = "#id")
     public Optional<SiteUser> getById(String id) {
-        log.info("Get user by id: {}", id);
         return repository.findById(id);
     }
 
     @Override
-    public void deleteById(String id) {
-        repository.deleteById(id);
+    // No need to do cache evict here, since all stale content will be expired soon.
+    public void delete(SiteUser entity) {
+        repository.deleteById(entity.getId());
     }
 
     // This api will delete all database records with given user id, including the user
     // itself.
+    // No need to do cache evict here, since all stale content will be expired soon.
     @Transactional
+    @CacheEvict(key = "#userId")
     public void cleanupByUserId(String userId) {
         noteRepository.deleteByUserId(userId);
         vaultRepository.deleteByUserId(userId);
@@ -66,10 +75,12 @@ public class UserService implements RepositoryService<String, SiteUser> {
         repository.deleteById(userId);
     }
 
+    @Cacheable(key = "#email")
     public Optional<SiteUser> getByEmail(String email) {
         return repository.findByEmail(email);
     }
 
+    @Cacheable(key = "#username")
     public SiteUser getByUsername(String username) {
         return repository.findByUsername(username);
     }
