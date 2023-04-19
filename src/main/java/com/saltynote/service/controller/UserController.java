@@ -1,12 +1,12 @@
 package com.saltynote.service.controller;
 
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.ServiceResponse;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.SiteUser;
@@ -104,20 +104,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> authenticate(@RequestBody UserCredential credential) {
+    public ResponseEntity<TokenPair> authenticate(@RequestBody UserCredential credential) {
         return ResponseEntity.ok(authenticationService.authenticate(credential));
     }
 
     @PostMapping("/refresh_token")
-    public ResponseEntity<JwtToken> refreshToken(@Valid @RequestBody JwtToken jwtToken) {
+    public ResponseEntity<TokenPair> refreshToken(@Valid @RequestBody TokenPair tokenPair) {
         // 1. No expiry, and valid.
-        JwtUser user = jwtService.parseRefreshToken(jwtToken.getRefreshToken());
+        JwtUser user = jwtService.parseRefreshToken(tokenPair.getRefreshToken());
         // 2. Not deleted from database.
         Optional<Vault> token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN,
-                jwtToken.getRefreshToken());
+                tokenPair.getRefreshToken());
         if (token.isPresent()) {
             String newToken = jwtService.createAccessToken(user);
-            return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));
+            return ResponseEntity.ok(new TokenPair(newToken, tokenPair.getRefreshToken()));
         }
         else {
             throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "Invalid refresh token provided!");

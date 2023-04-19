@@ -87,7 +87,7 @@ public class VaultService implements RepositoryService<String, Vault> {
         Optional<Vault> vaultOp = vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),
                 VaultType.REFRESH_TOKEN.getValue());
         // If refresh token is young enough, then just return it.
-        if (vaultOp.isPresent() && isRefreshTokenAsKid(vaultOp.get().getSecret())) {
+        if (vaultOp.isPresent() && isRefreshTokenReusable(vaultOp.get().getSecret())) {
             return vaultOp.get().getSecret();
         }
         // Refresh token is not a kid anymore or no existing refresh token found, a new
@@ -140,7 +140,7 @@ public class VaultService implements RepositoryService<String, Vault> {
         vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());
     }
 
-    private boolean isRefreshTokenAsKid(String refreshToken) {
+    private boolean isRefreshTokenReusable(String refreshToken) {
         try {
             DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);
             return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));

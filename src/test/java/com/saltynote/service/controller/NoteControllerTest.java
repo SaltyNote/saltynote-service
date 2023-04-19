@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.converter.NoteConverter;
-import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.NoteDto;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
@@ -140,7 +140,7 @@ public class NoteControllerTest {
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andReturn();
         String res = mvcLoginResult.getResponse().getContentAsString();
-        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+        TokenPair token = objectMapper.readValue(res, TokenPair.class);
         assertNotNull(token.getAccessToken());
 
         return Pair.of(siteUser, token.getAccessToken());
