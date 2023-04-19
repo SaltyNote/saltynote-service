@@ -126,7 +126,7 @@ public class NoteControllerTest {
                 .content(objectMapper.writeValueAsString(userNewRequest)))
             .andExpect(status().isOk());
 
-        SiteUser siteUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
+        SiteUser siteUser = userService.getByUsername(userNewRequest.getUsername());
         assertThat(siteUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
 
         UserCredential user = new UserCredential().setUsername(userNewRequest.getUsername())
@@ -155,14 +155,14 @@ public class NoteControllerTest {
         this.notesToCleaned = new ArrayList<>();
         // Create a temp note for current user.
         NoteDto note = createTmpNote(siteUser.getId());
-        this.savedNote = noteService.getRepository().save(noteConverter.toEntity(note));
+        this.savedNote = noteService.save(noteConverter.toEntity(note));
         this.notesToCleaned.add(this.savedNote);
     }
 
     @AfterEach
     void tearDown() {
         userService.cleanupByUserId(this.siteUser.getId());
-        noteService.getRepository().deleteAll(this.notesToCleaned);
+        noteService.deleteAll(this.notesToCleaned);
     }
 
     @Test
@@ -209,7 +209,7 @@ public class NoteControllerTest {
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(newNoteContent)));
 
-        Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+        Optional<Note> queryNote = noteService.getById(this.savedNote.getId());
         assertTrue(queryNote.isPresent());
         assertEquals(queryNote.get().getNote(), newNoteContent);
     }
@@ -228,7 +228,7 @@ public class NoteControllerTest {
             .andExpect(content().string(containsString(newTagsContent))); // expexct this
                                                                           // string
 
-        Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+        Optional<Note> queryNote = noteService.getById(this.savedNote.getId());
         assertTrue(queryNote.isPresent());
         assertEquals(queryNote.get().getTags(), newTagsContent);
     }
@@ -248,7 +248,7 @@ public class NoteControllerTest {
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-        Optional<Note> queryNote = noteService.getRepository().findById(this.savedNote.getId());
+        Optional<Note> queryNote = noteService.getById(this.savedNote.getId());
         assertTrue(queryNote.isPresent());
         assertEquals(queryNote.get().getNote(), this.savedNote.getNote());
 
@@ -268,13 +268,13 @@ public class NoteControllerTest {
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         Note returnedNote = objectMapper.readValue(res, Note.class);
-        assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+        assertTrue(noteService.getById(returnedNote.getId()).isPresent());
         this.mockMvc
             .perform(delete("/note/" + returnedNote.getId()).header(SecurityConstants.HEADER_STRING,
                     "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-        assertFalse(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+        assertFalse(noteService.getById(returnedNote.getId()).isPresent());
     }
 
     @Test
@@ -290,7 +290,7 @@ public class NoteControllerTest {
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         Note returnedNote = objectMapper.readValue(res, Note.class);
-        assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+        assertTrue(noteService.getById(returnedNote.getId()).isPresent());
 
         Pair<SiteUser, String> pair = signupTestUser();
 
@@ -300,7 +300,7 @@ public class NoteControllerTest {
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-        assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+        assertTrue(noteService.getById(returnedNote.getId()).isPresent());
         userService.cleanupByUserId(pair.getLeft().getId());
     }
 
@@ -319,7 +319,7 @@ public class NoteControllerTest {
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
         Note returnedNote = objectMapper.readValue(res, Note.class);
-        assertTrue(noteService.getRepository().findById(returnedNote.getId()).isPresent());
+        assertTrue(noteService.getById(returnedNote.getId()).isPresent());
         this.mockMvc.perform(get("/notes").header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

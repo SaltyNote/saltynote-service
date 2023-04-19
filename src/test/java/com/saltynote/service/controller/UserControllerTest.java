@@ -108,7 +108,7 @@ class UserControllerTest {
 
         SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
         user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
         assertNotNull(user.getId());
 
         this.mockMvc
@@ -121,9 +121,9 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(new Payload(emailStr))))
             .andExpect(status().isOk());
 
-        List<Vault> vaults = vaultService.getRepository().findByEmail(emailStr);
+        List<Vault> vaults = vaultService.getByEmail(emailStr);
         assertEquals(1, vaults.size());
-        vaultService.getRepository().delete(vaults.get(0));
+        vaultService.deleteById(vaults.get(0).getId());
         userService.cleanupByUserId(user.getId());
     }
 
@@ -167,7 +167,7 @@ class UserControllerTest {
             .andDo(print())
             .andExpect(status().isOk());
 
-        SiteUser queryUser = userService.getRepository().findByUsername(userNewRequest.getUsername());
+        SiteUser queryUser = userService.getByUsername(userNewRequest.getUsername());
         assertThat(queryUser).extracting(SiteUser::getEmail).isEqualTo(userNewRequest.getEmail());
 
         userService.cleanupByUserId(queryUser.getId());
@@ -181,7 +181,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -227,7 +227,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -287,7 +287,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
 
         assertNotNull(user.getId());
 
@@ -309,7 +309,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
 
         // request password change
         Payload payload = new Payload(user.getEmail());
@@ -318,8 +318,7 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(payload)))
             .andExpect(status().isOk());
 
-        List<Vault> vaults = vaultService.getRepository()
-            .findByUserIdAndType(user.getId(), VaultType.PASSWORD.getValue());
+        List<Vault> vaults = vaultService.getByUserIdAndType(user.getId(), VaultType.PASSWORD);
 
         assertEquals(1, vaults.size());
         Vault vault = vaults.get(0);
@@ -493,9 +492,9 @@ class UserControllerTest {
                 "Bearer " + token.getAccessToken()))
             .andExpect(status().isOk());
 
-        assertFalse(userService.getRepository().findById(jwtUser.getId()).isPresent());
-        assertTrue(noteService.getRepository().findAllByUserId(jwtUser.getId()).isEmpty());
-        assertTrue(vaultService.getRepository().findByUserId(jwtUser.getId()).isEmpty());
+        assertFalse(userService.getById(jwtUser.getId()).isPresent());
+        assertTrue(noteService.getAllByUserId(jwtUser.getId()).isEmpty());
+        assertTrue(vaultService.getByUserId(jwtUser.getId()).isEmpty());
     }
 
     private String getEmail(String username) {

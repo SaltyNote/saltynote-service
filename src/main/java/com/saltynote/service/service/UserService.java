@@ -5,6 +5,9 @@ import com.saltynote.service.repository.NoteRepository;
 import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.repository.VaultRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +15,9 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements RepositoryService<SiteUser, UserRepository> {
+@Slf4j
+@CacheConfig(cacheNames = "user")
+public class UserService implements RepositoryService<String, SiteUser> {
 
     private final UserRepository userRepository;
 
@@ -21,13 +26,20 @@ public class UserService implements RepositoryService<SiteUser, UserRepository> 
     private final VaultRepository vaultRepository;
 
     @Override
-    public UserRepository getRepository() {
-        return userRepository;
+    public SiteUser save(SiteUser entity) {
+        return userRepository.save(entity);
     }
 
     @Override
+    @Cacheable(key = "#id")
     public Optional<SiteUser> getById(String id) {
+        log.info("Get user by id: {}", id);
         return userRepository.findById(id);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        userRepository.deleteById(id);
     }
 
     // This api will delete all database records with given user id, including the user
@@ -37,6 +49,14 @@ public class UserService implements RepositoryService<SiteUser, UserRepository> 
         noteRepository.deleteByUserId(userId);
         vaultRepository.deleteByUserId(userId);
         userRepository.deleteById(userId);
+    }
+
+    public Optional<SiteUser> getByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public SiteUser getByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
 }

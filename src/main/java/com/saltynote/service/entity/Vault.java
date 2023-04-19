@@ -6,15 +6,22 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "vault")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Accessors(chain = true)
 public class Vault implements Serializable {
 
@@ -43,6 +50,23 @@ public class Vault implements Serializable {
     private void beforeSave() {
         this.id = FriendlyId.createFriendlyId();
         this.createdTime = new Timestamp(System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Vault vault = (Vault) o;
+        return Objects.equals(id, vault.id) && Objects.equals(userId, vault.userId)
+                && Objects.equals(secret, vault.secret) && Objects.equals(type, vault.type)
+                && Objects.equals(email, vault.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, secret, type, email);
     }
 
 }

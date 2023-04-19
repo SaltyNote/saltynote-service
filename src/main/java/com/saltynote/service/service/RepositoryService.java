@@ -2,10 +2,12 @@ package com.saltynote.service.service;
 
 import java.util.Optional;
 
-public interface RepositoryService<R, T> {
+public interface RepositoryService<K, T> {
 
-    T getRepository();
+    T save(T entity);
 
-    Optional<R> getById(String id);
+    Optional<T> getById(K id);
+
+    void deleteById(K id);
 
 }
