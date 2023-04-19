@@ -3,12 +3,12 @@ package com.saltynote.service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.Payload;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.Note;
@@ -108,7 +108,7 @@ class UserControllerTest {
 
         SiteUser user = new SiteUser().setUsername(faker.name().username()).setEmail(alreadyUsedEmail);
         user.setPassword(bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphanumeric(12)));
-        user = userService.save(user);
+        user = userService.create(user);
         assertNotNull(user.getId());
 
         this.mockMvc
@@ -181,7 +181,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -190,7 +190,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
-        var token = objectMapper.readValue(res, JwtToken.class);
+        var token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -200,7 +200,7 @@ class UserControllerTest {
         TimeUnit.SECONDS.sleep(1);
 
         // try refresh token
-        JwtToken tokenRequest = new JwtToken(null, token.getRefreshToken());
+        TokenPair tokenRequest = new TokenPair(null, token.getRefreshToken());
         mvcResult = this.mockMvc
             .perform(post("/refresh_token").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(tokenRequest)))
@@ -208,7 +208,7 @@ class UserControllerTest {
             .andReturn();
 
         res = mvcResult.getResponse().getContentAsString();
-        JwtToken newToken = objectMapper.readValue(res, JwtToken.class);
+        TokenPair newToken = objectMapper.readValue(res, TokenPair.class);
         assertNotNull(newToken.getAccessToken());
         assertNotNull(jwtService.verifyAccessToken(newToken.getAccessToken()));
         log.info("old token = {}", token.getAccessToken());
@@ -227,7 +227,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         UserCredential userRequest = new UserCredential().setUsername(uc.getUsername()).setPassword(uc.getPassword());
         MvcResult mvcResult = this.mockMvc
@@ -236,7 +236,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         String res = mvcResult.getResponse().getContentAsString();
-        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+        TokenPair token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -250,7 +250,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         res = mvcResult.getResponse().getContentAsString();
-        token = objectMapper.readValue(res, JwtToken.class);
+        token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -268,7 +268,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         res = mvcResult.getResponse().getContentAsString();
-        token = objectMapper.readValue(res, JwtToken.class);
+        token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -287,7 +287,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         assertNotNull(user.getId());
 
@@ -309,7 +309,7 @@ class UserControllerTest {
             .setPassword(RandomStringUtils.randomAlphanumeric(12));
         SiteUser user = uc.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.save(user);
+        user = userService.create(user);
 
         // request password change
         Payload payload = new Payload(user.getEmail());
@@ -392,7 +392,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         res = mvcResult.getResponse().getContentAsString();
-        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+        TokenPair token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));
@@ -455,7 +455,7 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andReturn();
         res = mvcResult.getResponse().getContentAsString();
-        JwtToken token = objectMapper.readValue(res, JwtToken.class);
+        TokenPair token = objectMapper.readValue(res, TokenPair.class);
 
         assertNotNull(token);
         assertNotNull(jwtService.parseRefreshToken(token.getRefreshToken()));

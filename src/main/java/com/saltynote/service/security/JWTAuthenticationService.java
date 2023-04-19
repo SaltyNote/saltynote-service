@@ -1,7 +1,7 @@
 package com.saltynote.service.security;
 
 import com.saltynote.service.domain.LoginUser;
-import com.saltynote.service.domain.transfer.JwtToken;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.service.JwtService;
@@ -30,7 +30,7 @@ public class JWTAuthenticationService {
 
     private final UserService userService;
 
-    public JwtToken authenticate(UserCredential credential) {
+    public TokenPair authenticate(UserCredential credential) {
 
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 credential.getUsername(), credential.getPassword(), Collections.emptyList()));
@@ -41,8 +41,8 @@ public class JWTAuthenticationService {
         // update current user's lastLoginTime, after user logged in successfully
         SiteUser curtUser = userService.getByUsername(user.getUsername());
         curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));
-        userService.save(curtUser);
-        return new JwtToken(accessToken, refreshToken);
+        userService.update(curtUser);
+        return new TokenPair(accessToken, refreshToken);
 
     }
 

@@ -9,8 +9,8 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.domain.IdentifiableUser;
-import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.security.SecurityConstants;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
@@ -87,7 +87,7 @@ public class JwtService {
     }
 
     public String tokenToJson(String accessToken, String refreshToken) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(new JwtToken(accessToken, refreshToken));
+        return objectMapper.writeValueAsString(new TokenPair(accessToken, refreshToken));
     }
 
 }

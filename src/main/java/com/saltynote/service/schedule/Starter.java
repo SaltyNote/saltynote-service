@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({ "dev", "test", "local", "default" })
+@Profile({ "dev", "test", "local" })
 @Slf4j
 public class Starter implements CommandLineRunner {
 

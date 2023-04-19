@@ -1,8 +1,6 @@
 package com.saltynote.service.domain;
 
-public interface IdentifiableUser {
-
-    String getId();
+public interface IdentifiableUser extends Identifiable {
 
     String getUsername();
 

@@ -1,6 +1,7 @@
 package com.saltynote.service.entity;
 
 import com.devskiller.friendly_id.FriendlyId;
+import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -23,8 +25,9 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Accessors(chain = true)
-public class Vault implements Serializable {
+public class Vault implements Serializable, Identifiable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
