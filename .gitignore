@@ -33,3 +33,4 @@ build/
 **/application-local.properties
 
 .DS_Store
+.fastRequest
