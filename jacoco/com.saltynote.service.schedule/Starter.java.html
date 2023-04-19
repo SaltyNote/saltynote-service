@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({ &quot;dev&quot;, &quot;test&quot;, &quot;local&quot;, &quot;default&quot; })
-<span class="fc" id="L12">@Slf4j</span>
-<span class="fc" id="L13">public class Starter implements CommandLineRunner {</span>
+@Profile({ &quot;dev&quot;, &quot;test&quot;, &quot;local&quot; })
+<span class="nc" id="L12">@Slf4j</span>
+<span class="nc" id="L13">public class Starter implements CommandLineRunner {</span>
 
     @Value(&quot;${server.port}&quot;)
     private int port;
@@ -20,10 +20,10 @@ import org.springframework.stereotype.Component;
      */
     @Override
     public void run(String... args) {
-<span class="fc" id="L23">        String baseUrl = &quot;http://127.0.0.1:&quot; + port;</span>
-<span class="fc" id="L24">        BaseUtils.setBaseUrl(baseUrl);</span>
-<span class="fc" id="L25">        log.info(&quot;Set base url to {}&quot;, baseUrl);</span>
-<span class="fc" id="L26">    }</span>
+<span class="nc" id="L23">        String baseUrl = &quot;http://127.0.0.1:&quot; + port;</span>
+<span class="nc" id="L24">        BaseUtils.setBaseUrl(baseUrl);</span>
+<span class="nc" id="L25">        log.info(&quot;Set base url to {}&quot;, baseUrl);</span>
+<span class="nc" id="L26">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

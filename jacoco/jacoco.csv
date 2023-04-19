@@ -5,6 +5,7 @@ saltynote-service,com.saltynote.service.event,EmailEvent.Type.new EmailEvent.Typ
 saltynote-service,com.saltynote.service.event,EmailEventListener,11,70,1,3,1,18,1,4,0,3
 saltynote-service,com.saltynote.service.event,EmailEvent.Type,3,53,0,0,1,14,1,4,1,4
 saltynote-service,com.saltynote.service.domain.transfer,Payload,65,16,14,0,0,4,11,4,4,4
+saltynote-service,com.saltynote.service.domain.transfer,TokenPair,0,26,0,0,0,5,0,6,0,6
 saltynote-service,com.saltynote.service.domain.transfer,NoteQuery,75,0,14,0,2,0,14,0,7,0
 saltynote-service,com.saltynote.service.domain.transfer,PasswordReset,107,17,22,0,1,4,16,5,5,5
 saltynote-service,com.saltynote.service.domain.transfer,UserNewRequest,72,11,16,0,1,2,12,3,4,3
@@ -13,17 +14,17 @@ saltynote-service,com.saltynote.service.domain.transfer,ServiceResponse,98,32,22
 saltynote-service,com.saltynote.service.domain.transfer,JwtUser,92,32,22,0,0,5,14,7,3,7
 saltynote-service,com.saltynote.service.domain.transfer,PasswordUpdate,107,19,22,0,1,4,16,5,5,5
 saltynote-service,com.saltynote.service.domain.transfer,NoteDto,263,59,62,0,0,8,35,15,4,15
-saltynote-service,com.saltynote.service.domain.transfer,JwtToken,0,26,0,0,0,5,0,6,0,6
 saltynote-service,com.saltynote.service.entity,Vault,110,45,16,0,12,9,15,10,7,10
 saltynote-service,com.saltynote.service.entity,SiteUser,88,45,12,0,11,9,13,10,7,10
 saltynote-service,com.saltynote.service.entity,Note,111,99,20,2,10,18,14,20,3,20
 saltynote-service,com.saltynote.service.domain.converter,NoteConverterImpl,105,46,11,1,26,11,9,2,3,2
 saltynote-service,com.saltynote.service.service,UserDetailsServiceImpl,5,18,1,1,1,4,1,2,0,2
-saltynote-service,com.saltynote.service.service,NoteService,6,32,0,0,1,8,1,6,1,6
+saltynote-service,com.saltynote.service.service,NoteService,14,49,1,1,3,12,2,8,1,8
+saltynote-service,com.saltynote.service.service,RepositoryService,16,20,4,6,1,5,4,3,0,2
 saltynote-service,com.saltynote.service.service,EmailService,62,18,0,0,18,5,2,1,2,1
 saltynote-service,com.saltynote.service.service,JwtService,54,118,9,9,1,22,10,10,1,10
-saltynote-service,com.saltynote.service.service,UserService,5,54,0,0,2,11,1,7,1,7
-saltynote-service,com.saltynote.service.service,VaultService,42,204,3,7,13,32,6,20,3,18
+saltynote-service,com.saltynote.service.service,UserService,13,67,1,1,4,14,2,8,1,8
+saltynote-service,com.saltynote.service.service,VaultService,63,204,5,7,18,32,8,20,4,18
 saltynote-service,com.saltynote.service.filter,GlobalFilter,0,24,0,0,0,7,0,4,0,4
 saltynote-service,com.saltynote.service.security,JWTAuthorizationFilter,4,61,3,5,2,17,3,4,0,3
 saltynote-service,com.saltynote.service.security,SecurityConfig,0,24,0,0,0,6,0,3,0,3
@@ -34,7 +35,7 @@ saltynote-service,com.saltynote.service.aop,ControllerMonitor,1,28,0,0,1,8,1,3,1
 saltynote-service,com.saltynote.service.configure,ServiceConfig,0,3,0,0,0,1,0,1,0,1
 saltynote-service,com.saltynote.service.configure,SpringDocConfig,0,93,0,0,0,12,0,5,0,5
 saltynote-service,com.saltynote.service,ServiceApplication,5,9,0,0,2,2,1,2,1,2
-saltynote-service,com.saltynote.service.utils,BaseUtils,13,40,3,7,4,11,5,6,2,4
+saltynote-service,com.saltynote.service.utils,BaseUtils,20,33,4,6,7,8,6,5,3,3
 saltynote-service,com.saltynote.service.controller,NoteController,32,194,10,16,5,41,13,12,3,9
 saltynote-service,com.saltynote.service.controller,UserController,89,310,11,15,17,55,12,12,1,10
 saltynote-service,com.saltynote.service.controller,HomeController,0,8,0,0,0,2,0,2,0,2
@@ -45,4 +46,4 @@ saltynote-service,com.saltynote.service.domain,VaultEntity,56,71,15,7,0,4,13,8,2
 saltynote-service,com.saltynote.service.controller.advice,ExceptionHandlerControllerAdvice,13,42,0,0,3,8,1,5,1,5
 saltynote-service,com.saltynote.service.exception,WebAppRuntimeException,0,10,0,0,0,4,0,2,0,2
 saltynote-service,com.saltynote.service.exception,IllegalInitialException,4,0,0,0,2,0,1,0,1,0
-saltynote-service,com.saltynote.service.schedule,Starter,0,18,0,0,0,6,0,3,0,3
+saltynote-service,com.saltynote.service.schedule,Starter,18,0,0,0,6,0,3,0,3,0

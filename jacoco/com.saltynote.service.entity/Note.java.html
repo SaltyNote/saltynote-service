@@ -2,6 +2,7 @@
 
 import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -23,73 +24,73 @@ import java.util.Objects;
 @Entity
 @Table(name = &quot;note&quot;)
 @Getter
-<span class="fc" id="L26">@Setter</span>
-<span class="nc" id="L27">@ToString</span>
-<span class="fc" id="L28">@RequiredArgsConstructor</span>
+<span class="fc" id="L27">@Setter</span>
+<span class="nc" id="L28">@ToString</span>
+<span class="fc" id="L29">@RequiredArgsConstructor</span>
 @Accessors(chain = true)
-public class Note implements Serializable {
+public class Note implements Serializable, Identifiable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = &quot;id&quot;, nullable = false)
-<span class="fc" id="L37">    private String id;</span>
+<span class="fc" id="L38">    private String id;</span>
 
     @Column(name = &quot;user_id&quot;, nullable = false)
-<span class="fc" id="L40">    private String userId;</span>
+<span class="fc" id="L41">    private String userId;</span>
 
     @Column(name = &quot;text&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L44">    private String text;</span>
+<span class="fc" id="L45">    private String text;</span>
 
     @Column(name = &quot;url&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L48">    private String url;</span>
+<span class="fc" id="L49">    private String url;</span>
 
     @Column(name = &quot;note&quot;)
-<span class="fc" id="L51">    private String note;</span>
+<span class="fc" id="L52">    private String note;</span>
 
     @Column(name = &quot;is_page_only&quot;)
     @JsonProperty(&quot;is_page_only&quot;)
-<span class="fc" id="L55">    private Boolean pageOnly;</span>
+<span class="fc" id="L56">    private Boolean pageOnly;</span>
 
     @Column(name = &quot;highlight_color&quot;)
-<span class="fc" id="L58">    private String highlightColor;</span>
+<span class="fc" id="L59">    private String highlightColor;</span>
 
     @Column(name = &quot;created_time&quot;, nullable = false)
-<span class="fc" id="L61">    private Timestamp createdTime;</span>
+<span class="fc" id="L62">    private Timestamp createdTime;</span>
 
     @Column(name = &quot;tags&quot;)
-<span class="fc" id="L64">    private String tags;</span>
+<span class="fc" id="L65">    private String tags;</span>
 
     @PrePersist
     private void beforeSave() {
-<span class="fc" id="L68">        this.id = FriendlyId.createFriendlyId();</span>
-<span class="fc" id="L69">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if (this.pageOnly == null) {</span>
-<span class="fc" id="L71">            this.pageOnly = false;</span>
+<span class="fc" id="L69">        this.id = FriendlyId.createFriendlyId();</span>
+<span class="fc" id="L70">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (this.pageOnly == null) {</span>
+<span class="fc" id="L72">            this.pageOnly = false;</span>
         }
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (!StringUtils.hasText(this.highlightColor)) {</span>
-<span class="fc" id="L74">            this.highlightColor = &quot;&quot;;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (!StringUtils.hasText(this.highlightColor)) {</span>
+<span class="fc" id="L75">            this.highlightColor = &quot;&quot;;</span>
         }
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L77">    }</span>
 
     @Override
     public boolean equals(Object o) {
-<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (this == o)</span>
-<span class="nc" id="L81">            return true;</span>
-<span class="nc bnc" id="L82" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
-<span class="nc" id="L83">            return false;</span>
-<span class="nc" id="L84">        Note note1 = (Note) o;</span>
-<span class="nc bnc" id="L85" title="All 6 branches missed.">        return Objects.equals(id, note1.id) &amp;&amp; Objects.equals(userId, note1.userId) &amp;&amp; Objects.equals(text, note1.text)</span>
-<span class="nc bnc" id="L86" title="All 4 branches missed.">                &amp;&amp; Objects.equals(url, note1.url) &amp;&amp; Objects.equals(note, note1.note)</span>
-<span class="nc bnc" id="L87" title="All 2 branches missed.">                &amp;&amp; Objects.equals(tags, note1.tags);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (this == o)</span>
+<span class="nc" id="L82">            return true;</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
+<span class="nc" id="L84">            return false;</span>
+<span class="nc" id="L85">        Note note1 = (Note) o;</span>
+<span class="nc bnc" id="L86" title="All 6 branches missed.">        return Objects.equals(id, note1.id) &amp;&amp; Objects.equals(userId, note1.userId) &amp;&amp; Objects.equals(text, note1.text)</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">                &amp;&amp; Objects.equals(url, note1.url) &amp;&amp; Objects.equals(note, note1.note)</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                &amp;&amp; Objects.equals(tags, note1.tags);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L92">        return Objects.hash(id, userId, text, url, note, tags);</span>
+<span class="nc" id="L93">        return Objects.hash(id, userId, text, url, note, tags);</span>
     }
 
 }

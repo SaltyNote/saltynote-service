@@ -26,37 +26,47 @@ public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
     private final VaultRepository vaultRepository;
 
     @Override
-    public SiteUser save(SiteUser entity) {
-<span class="fc" id="L30">        return userRepository.save(entity);</span>
+    public SiteUser create(SiteUser entity) {
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (hasValidId(entity)) {</span>
+<span class="nc" id="L31">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
+<span class="nc" id="L32">            entity.setId(null);</span>
+        }
+<span class="fc" id="L34">        return userRepository.save(entity);</span>
+    }
+
+    @Override
+    public SiteUser update(SiteUser entity) {
+<span class="fc" id="L39">        checkIdExists(entity);</span>
+<span class="fc" id="L40">        return userRepository.save(entity);</span>
     }
 
     @Override
     @Cacheable(key = &quot;#id&quot;)
     public Optional&lt;SiteUser&gt; getById(String id) {
-<span class="fc" id="L36">        log.info(&quot;Get user by id: {}&quot;, id);</span>
-<span class="fc" id="L37">        return userRepository.findById(id);</span>
+<span class="fc" id="L46">        log.info(&quot;Get user by id: {}&quot;, id);</span>
+<span class="fc" id="L47">        return userRepository.findById(id);</span>
     }
 
     @Override
     public void deleteById(String id) {
-<span class="nc" id="L42">        userRepository.deleteById(id);</span>
-<span class="nc" id="L43">    }</span>
+<span class="nc" id="L52">        userRepository.deleteById(id);</span>
+<span class="nc" id="L53">    }</span>
 
     // This api will delete all database records with given user id, including the user
     // itself.
     @Transactional
     public void cleanupByUserId(String userId) {
-<span class="fc" id="L49">        noteRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L50">        vaultRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L51">        userRepository.deleteById(userId);</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L59">        noteRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L60">        vaultRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L61">        userRepository.deleteById(userId);</span>
+<span class="fc" id="L62">    }</span>
 
     public Optional&lt;SiteUser&gt; getByEmail(String email) {
-<span class="fc" id="L55">        return userRepository.findByEmail(email);</span>
+<span class="fc" id="L65">        return userRepository.findByEmail(email);</span>
     }
 
     public SiteUser getByUsername(String username) {
-<span class="fc" id="L59">        return userRepository.findByUsername(username);</span>
+<span class="fc" id="L69">        return userRepository.findByUsername(username);</span>
     }
 
 }

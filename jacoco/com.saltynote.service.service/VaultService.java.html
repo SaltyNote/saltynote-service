@@ -29,7 +29,7 @@ import java.util.Optional;
 @CacheConfig(cacheNames = &quot;vault&quot;)
 public class VaultService implements RepositoryService&lt;String, Vault&gt; {
 
-    private final VaultRepository vaultRepository;
+    private final VaultRepository repository;
 
     private final ObjectMapper objectMapper;
 
@@ -44,12 +44,12 @@ public class VaultService implements RepositoryService&lt;String, Vault&gt; {
     }
 
     public Vault createForEmail(@NotNull String email, VaultType type) {
-<span class="fc" id="L47">        return vaultRepository</span>
+<span class="fc" id="L47">        return repository</span>
 <span class="fc" id="L48">            .save(new Vault().setEmail(email).setType(type.getValue()).setSecret(FriendlyId.createFriendlyId()));</span>
     }
 
     public Vault create(@NotNull String userId, VaultType type, String secret) {
-<span class="fc" id="L52">        return vaultRepository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));</span>
+<span class="fc" id="L52">        return repository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));</span>
     }
 
     public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
@@ -84,10 +84,10 @@ public class VaultService implements RepositoryService&lt;String, Vault&gt; {
      * @return the refresh token value
      */
     public String fetchOrCreateRefreshToken(IdentifiableUser user) {
-<span class="fc" id="L87">        Optional&lt;Vault&gt; vaultOp = vaultRepository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),</span>
+<span class="fc" id="L87">        Optional&lt;Vault&gt; vaultOp = repository.findFirstByUserIdAndTypeOrderByCreatedTimeDesc(user.getId(),</span>
 <span class="fc" id="L88">                VaultType.REFRESH_TOKEN.getValue());</span>
         // If refresh token is young enough, then just return it.
-<span class="fc bfc" id="L90" title="All 4 branches covered.">        if (vaultOp.isPresent() &amp;&amp; isRefreshTokenAsKid(vaultOp.get().getSecret())) {</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">        if (vaultOp.isPresent() &amp;&amp; isRefreshTokenReusable(vaultOp.get().getSecret())) {</span>
 <span class="fc" id="L91">            return vaultOp.get().getSecret();</span>
         }
         // Refresh token is not a kid anymore or no existing refresh token found, a new
@@ -107,7 +107,7 @@ public class VaultService implements RepositoryService&lt;String, Vault&gt; {
 <span class="nc" id="L107">            return Optional.empty();</span>
         }
 <span class="fc" id="L109">        VaultEntity ve = veo.get();</span>
-<span class="fc" id="L110">        Optional&lt;Vault&gt; vault = vaultRepository.findBySecret(ve.getSecret());</span>
+<span class="fc" id="L110">        Optional&lt;Vault&gt; vault = repository.findBySecret(ve.getSecret());</span>
 <span class="pc bpc" id="L111" title="2 of 4 branches missed.">        if (vault.isPresent() &amp;&amp; !vault.get().getUserId().equals(ve.getUserId())) {</span>
 <span class="nc" id="L112">            log.error(&quot;User id are not match from decoded token {} and database {}&quot;, ve.getUserId(),</span>
 <span class="nc" id="L113">                    vault.get().getUserId());</span>
@@ -118,52 +118,62 @@ public class VaultService implements RepositoryService&lt;String, Vault&gt; {
     }
 
     @Override
-    public Vault save(Vault entity) {
-<span class="nc" id="L122">        return vaultRepository.save(entity);</span>
+    public Vault create(Vault entity) {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (hasValidId(entity)) {</span>
+<span class="nc" id="L123">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
+<span class="nc" id="L124">            entity.setId(null);</span>
+        }
+<span class="nc" id="L126">        return repository.save(entity);</span>
+    }
+
+    @Override
+    public Vault update(Vault entity) {
+<span class="nc" id="L131">        checkIdExists(entity);</span>
+<span class="nc" id="L132">        return repository.save(entity);</span>
     }
 
     @Override
     public Optional&lt;Vault&gt; getById(String id) {
-<span class="nc" id="L127">        return vaultRepository.findById(id);</span>
+<span class="nc" id="L137">        return repository.findById(id);</span>
     }
 
     @Override
     public void deleteById(String id) {
-<span class="fc" id="L132">        vaultRepository.deleteById(id);</span>
-<span class="fc" id="L133">    }</span>
+<span class="fc" id="L142">        repository.deleteById(id);</span>
+<span class="fc" id="L143">    }</span>
 
     public Optional&lt;Vault&gt; findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
-<span class="fc" id="L136">        return vaultRepository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);</span>
+<span class="fc" id="L146">        return repository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);</span>
     }
 
     public void cleanRefreshTokenByUserId(String userId) {
-<span class="nc" id="L140">        vaultRepository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());</span>
-<span class="nc" id="L141">    }</span>
+<span class="nc" id="L150">        repository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());</span>
+<span class="nc" id="L151">    }</span>
 
-    private boolean isRefreshTokenAsKid(String refreshToken) {
+    private boolean isRefreshTokenReusable(String refreshToken) {
         try {
-<span class="fc" id="L145">            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);</span>
-<span class="fc" id="L146">            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));</span>
+<span class="fc" id="L155">            DecodedJWT decodedJWT = jwtService.verifyRefreshToken(refreshToken);</span>
+<span class="fc" id="L156">            return decodedJWT.getExpiresAt().after(new Date(System.currentTimeMillis() + refreshTokenTTL * 8 / 10));</span>
         }
-<span class="nc" id="L148">        catch (JWTVerificationException e) {</span>
-<span class="nc" id="L149">            return false;</span>
+<span class="nc" id="L158">        catch (JWTVerificationException e) {</span>
+<span class="nc" id="L159">            return false;</span>
         }
     }
 
     public Optional&lt;Vault&gt; getByEmailAndSecretAndType(String email, String token, VaultType type) {
-<span class="fc" id="L154">        return vaultRepository.findByEmailAndSecretAndType(email, token, type.getValue());</span>
+<span class="fc" id="L164">        return repository.findByEmailAndSecretAndType(email, token, type.getValue());</span>
     }
 
     public List&lt;Vault&gt; getByEmail(String email) {
-<span class="fc" id="L158">        return vaultRepository.findByEmail(email);</span>
+<span class="fc" id="L168">        return repository.findByEmail(email);</span>
     }
 
     public List&lt;Vault&gt; getByUserIdAndType(String userId, VaultType vaultType) {
-<span class="fc" id="L162">        return vaultRepository.findByUserIdAndType(userId, vaultType.getValue());</span>
+<span class="fc" id="L172">        return repository.findByUserIdAndType(userId, vaultType.getValue());</span>
     }
 
     public List&lt;Vault&gt; getByUserId(String userId) {
-<span class="fc" id="L166">        return vaultRepository.findByUserId(userId);</span>
+<span class="fc" id="L176">        return repository.findByUserId(userId);</span>
     }
 
 }

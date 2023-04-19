@@ -14,10 +14,10 @@ public class BaseUtils {
 
     // This is used for test or dev usage, do not call it in prod.
     public static void setBaseUrl(String baseUrl) {
-<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (StringUtils.startsWithIgnoreCase(baseUrl, &quot;http&quot;)) {</span>
-<span class="fc" id="L18">            BaseUtils.baseUrl = baseUrl;</span>
+<span class="nc bnc" id="L17" title="All 2 branches missed.">        if (StringUtils.startsWithIgnoreCase(baseUrl, &quot;http&quot;)) {</span>
+<span class="nc" id="L18">            BaseUtils.baseUrl = baseUrl;</span>
         }
-<span class="fc" id="L20">    }</span>
+<span class="nc" id="L20">    }</span>
 
     public static String getConfirmationUrl(@NotNull String secret) {
 <span class="nc" id="L23">        return baseUrl + &quot;/email/verification?confirmation=&quot; + secret;</span>

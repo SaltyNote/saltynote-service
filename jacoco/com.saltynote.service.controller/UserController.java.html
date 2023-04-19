@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.saltynote.service.controller;
 
 import com.saltynote.service.domain.VaultType;
-import com.saltynote.service.domain.transfer.JwtToken;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.domain.transfer.PasswordReset;
 import com.saltynote.service.domain.transfer.PasswordUpdate;
 import com.saltynote.service.domain.transfer.Payload;
 import com.saltynote.service.domain.transfer.ServiceResponse;
+import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
 import com.saltynote.service.domain.transfer.UserNewRequest;
 import com.saltynote.service.entity.SiteUser;
@@ -92,7 +92,7 @@ public class UserController {
         }
 <span class="fc" id="L93">        SiteUser user = userNewRequest.toSiteUser();</span>
 <span class="fc" id="L94">        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));</span>
-<span class="fc" id="L95">        user = userService.save(user);</span>
+<span class="fc" id="L95">        user = userService.create(user);</span>
 <span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (StringUtils.hasText(user.getId())) {</span>
 <span class="fc" id="L97">            vaultService.deleteById(vaultOp.get().getId());</span>
 <span class="fc" id="L98">            return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));</span>
@@ -104,20 +104,20 @@ public class UserController {
     }
 
     @PostMapping(&quot;/login&quot;)
-    public ResponseEntity&lt;JwtToken&gt; authenticate(@RequestBody UserCredential credential) {
+    public ResponseEntity&lt;TokenPair&gt; authenticate(@RequestBody UserCredential credential) {
 <span class="fc" id="L108">        return ResponseEntity.ok(authenticationService.authenticate(credential));</span>
     }
 
     @PostMapping(&quot;/refresh_token&quot;)
-    public ResponseEntity&lt;JwtToken&gt; refreshToken(@Valid @RequestBody JwtToken jwtToken) {
+    public ResponseEntity&lt;TokenPair&gt; refreshToken(@Valid @RequestBody TokenPair tokenPair) {
         // 1. No expiry, and valid.
-<span class="fc" id="L114">        JwtUser user = jwtService.parseRefreshToken(jwtToken.getRefreshToken());</span>
+<span class="fc" id="L114">        JwtUser user = jwtService.parseRefreshToken(tokenPair.getRefreshToken());</span>
         // 2. Not deleted from database.
 <span class="fc" id="L116">        Optional&lt;Vault&gt; token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN,</span>
-<span class="fc" id="L117">                jwtToken.getRefreshToken());</span>
+<span class="fc" id="L117">                tokenPair.getRefreshToken());</span>
 <span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (token.isPresent()) {</span>
 <span class="fc" id="L119">            String newToken = jwtService.createAccessToken(user);</span>
-<span class="fc" id="L120">            return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));</span>
+<span class="fc" id="L120">            return ResponseEntity.ok(new TokenPair(newToken, tokenPair.getRefreshToken()));</span>
         }
         else {
 <span class="nc" id="L123">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Invalid refresh token provided!&quot;);</span>
@@ -163,7 +163,7 @@ public class UserController {
 <span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if (usero.isPresent()) {</span>
 <span class="fc" id="L164">            SiteUser user = usero.get();</span>
 <span class="fc" id="L165">            user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));</span>
-<span class="fc" id="L166">            userService.save(user);</span>
+<span class="fc" id="L166">            userService.update(user);</span>
 <span class="fc" id="L167">            vaultService.deleteById(vo.get().getId());</span>
 <span class="fc" id="L168">            return ResponseEntity.ok(ServiceResponse.ok(&quot;Password has been reset!&quot;));</span>
         }
@@ -194,7 +194,7 @@ public class UserController {
         }
 
 <span class="fc" id="L196">        user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));</span>
-<span class="fc" id="L197">        userService.save(user);</span>
+<span class="fc" id="L197">        userService.update(user);</span>
 <span class="fc" id="L198">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Password is updated now.&quot;));</span>
     }
 

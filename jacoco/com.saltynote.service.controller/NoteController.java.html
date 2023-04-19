@@ -66,7 +66,7 @@ public class NoteController {
 <span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {</span>
 <span class="nc" id="L67">            noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());</span>
         }
-<span class="fc" id="L69">        noteTobeUpdate = noteService.save(noteTobeUpdate);</span>
+<span class="fc" id="L69">        noteTobeUpdate = noteService.update(noteTobeUpdate);</span>
 <span class="fc" id="L70">        return ResponseEntity.ok(noteTobeUpdate);</span>
     }
 
@@ -112,7 +112,7 @@ public class NoteController {
 <span class="fc" id="L112">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
 <span class="fc" id="L113">        noteDto.setUserId(user.getId());</span>
 <span class="fc" id="L114">        Note note = noteConverter.toEntity(noteDto);</span>
-<span class="fc" id="L115">        note = noteService.save(note);</span>
+<span class="fc" id="L115">        note = noteService.create(note);</span>
 <span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(note.getId())) {</span>
 <span class="fc" id="L117">            return ResponseEntity.ok(note);</span>
         }
