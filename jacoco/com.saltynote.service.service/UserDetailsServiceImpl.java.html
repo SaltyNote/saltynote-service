@@ -15,7 +15,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public LoginUser loadUserByUsername(String username) throws UsernameNotFoundException {
-<span class="fc" id="L18">        SiteUser user = userService.getRepository().findByUsername(username);</span>
+<span class="fc" id="L18">        SiteUser user = userService.getByUsername(username);</span>
 <span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (user == null) {</span>
 <span class="nc" id="L20">            throw new UsernameNotFoundException(username);</span>
         }

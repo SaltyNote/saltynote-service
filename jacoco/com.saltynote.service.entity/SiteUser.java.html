@@ -9,48 +9,73 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = &quot;user&quot;)
-<span class="pc bnc" id="L20" title="All 54 branches missed.">@Data</span>
+@Getter
+<span class="pc" id="L26">@Setter</span>
+<span class="nc" id="L27">@ToString</span>
+<span class="fc" id="L28">@RequiredArgsConstructor</span>
 @Accessors(chain = true)
 public class SiteUser implements Serializable, IdentifiableUser {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = &quot;id&quot;, nullable = false)
-<span class="fc" id="L28">    private String id;</span>
+<span class="fc" id="L37">    private String id;</span>
 
     @Column(name = &quot;username&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L32">    private String username;</span>
+<span class="fc" id="L41">    private String username;</span>
 
     @Column(name = &quot;email&quot;, nullable = false)
     @NotBlank
     @Email
-<span class="fc" id="L37">    private String email;</span>
+<span class="fc" id="L46">    private String email;</span>
 
     @Column(name = &quot;password&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L41">    private String password;</span>
+<span class="fc" id="L50">    private String password;</span>
 
     @Column(name = &quot;register_time&quot;)
-<span class="nc" id="L44">    private Timestamp registerTime;</span>
+<span class="nc" id="L53">    private Timestamp registerTime;</span>
 
     @Column(name = &quot;last_login_time&quot;)
-<span class="nc" id="L47">    private Timestamp lastLoginTime;</span>
+<span class="nc" id="L56">    private Timestamp lastLoginTime;</span>
 
     @PrePersist
     private void beforeSave() {
-<span class="fc" id="L51">        this.id = FriendlyId.createFriendlyId();</span>
-<span class="fc" id="L52">        this.registerTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L60">        this.id = FriendlyId.createFriendlyId();</span>
+<span class="fc" id="L61">        this.registerTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L62">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (this == o)</span>
+<span class="nc" id="L67">            return true;</span>
+<span class="nc bnc" id="L68" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
+<span class="nc" id="L69">            return false;</span>
+<span class="nc" id="L70">        SiteUser siteUser = (SiteUser) o;</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        return Objects.equals(id, siteUser.id) &amp;&amp; Objects.equals(username, siteUser.username)</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">                &amp;&amp; Objects.equals(email, siteUser.email);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L77">        return Objects.hash(id, username, email);</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

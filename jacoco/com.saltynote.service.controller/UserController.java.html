@@ -66,7 +66,7 @@ public class UserController {
     @PostMapping(&quot;/email/verification&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; getVerificationToken(@Valid @RequestBody Payload payload) {
         // check whether this email is already signed up or not.
-<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (userService.getRepository().findByEmail(payload.getEmail()).isPresent()) {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (userService.getByEmail(payload.getEmail()).isPresent()) {</span>
 <span class="fc" id="L70">            return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
 <span class="fc" id="L71">                .body(new ServiceResponse(HttpStatus.BAD_REQUEST, &quot;Email is already signed up.&quot;));</span>
         }
@@ -84,129 +84,128 @@ public class UserController {
                     &quot;Password should be at least &quot; + passwordMinimalLength + &quot; characters.&quot;);
         }
         // Check token
-<span class="fc" id="L87">        Optional&lt;Vault&gt; vaultOp = vaultService.getRepository()</span>
-<span class="fc" id="L88">            .findByEmailAndSecretAndType(userNewRequest.getEmail(), userNewRequest.getToken(),</span>
-<span class="fc" id="L89">                    VaultType.NEW_ACCOUNT.getValue());</span>
+<span class="fc" id="L87">        Optional&lt;Vault&gt; vaultOp = vaultService.getByEmailAndSecretAndType(userNewRequest.getEmail(),</span>
+<span class="fc" id="L88">                userNewRequest.getToken(), VaultType.NEW_ACCOUNT);</span>
 
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (vaultOp.isEmpty()) {</span>
-<span class="nc" id="L92">            throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, &quot;A valid verification code is required for signup.&quot;);</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (vaultOp.isEmpty()) {</span>
+<span class="nc" id="L91">            throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, &quot;A valid verification code is required for signup.&quot;);</span>
         }
-<span class="fc" id="L94">        SiteUser user = userNewRequest.toSiteUser();</span>
-<span class="fc" id="L95">        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));</span>
-<span class="fc" id="L96">        user = userService.getRepository().save(user);</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (StringUtils.hasText(user.getId())) {</span>
-<span class="fc" id="L98">            vaultService.getRepository().delete(vaultOp.get());</span>
-<span class="fc" id="L99">            return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));</span>
+<span class="fc" id="L93">        SiteUser user = userNewRequest.toSiteUser();</span>
+<span class="fc" id="L94">        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));</span>
+<span class="fc" id="L95">        user = userService.save(user);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (StringUtils.hasText(user.getId())) {</span>
+<span class="fc" id="L97">            vaultService.deleteById(vaultOp.get().getId());</span>
+<span class="fc" id="L98">            return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));</span>
         }
         else {
-<span class="nc" id="L102">            throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,</span>
+<span class="nc" id="L101">            throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,</span>
                     &quot;Failed to signup, please try again later.&quot;);
         }
     }
 
     @PostMapping(&quot;/login&quot;)
     public ResponseEntity&lt;JwtToken&gt; authenticate(@RequestBody UserCredential credential) {
-<span class="fc" id="L109">        return ResponseEntity.ok(authenticationService.authenticate(credential));</span>
+<span class="fc" id="L108">        return ResponseEntity.ok(authenticationService.authenticate(credential));</span>
     }
 
     @PostMapping(&quot;/refresh_token&quot;)
     public ResponseEntity&lt;JwtToken&gt; refreshToken(@Valid @RequestBody JwtToken jwtToken) {
         // 1. No expiry, and valid.
-<span class="fc" id="L115">        JwtUser user = jwtService.parseRefreshToken(jwtToken.getRefreshToken());</span>
+<span class="fc" id="L114">        JwtUser user = jwtService.parseRefreshToken(jwtToken.getRefreshToken());</span>
         // 2. Not deleted from database.
-<span class="fc" id="L117">        Optional&lt;Vault&gt; token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN,</span>
-<span class="fc" id="L118">                jwtToken.getRefreshToken());</span>
-<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (token.isPresent()) {</span>
-<span class="fc" id="L120">            String newToken = jwtService.createAccessToken(user);</span>
-<span class="fc" id="L121">            return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));</span>
+<span class="fc" id="L116">        Optional&lt;Vault&gt; token = vaultService.findByUserIdAndTypeAndValue(user.getId(), VaultType.REFRESH_TOKEN,</span>
+<span class="fc" id="L117">                jwtToken.getRefreshToken());</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (token.isPresent()) {</span>
+<span class="fc" id="L119">            String newToken = jwtService.createAccessToken(user);</span>
+<span class="fc" id="L120">            return ResponseEntity.ok(new JwtToken(newToken, jwtToken.getRefreshToken()));</span>
         }
         else {
-<span class="nc" id="L124">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Invalid refresh token provided!&quot;);</span>
+<span class="nc" id="L123">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Invalid refresh token provided!&quot;);</span>
         }
     }
 
     @Transactional
     @DeleteMapping(&quot;/refresh_tokens&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; cleanRefreshTokens(Authentication auth) {
-<span class="nc" id="L131">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
-<span class="nc" id="L132">        log.info(&quot;[cleanRefreshTokens] user = {}&quot;, user);</span>
-<span class="nc" id="L133">        vaultService.cleanRefreshTokenByUserId(user.getId());</span>
-<span class="nc" id="L134">        return ResponseEntity.ok(ServiceResponse.ok(&quot;All your refresh tokens are cleaned.&quot;));</span>
+<span class="nc" id="L130">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
+<span class="nc" id="L131">        log.info(&quot;[cleanRefreshTokens] user = {}&quot;, user);</span>
+<span class="nc" id="L132">        vaultService.cleanRefreshTokenByUserId(user.getId());</span>
+<span class="nc" id="L133">        return ResponseEntity.ok(ServiceResponse.ok(&quot;All your refresh tokens are cleaned.&quot;));</span>
     }
 
     @PostMapping(&quot;/password/forget&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; forgetPassword(@Valid @RequestBody Payload payload) {
-<span class="fc" id="L139">        Optional&lt;SiteUser&gt; usero = userService.getRepository().findByEmail(payload.getEmail());</span>
-<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (usero.isEmpty()) {</span>
-<span class="nc" id="L141">            log.warn(&quot;User is not found for email = {}&quot;, payload.getEmail());</span>
-<span class="nc" id="L142">            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)</span>
-<span class="nc" id="L143">                .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, &quot;Invalid email&quot;));</span>
+<span class="fc" id="L138">        Optional&lt;SiteUser&gt; usero = userService.getByEmail(payload.getEmail());</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if (usero.isEmpty()) {</span>
+<span class="nc" id="L140">            log.warn(&quot;User is not found for email = {}&quot;, payload.getEmail());</span>
+<span class="nc" id="L141">            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)</span>
+<span class="nc" id="L142">                .body(new ServiceResponse(HttpStatus.PRECONDITION_FAILED, &quot;Invalid email&quot;));</span>
         }
 
-<span class="fc" id="L146">        eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));</span>
-<span class="fc" id="L147">        return ResponseEntity.ok(ServiceResponse</span>
-<span class="fc" id="L148">            .ok(&quot;Password reset email will be sent to your email, please reset your email with link there.&quot;));</span>
+<span class="fc" id="L145">        eventPublisher.publishEvent(new EmailEvent(this, usero.get(), EmailEvent.Type.PASSWORD_FORGET));</span>
+<span class="fc" id="L146">        return ResponseEntity.ok(ServiceResponse</span>
+<span class="fc" id="L147">            .ok(&quot;Password reset email will be sent to your email, please reset your email with link there.&quot;));</span>
     }
 
     @PostMapping(&quot;/password/reset&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; resetPassword(@Valid @RequestBody PasswordReset passwordReset) {
-<span class="fc" id="L153">        val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Invalid payload provided.&quot;);</span>
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (passwordReset.getPassword().length() &lt; passwordMinimalLength) {</span>
-<span class="nc" id="L155">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
+<span class="fc" id="L152">        val wre = new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Invalid payload provided.&quot;);</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        if (passwordReset.getPassword().length() &lt; passwordMinimalLength) {</span>
+<span class="nc" id="L154">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
                     &quot;Password should be at least &quot; + passwordMinimalLength + &quot; characters.&quot;);
         }
-<span class="fc" id="L158">        Optional&lt;Vault&gt; vo = vaultService.findByToken(passwordReset.getToken());</span>
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (vo.isEmpty()) {</span>
-<span class="nc" id="L160">            throw wre;</span>
+<span class="fc" id="L157">        Optional&lt;Vault&gt; vo = vaultService.findByToken(passwordReset.getToken());</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (vo.isEmpty()) {</span>
+<span class="nc" id="L159">            throw wre;</span>
         }
 
-<span class="fc" id="L163">        Optional&lt;SiteUser&gt; usero = userService.getRepository().findById(vo.get().getUserId());</span>
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (usero.isPresent()) {</span>
-<span class="fc" id="L165">            SiteUser user = usero.get();</span>
-<span class="fc" id="L166">            user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));</span>
-<span class="fc" id="L167">            userService.getRepository().save(user);</span>
-<span class="fc" id="L168">            vaultService.getRepository().delete(vo.get());</span>
-<span class="fc" id="L169">            return ResponseEntity.ok(ServiceResponse.ok(&quot;Password has been reset!&quot;));</span>
+<span class="fc" id="L162">        Optional&lt;SiteUser&gt; usero = userService.getById(vo.get().getUserId());</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if (usero.isPresent()) {</span>
+<span class="fc" id="L164">            SiteUser user = usero.get();</span>
+<span class="fc" id="L165">            user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));</span>
+<span class="fc" id="L166">            userService.save(user);</span>
+<span class="fc" id="L167">            vaultService.deleteById(vo.get().getId());</span>
+<span class="fc" id="L168">            return ResponseEntity.ok(ServiceResponse.ok(&quot;Password has been reset!&quot;));</span>
         }
         else {
-<span class="nc" id="L172">            throw wre;</span>
+<span class="nc" id="L171">            throw wre;</span>
         }
     }
 
     @RequestMapping(value = &quot;/password&quot;, method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity&lt;ServiceResponse&gt; updatePassword(@Valid @RequestBody PasswordUpdate passwordUpdate,
             Authentication auth) {
-<span class="fc" id="L179">        JwtUser jwtUser = (JwtUser) auth.getPrincipal();</span>
+<span class="fc" id="L178">        JwtUser jwtUser = (JwtUser) auth.getPrincipal();</span>
         // Validate new password
-<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if (passwordUpdate.getPassword().length() &lt; passwordMinimalLength) {</span>
-<span class="nc" id="L182">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (passwordUpdate.getPassword().length() &lt; passwordMinimalLength) {</span>
+<span class="nc" id="L181">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
                     &quot;New password should be at least &quot; + passwordMinimalLength + &quot; characters.&quot;);
         }
 
         // Validate old password
-<span class="fc" id="L187">        Optional&lt;SiteUser&gt; usero = userService.getRepository().findById(jwtUser.getId());</span>
-<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if (usero.isEmpty()) {</span>
-<span class="nc" id="L189">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
+<span class="fc" id="L186">        Optional&lt;SiteUser&gt; usero = userService.getById(jwtUser.getId());</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (usero.isEmpty()) {</span>
+<span class="nc" id="L188">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,</span>
                     &quot;Something goes wrong when fetching your info, please try later again.&quot;);
         }
-<span class="fc" id="L192">        SiteUser user = usero.get();</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {</span>
-<span class="nc" id="L194">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Wrong current password is provided.&quot;);</span>
+<span class="fc" id="L191">        SiteUser user = usero.get();</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if (!bCryptPasswordEncoder.matches(passwordUpdate.getOldPassword(), user.getPassword())) {</span>
+<span class="nc" id="L193">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;Wrong current password is provided.&quot;);</span>
         }
 
-<span class="fc" id="L197">        user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));</span>
-<span class="fc" id="L198">        userService.getRepository().save(user);</span>
-<span class="fc" id="L199">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Password is updated now.&quot;));</span>
+<span class="fc" id="L196">        user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));</span>
+<span class="fc" id="L197">        userService.save(user);</span>
+<span class="fc" id="L198">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Password is updated now.&quot;));</span>
     }
 
     @DeleteMapping(&quot;/account/{id}&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; accountDeletion(@PathVariable(&quot;id&quot;) String userId, Authentication auth) {
-<span class="fc" id="L204">        JwtUser jwtUser = (JwtUser) auth.getPrincipal();</span>
-<span class="fc bfc" id="L205" title="All 2 branches covered.">        if (!Objects.equals(userId, jwtUser.getId())) {</span>
-<span class="fc" id="L206">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;User information is not confirmed&quot;);</span>
+<span class="fc" id="L203">        JwtUser jwtUser = (JwtUser) auth.getPrincipal();</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (!Objects.equals(userId, jwtUser.getId())) {</span>
+<span class="fc" id="L205">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;User information is not confirmed&quot;);</span>
         }
-<span class="fc" id="L208">        userService.cleanupByUserId(jwtUser.getId());</span>
-<span class="fc" id="L209">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Account deletion is successful.&quot;));</span>
+<span class="fc" id="L207">        userService.cleanupByUserId(jwtUser.getId());</span>
+<span class="fc" id="L208">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Account deletion is successful.&quot;));</span>
     }
 
 }

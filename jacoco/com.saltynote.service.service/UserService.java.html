@@ -5,14 +5,19 @@ import com.saltynote.service.repository.NoteRepository;
 import com.saltynote.service.repository.UserRepository;
 import com.saltynote.service.repository.VaultRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-<span class="fc" id="L14">@RequiredArgsConstructor</span>
-public class UserService implements RepositoryService&lt;SiteUser, UserRepository&gt; {
+<span class="fc" id="L17">@RequiredArgsConstructor</span>
+<span class="fc" id="L18">@Slf4j</span>
+@CacheConfig(cacheNames = &quot;user&quot;)
+public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
 
     private final UserRepository userRepository;
 
@@ -21,23 +26,38 @@ public class UserService implements RepositoryService&lt;SiteUser, UserRepositor
     private final VaultRepository vaultRepository;
 
     @Override
-    public UserRepository getRepository() {
-<span class="fc" id="L25">        return userRepository;</span>
+    public SiteUser save(SiteUser entity) {
+<span class="fc" id="L30">        return userRepository.save(entity);</span>
     }
 
     @Override
+    @Cacheable(key = &quot;#id&quot;)
     public Optional&lt;SiteUser&gt; getById(String id) {
-<span class="nc" id="L30">        return userRepository.findById(id);</span>
+<span class="fc" id="L36">        log.info(&quot;Get user by id: {}&quot;, id);</span>
+<span class="fc" id="L37">        return userRepository.findById(id);</span>
     }
+
+    @Override
+    public void deleteById(String id) {
+<span class="nc" id="L42">        userRepository.deleteById(id);</span>
+<span class="nc" id="L43">    }</span>
 
     // This api will delete all database records with given user id, including the user
     // itself.
     @Transactional
     public void cleanupByUserId(String userId) {
-<span class="fc" id="L37">        noteRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L38">        vaultRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L39">        userRepository.deleteById(userId);</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L49">        noteRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L50">        vaultRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L51">        userRepository.deleteById(userId);</span>
+<span class="fc" id="L52">    }</span>
+
+    public Optional&lt;SiteUser&gt; getByEmail(String email) {
+<span class="fc" id="L55">        return userRepository.findByEmail(email);</span>
+    }
+
+    public SiteUser getByUsername(String username) {
+<span class="fc" id="L59">        return userRepository.findByUsername(username);</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

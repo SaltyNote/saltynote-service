@@ -6,15 +6,22 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = &quot;vault&quot;)
-<span class="pc bnc" id="L17" title="All 54 branches missed.">@Data</span>
+@Getter
+<span class="pc" id="L22">@Setter</span>
+<span class="nc" id="L23">@ToString</span>
+<span class="fc" id="L24">@RequiredArgsConstructor</span>
 @Accessors(chain = true)
 public class Vault implements Serializable {
 
@@ -22,28 +29,45 @@ public class Vault implements Serializable {
 
     @Id
     @Column(name = &quot;id&quot;, nullable = false)
-<span class="fc" id="L25">    private String id;</span>
+<span class="fc" id="L32">    private String id;</span>
 
     @Column(name = &quot;user_id&quot;)
-<span class="fc" id="L28">    private String userId;</span>
+<span class="fc" id="L35">    private String userId;</span>
 
     @Column(name = &quot;secret&quot;, nullable = false)
-<span class="fc" id="L31">    private String secret;</span>
+<span class="fc" id="L38">    private String secret;</span>
 
     @Column(name = &quot;type&quot;, nullable = false)
-<span class="nc" id="L34">    private String type;</span>
+<span class="nc" id="L41">    private String type;</span>
 
     @Column(name = &quot;email&quot;)
-<span class="fc" id="L37">    private String email;</span>
+<span class="fc" id="L44">    private String email;</span>
 
     @Column(name = &quot;created_time&quot;, nullable = false)
-<span class="nc" id="L40">    private Timestamp createdTime;</span>
+<span class="nc" id="L47">    private Timestamp createdTime;</span>
 
     @PrePersist
     private void beforeSave() {
-<span class="fc" id="L44">        this.id = FriendlyId.createFriendlyId();</span>
-<span class="fc" id="L45">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L46">    }</span>
+<span class="fc" id="L51">        this.id = FriendlyId.createFriendlyId();</span>
+<span class="fc" id="L52">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L53">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (this == o)</span>
+<span class="nc" id="L58">            return true;</span>
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
+<span class="nc" id="L60">            return false;</span>
+<span class="nc" id="L61">        Vault vault = (Vault) o;</span>
+<span class="nc bnc" id="L62" title="All 4 branches missed.">        return Objects.equals(id, vault.id) &amp;&amp; Objects.equals(userId, vault.userId)</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">                &amp;&amp; Objects.equals(secret, vault.secret) &amp;&amp; Objects.equals(type, vault.type)</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                &amp;&amp; Objects.equals(email, vault.email);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L69">        return Objects.hash(id, userId, secret, type, email);</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

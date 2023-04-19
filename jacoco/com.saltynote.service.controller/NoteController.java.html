@@ -44,7 +44,7 @@ public class NoteController {
 
     @GetMapping(&quot;/note/{id}&quot;)
     public ResponseEntity&lt;Note&gt; getNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
-<span class="fc" id="L47">        Optional&lt;Note&gt; note = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L47">        Optional&lt;Note&gt; note = noteService.getById(id);</span>
 <span class="fc" id="L48">        checkNoteOwner(note, auth);</span>
 <span class="pc" id="L49">        return note.map(ResponseEntity::ok).orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
     }
@@ -52,7 +52,7 @@ public class NoteController {
     @RequestMapping(value = &quot;/note/{id}&quot;, method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity&lt;Note&gt; updateNoteById(@PathVariable(&quot;id&quot;) String id, @RequestBody NoteDto noteDto,
             Authentication auth) {
-<span class="fc" id="L55">        Optional&lt;Note&gt; queryNote = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L55">        Optional&lt;Note&gt; queryNote = noteService.getById(id);</span>
 <span class="fc" id="L56">        checkNoteOwner(queryNote, auth);</span>
 <span class="fc" id="L57">        Note noteTobeUpdate = queryNote.get();</span>
 <span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getNote())) {</span>
@@ -66,15 +66,15 @@ public class NoteController {
 <span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {</span>
 <span class="nc" id="L67">            noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());</span>
         }
-<span class="fc" id="L69">        noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);</span>
+<span class="fc" id="L69">        noteTobeUpdate = noteService.save(noteTobeUpdate);</span>
 <span class="fc" id="L70">        return ResponseEntity.ok(noteTobeUpdate);</span>
     }
 
     @DeleteMapping(&quot;/note/{id}&quot;)
     public ResponseEntity&lt;ServiceResponse&gt; deleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
-<span class="fc" id="L75">        Optional&lt;Note&gt; note = noteService.getRepository().findById(id);</span>
+<span class="fc" id="L75">        Optional&lt;Note&gt; note = noteService.getById(id);</span>
 <span class="fc" id="L76">        checkNoteOwner(note, auth);</span>
-<span class="fc" id="L77">        noteService.getRepository().deleteById(id);</span>
+<span class="fc" id="L77">        noteService.deleteById(id);</span>
 <span class="fc" id="L78">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Delete Successfully!&quot;));</span>
     }
 
@@ -89,7 +89,7 @@ public class NoteController {
     @GetMapping(&quot;/notes&quot;)
     public List&lt;Note&gt; getNotes(Authentication auth, @RequestParam(required = false) String keyword) {
 <span class="fc" id="L91">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
-<span class="fc" id="L92">        List&lt;Note&gt; allNotes = noteService.getRepository().findAllByUserId(user.getId());</span>
+<span class="fc" id="L92">        List&lt;Note&gt; allNotes = noteService.getAllByUserId(user.getId());</span>
 <span class="pc bpc" id="L93" title="2 of 6 branches missed.">        if (allNotes == null || allNotes.isEmpty() || StringUtils.isBlank(keyword)) {</span>
 <span class="fc" id="L94">            return allNotes;</span>
         }
@@ -104,7 +104,7 @@ public class NoteController {
     @PostMapping(&quot;/notes&quot;)
     public List&lt;Note&gt; getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
 <span class="nc" id="L106">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
-<span class="nc" id="L107">        return noteService.getRepository().findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());</span>
+<span class="nc" id="L107">        return noteService.getAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());</span>
     }
 
     @PostMapping(&quot;/note&quot;)
@@ -112,7 +112,7 @@ public class NoteController {
 <span class="fc" id="L112">        JwtUser user = (JwtUser) auth.getPrincipal();</span>
 <span class="fc" id="L113">        noteDto.setUserId(user.getId());</span>
 <span class="fc" id="L114">        Note note = noteConverter.toEntity(noteDto);</span>
-<span class="fc" id="L115">        note = noteService.getRepository().save(note);</span>
+<span class="fc" id="L115">        note = noteService.save(note);</span>
 <span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(note.getId())) {</span>
 <span class="fc" id="L117">            return ResponseEntity.ok(note);</span>
         }

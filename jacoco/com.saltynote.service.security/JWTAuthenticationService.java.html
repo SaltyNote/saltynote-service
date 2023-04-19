@@ -39,9 +39,9 @@ public class JWTAuthenticationService {
 <span class="fc" id="L39">        String accessToken = jwtService.createAccessToken(user);</span>
 <span class="fc" id="L40">        String refreshToken = vaultService.fetchOrCreateRefreshToken(user);</span>
         // update current user's lastLoginTime, after user logged in successfully
-<span class="fc" id="L42">        SiteUser curtUser = userService.getRepository().findByUsername(user.getUsername());</span>
+<span class="fc" id="L42">        SiteUser curtUser = userService.getByUsername(user.getUsername());</span>
 <span class="fc" id="L43">        curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));</span>
-<span class="fc" id="L44">        userService.getRepository().save(curtUser);</span>
+<span class="fc" id="L44">        userService.save(curtUser);</span>
 <span class="fc" id="L45">        return new JwtToken(accessToken, refreshToken);</span>
 
     }
