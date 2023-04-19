@@ -50,7 +50,7 @@ public class NoteService implements RepositoryService<String, Note> {
         return repository.findAllByUserId(userId);
     }
 
-    @Cacheable(key = "#userId-#url")
+    @Cacheable(key = "#userId + #url")
     public List<Note> getAllByUserIdAndUrl(String userId, String url) {
         return repository.findAllByUserIdAndUrl(userId, url);
     }
