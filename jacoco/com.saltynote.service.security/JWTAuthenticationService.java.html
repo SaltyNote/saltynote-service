@@ -3,10 +3,10 @@
 import com.saltynote.service.domain.LoginUser;
 import com.saltynote.service.domain.transfer.TokenPair;
 import com.saltynote.service.domain.transfer.UserCredential;
-import com.saltynote.service.entity.SiteUser;
 import com.saltynote.service.service.JwtService;
 import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,11 +14,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.Collections;
 
-<span class="fc" id="L20">@Slf4j</span>
-<span class="fc" id="L21">@RequiredArgsConstructor</span>
+<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
 @Service
 public class JWTAuthenticationService {
 
@@ -30,19 +29,17 @@ public class JWTAuthenticationService {
 
     private final UserService userService;
 
-    public TokenPair authenticate(UserCredential credential) {
+    public TokenPair authenticate(UserCredential credential, HttpServletRequest request) {
 
-<span class="fc" id="L35">        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(</span>
-<span class="fc" id="L36">                credential.getUsername(), credential.getPassword(), Collections.emptyList()));</span>
+<span class="fc" id="L34">        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(</span>
+<span class="fc" id="L35">                credential.getUsername(), credential.getPassword(), Collections.emptyList()));</span>
 
-<span class="fc" id="L38">        LoginUser user = (LoginUser) auth.getPrincipal();</span>
-<span class="fc" id="L39">        String accessToken = jwtService.createAccessToken(user);</span>
-<span class="fc" id="L40">        String refreshToken = vaultService.fetchOrCreateRefreshToken(user);</span>
+<span class="fc" id="L37">        LoginUser user = (LoginUser) auth.getPrincipal();</span>
+<span class="fc" id="L38">        String accessToken = jwtService.createAccessToken(user);</span>
+<span class="fc" id="L39">        String refreshToken = vaultService.fetchOrCreateRefreshToken(user);</span>
         // update current user's lastLoginTime, after user logged in successfully
-<span class="fc" id="L42">        SiteUser curtUser = userService.getByUsername(user.getUsername());</span>
-<span class="fc" id="L43">        curtUser.setLastLoginTime(new Timestamp(System.currentTimeMillis()));</span>
-<span class="fc" id="L44">        userService.update(curtUser);</span>
-<span class="fc" id="L45">        return new TokenPair(accessToken, refreshToken);</span>
+<span class="fc" id="L41">        userService.saveLoginHistory(user.getId(), request.getRemoteAddr(), request.getHeader(&quot;User-Agent&quot;));</span>
+<span class="fc" id="L42">        return new TokenPair(accessToken, refreshToken);</span>
 
     }
 
