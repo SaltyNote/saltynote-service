@@ -19,6 +19,7 @@ import com.saltynote.service.service.UserService;
 import com.saltynote.service.service.VaultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,8 +105,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenPair> authenticate(@RequestBody UserCredential credential) {
-        return ResponseEntity.ok(authenticationService.authenticate(credential));
+    public ResponseEntity<TokenPair> authenticate(@RequestBody UserCredential credential, HttpServletRequest request) {
+        return ResponseEntity.ok(authenticationService.authenticate(credential, request));
     }
 
     @PostMapping("/refresh_token")
