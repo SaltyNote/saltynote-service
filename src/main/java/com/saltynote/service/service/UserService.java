@@ -17,18 +17,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @CacheConfig(cacheNames = "user")
-public class UserService implements RepositoryService<String, SiteUser, UserRepository> {
+public class UserService implements RepositoryService<String, SiteUser> {
 
     private final UserRepository userRepository;
 
     private final NoteRepository noteRepository;
 
     private final VaultRepository vaultRepository;
-
-    @Override
-    public UserRepository getRepository() {
-        return userRepository;
-    }
 
     @Override
     public SiteUser save(SiteUser entity) {

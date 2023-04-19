@@ -13,14 +13,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "note")
-public class NoteService implements RepositoryService<String, Note, NoteRepository> {
+public class NoteService implements RepositoryService<String, Note> {
 
     private final NoteRepository repository;
-
-    @Override
-    public NoteRepository getRepository() {
-        return repository;
-    }
 
     @Override
     public Note save(Note entity) {
@@ -46,6 +41,10 @@ public class NoteService implements RepositoryService<String, Note, NoteReposito
     @Cacheable(key = "#userId-#url")
     public List<Note> getAllByUserIdAndUrl(String userId, String url) {
         return repository.findAllByUserIdAndUrl(userId, url);
+    }
+
+    public void deleteAll(List<Note> notesToCleaned) {
+        repository.deleteAll(notesToCleaned);
     }
 
 }

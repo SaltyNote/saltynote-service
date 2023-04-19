@@ -20,13 +20,14 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "vault")
-public class VaultService implements RepositoryService<String, Vault, VaultRepository> {
+public class VaultService implements RepositoryService<String, Vault> {
 
     private final VaultRepository vaultRepository;
 
@@ -106,7 +107,7 @@ public class VaultService implements RepositoryService<String, Vault, VaultRepos
             return Optional.empty();
         }
         VaultEntity ve = veo.get();
-        Optional<Vault> vault = getRepository().findBySecret(ve.getSecret());
+        Optional<Vault> vault = vaultRepository.findBySecret(ve.getSecret());
         if (vault.isPresent() && !vault.get().getUserId().equals(ve.getUserId())) {
             log.error("User id are not match from decoded token {} and database {}", ve.getUserId(),
                     vault.get().getUserId());
@@ -117,13 +118,8 @@ public class VaultService implements RepositoryService<String, Vault, VaultRepos
     }
 
     @Override
-    public VaultRepository getRepository() {
-        return vaultRepository;
-    }
-
-    @Override
     public Vault save(Vault entity) {
-        return getRepository().save(entity);
+        return vaultRepository.save(entity);
     }
 
     @Override
@@ -133,7 +129,7 @@ public class VaultService implements RepositoryService<String, Vault, VaultRepos
 
     @Override
     public void deleteById(String id) {
-        getRepository().deleteById(id);
+        vaultRepository.deleteById(id);
     }
 
     public Optional<Vault> findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
@@ -156,6 +152,18 @@ public class VaultService implements RepositoryService<String, Vault, VaultRepos
 
     public Optional<Vault> getByEmailAndSecretAndType(String email, String token, VaultType type) {
         return vaultRepository.findByEmailAndSecretAndType(email, token, type.getValue());
+    }
+
+    public List<Vault> getByEmail(String email) {
+        return vaultRepository.findByEmail(email);
+    }
+
+    public List<Vault> getByUserIdAndType(String userId, VaultType vaultType) {
+        return vaultRepository.findByUserIdAndType(userId, vaultType.getValue());
+    }
+
+    public List<Vault> getByUserId(String userId) {
+        return vaultRepository.findByUserId(userId);
     }
 
 }
