@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -25,6 +26,7 @@ import java.util.Objects;
 @Accessors(chain = true)
 public class Vault implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
