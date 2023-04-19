@@ -52,9 +52,6 @@ public class SiteUser implements Serializable, IdentifiableUser {
     @Column(name = "register_time")
     private Timestamp registerTime;
 
-    @Column(name = "last_login_time")
-    private Timestamp lastLoginTime;
-
     @PrePersist
     private void beforeSave() {
         this.id = FriendlyId.createFriendlyId();
