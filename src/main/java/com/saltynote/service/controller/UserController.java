@@ -66,7 +66,7 @@ public class UserController {
     @PostMapping("/email/verification")
     public ResponseEntity<ServiceResponse> getVerificationToken(@Valid @RequestBody Payload payload) {
         // check whether this email is already signed up or not.
-        if (userService.getRepository().findByEmail(payload.getEmail()).isPresent()) {
+        if (userService.getByEmail(payload.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ServiceResponse(HttpStatus.BAD_REQUEST, "Email is already signed up."));
         }
@@ -84,18 +84,17 @@ public class UserController {
                     "Password should be at least " + passwordMinimalLength + " characters.");
         }
         // Check token
-        Optional<Vault> vaultOp = vaultService.getRepository()
-            .findByEmailAndSecretAndType(userNewRequest.getEmail(), userNewRequest.getToken(),
-                    VaultType.NEW_ACCOUNT.getValue());
+        Optional<Vault> vaultOp = vaultService.getByEmailAndSecretAndType(userNewRequest.getEmail(),
+                userNewRequest.getToken(), VaultType.NEW_ACCOUNT);
 
         if (vaultOp.isEmpty()) {
             throw new WebAppRuntimeException(HttpStatus.FORBIDDEN, "A valid verification code is required for signup.");
         }
         SiteUser user = userNewRequest.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user = userService.getRepository().save(user);
+        user = userService.save(user);
         if (StringUtils.hasText(user.getId())) {
-            vaultService.getRepository().delete(vaultOp.get());
+            vaultService.deleteById(vaultOp.get().getId());
             return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
         }
         else {
@@ -136,7 +135,7 @@ public class UserController {
 
     @PostMapping("/password/forget")
     public ResponseEntity<ServiceResponse> forgetPassword(@Valid @RequestBody Payload payload) {
-        Optional<SiteUser> usero = userService.getRepository().findByEmail(payload.getEmail());
+        Optional<SiteUser> usero = userService.getByEmail(payload.getEmail());
         if (usero.isEmpty()) {
             log.warn("User is not found for email = {}", payload.getEmail());
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
@@ -160,12 +159,12 @@ public class UserController {
             throw wre;
         }
 
-        Optional<SiteUser> usero = userService.getRepository().findById(vo.get().getUserId());
+        Optional<SiteUser> usero = userService.getById(vo.get().getUserId());
         if (usero.isPresent()) {
             SiteUser user = usero.get();
             user.setPassword(bCryptPasswordEncoder.encode(passwordReset.getPassword()));
-            userService.getRepository().save(user);
-            vaultService.getRepository().delete(vo.get());
+            userService.save(user);
+            vaultService.deleteById(vo.get().getId());
             return ResponseEntity.ok(ServiceResponse.ok("Password has been reset!"));
         }
         else {
@@ -184,7 +183,7 @@ public class UserController {
         }
 
         // Validate old password
-        Optional<SiteUser> usero = userService.getRepository().findById(jwtUser.getId());
+        Optional<SiteUser> usero = userService.getById(jwtUser.getId());
         if (usero.isEmpty()) {
             throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST,
                     "Something goes wrong when fetching your info, please try later again.");
@@ -195,7 +194,7 @@ public class UserController {
         }
 
         user.setPassword(bCryptPasswordEncoder.encode(passwordUpdate.getPassword()));
-        userService.getRepository().save(user);
+        userService.save(user);
         return ResponseEntity.ok(ServiceResponse.ok("Password is updated now."));
     }
 

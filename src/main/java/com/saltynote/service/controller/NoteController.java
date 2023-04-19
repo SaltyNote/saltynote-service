@@ -44,7 +44,7 @@ public class NoteController {
 
     @GetMapping("/note/{id}")
     public ResponseEntity<Note> getNoteById(@PathVariable("id") String id, Authentication auth) {
-        Optional<Note> note = noteService.getRepository().findById(id);
+        Optional<Note> note = noteService.getById(id);
         checkNoteOwner(note, auth);
         return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -52,7 +52,7 @@ public class NoteController {
     @RequestMapping(value = "/note/{id}", method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity<Note> updateNoteById(@PathVariable("id") String id, @RequestBody NoteDto noteDto,
             Authentication auth) {
-        Optional<Note> queryNote = noteService.getRepository().findById(id);
+        Optional<Note> queryNote = noteService.getById(id);
         checkNoteOwner(queryNote, auth);
         Note noteTobeUpdate = queryNote.get();
         if (StringUtils.isNotBlank(noteDto.getNote())) {
@@ -66,15 +66,15 @@ public class NoteController {
         if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {
             noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());
         }
-        noteTobeUpdate = noteService.getRepository().save(noteTobeUpdate);
+        noteTobeUpdate = noteService.save(noteTobeUpdate);
         return ResponseEntity.ok(noteTobeUpdate);
     }
 
     @DeleteMapping("/note/{id}")
     public ResponseEntity<ServiceResponse> deleteNoteById(@PathVariable("id") String id, Authentication auth) {
-        Optional<Note> note = noteService.getRepository().findById(id);
+        Optional<Note> note = noteService.getById(id);
         checkNoteOwner(note, auth);
-        noteService.getRepository().deleteById(id);
+        noteService.deleteById(id);
         return ResponseEntity.ok(ServiceResponse.ok("Delete Successfully!"));
     }
 
@@ -89,7 +89,7 @@ public class NoteController {
     @GetMapping("/notes")
     public List<Note> getNotes(Authentication auth, @RequestParam(required = false) String keyword) {
         JwtUser user = (JwtUser) auth.getPrincipal();
-        List<Note> allNotes = noteService.getRepository().findAllByUserId(user.getId());
+        List<Note> allNotes = noteService.getAllByUserId(user.getId());
         if (allNotes == null || allNotes.isEmpty() || StringUtils.isBlank(keyword)) {
             return allNotes;
         }
@@ -104,7 +104,7 @@ public class NoteController {
     @PostMapping("/notes")
     public List<Note> getNotesByUrl(Authentication auth, @Valid @RequestBody NoteQuery noteQuery) {
         JwtUser user = (JwtUser) auth.getPrincipal();
-        return noteService.getRepository().findAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());
+        return noteService.getAllByUserIdAndUrl(user.getId(), noteQuery.getUrl());
     }
 
     @PostMapping("/note")
@@ -112,7 +112,7 @@ public class NoteController {
         JwtUser user = (JwtUser) auth.getPrincipal();
         noteDto.setUserId(user.getId());
         Note note = noteConverter.toEntity(noteDto);
-        note = noteService.getRepository().save(note);
+        note = noteService.save(note);
         if (StringUtils.isNotBlank(note.getId())) {
             return ResponseEntity.ok(note);
         }
