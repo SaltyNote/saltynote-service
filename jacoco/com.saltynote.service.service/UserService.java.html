@@ -9,15 +9,18 @@ import com.saltynote.service.repository.VaultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-<span class="fc" id="L19">@RequiredArgsConstructor</span>
-<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
+<span class="fc" id="L23">@Slf4j</span>
 @CacheConfig(cacheNames = &quot;user&quot;)
 public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
 
@@ -30,54 +33,62 @@ public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
     private final LoginHistoryRepository loginHistoryRepository;
 
     @Override
+    @Caching(put = { @CachePut(key = &quot;#entity.id&quot;), @CachePut(key = &quot;#entity.username&quot;),
+            @CachePut(key = &quot;#entity.email&quot;) })
     public SiteUser create(SiteUser entity) {
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (hasValidId(entity)) {</span>
-<span class="nc" id="L35">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
-<span class="nc" id="L36">            entity.setId(null);</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if (hasValidId(entity)) {</span>
+<span class="nc" id="L40">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
+<span class="nc" id="L41">            entity.setId(null);</span>
         }
-<span class="fc" id="L38">        return repository.save(entity);</span>
+<span class="fc" id="L43">        return repository.save(entity);</span>
     }
 
     @Override
+    @Caching(put = { @CachePut(key = &quot;#entity.id&quot;), @CachePut(key = &quot;#entity.username&quot;),
+            @CachePut(key = &quot;#entity.email&quot;) })
     public SiteUser update(SiteUser entity) {
-<span class="fc" id="L43">        checkIdExists(entity);</span>
-<span class="fc" id="L44">        return repository.save(entity);</span>
+<span class="fc" id="L50">        checkIdExists(entity);</span>
+<span class="fc" id="L51">        return repository.save(entity);</span>
     }
 
     @Override
     @Cacheable(key = &quot;#id&quot;)
     public Optional&lt;SiteUser&gt; getById(String id) {
-<span class="fc" id="L50">        log.info(&quot;Get user by id: {}&quot;, id);</span>
-<span class="fc" id="L51">        return repository.findById(id);</span>
+<span class="fc" id="L57">        return repository.findById(id);</span>
     }
 
     @Override
-    public void deleteById(String id) {
-<span class="nc" id="L56">        repository.deleteById(id);</span>
-<span class="nc" id="L57">    }</span>
+    // No need to do cache evict here, since all stale content will be expired soon.
+    public void delete(SiteUser entity) {
+<span class="nc" id="L63">        repository.deleteById(entity.getId());</span>
+<span class="nc" id="L64">    }</span>
 
     // This api will delete all database records with given user id, including the user
     // itself.
+    // No need to do cache evict here, since all stale content will be expired soon.
     @Transactional
+    @CacheEvict(key = &quot;#userId&quot;)
     public void cleanupByUserId(String userId) {
-<span class="fc" id="L63">        noteRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L64">        vaultRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L65">        loginHistoryRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L66">        repository.deleteById(userId);</span>
-<span class="fc" id="L67">    }</span>
+<span class="fc" id="L72">        noteRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L73">        vaultRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L74">        loginHistoryRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L75">        repository.deleteById(userId);</span>
+<span class="fc" id="L76">    }</span>
 
+    @Cacheable(key = &quot;#email&quot;)
     public Optional&lt;SiteUser&gt; getByEmail(String email) {
-<span class="fc" id="L70">        return repository.findByEmail(email);</span>
+<span class="fc" id="L80">        return repository.findByEmail(email);</span>
     }
 
+    @Cacheable(key = &quot;#username&quot;)
     public SiteUser getByUsername(String username) {
-<span class="fc" id="L74">        return repository.findByUsername(username);</span>
+<span class="nc" id="L85">        return repository.findByUsername(username);</span>
     }
 
     public void saveLoginHistory(String userId, String ip, String userAgent) {
-<span class="fc" id="L78">        LoginHistory loginHistory = new LoginHistory().setUserId(userId).setRemoteIp(ip).setUserAgent(userAgent);</span>
-<span class="fc" id="L79">        loginHistoryRepository.save(loginHistory);</span>
-<span class="fc" id="L80">    }</span>
+<span class="fc" id="L89">        LoginHistory loginHistory = new LoginHistory().setUserId(userId).setRemoteIp(ip).setUserAgent(userAgent);</span>
+<span class="fc" id="L90">        loginHistoryRepository.save(loginHistory);</span>
+<span class="fc" id="L91">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

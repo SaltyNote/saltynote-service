@@ -74,7 +74,7 @@ public class NoteController {
     public ResponseEntity&lt;ServiceResponse&gt; deleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
 <span class="fc" id="L75">        Optional&lt;Note&gt; note = noteService.getById(id);</span>
 <span class="fc" id="L76">        checkNoteOwner(note, auth);</span>
-<span class="fc" id="L77">        noteService.deleteById(id);</span>
+<span class="fc" id="L77">        noteService.delete(note.get());</span>
 <span class="fc" id="L78">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Delete Successfully!&quot;));</span>
     }
 
