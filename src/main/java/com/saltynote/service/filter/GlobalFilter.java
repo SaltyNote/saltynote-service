@@ -1,9 +1,11 @@
 package com.saltynote.service.filter;
 
+import com.saltynote.service.security.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
@@ -25,9 +27,9 @@ public class GlobalFilter extends OncePerRequestFilter
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        response.addHeader("X-SaltyNote-Port", String.valueOf(port));
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
+        response.addHeader(SecurityConstants.SALTY_PORT_HEADER, String.valueOf(port));
         filterChain.doFilter(request, response);
     }
 

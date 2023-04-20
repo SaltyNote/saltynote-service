@@ -170,7 +170,7 @@ public class NoteControllerTest {
         // Suppress codacy warning
         assertNotNull(this.savedNote.getId());
         this.mockMvc
-            .perform(get("/note/" + this.savedNote.getId()).header(SecurityConstants.HEADER_STRING,
+            .perform(get("/note/" + this.savedNote.getId()).header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -189,7 +189,7 @@ public class NoteControllerTest {
         Pair<SiteUser, String> pair = signupTestUser();
         assertNotNull(pair.getRight());
         this.mockMvc
-            .perform(get("/note/" + this.savedNote.getId()).header(SecurityConstants.HEADER_STRING,
+            .perform(get("/note/" + this.savedNote.getId()).header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + pair.getRight()))
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
@@ -204,7 +204,7 @@ public class NoteControllerTest {
         this.mockMvc
             .perform(post("/note/" + this.savedNote.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(noteToUpdate))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(newNoteContent)));
@@ -222,11 +222,10 @@ public class NoteControllerTest {
         this.mockMvc
             .perform(post("/note/" + this.savedNote.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(tagToUpdate))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(containsString(newTagsContent))); // expexct this
-                                                                          // string
+            .andExpect(content().string(containsString(newTagsContent)));
 
         Optional<Note> queryNote = noteService.getById(this.savedNote.getId());
         assertTrue(queryNote.isPresent());
@@ -244,7 +243,7 @@ public class NoteControllerTest {
         this.mockMvc
             .perform(post("/note/" + this.savedNote.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(noteToUpdate))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + pair.getRight()))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + pair.getRight()))
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
@@ -261,7 +260,7 @@ public class NoteControllerTest {
         MvcResult mvcResult = this.mockMvc
             .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(note))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -270,7 +269,7 @@ public class NoteControllerTest {
         Note returnedNote = objectMapper.readValue(res, Note.class);
         assertTrue(noteService.getById(returnedNote.getId()).isPresent());
         this.mockMvc
-            .perform(delete("/note/" + returnedNote.getId()).header(SecurityConstants.HEADER_STRING,
+            .perform(delete("/note/" + returnedNote.getId()).header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
@@ -283,7 +282,7 @@ public class NoteControllerTest {
         MvcResult mvcResult = this.mockMvc
             .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(note))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -295,7 +294,7 @@ public class NoteControllerTest {
         Pair<SiteUser, String> pair = signupTestUser();
 
         this.mockMvc
-            .perform(delete("/note/" + returnedNote.getId()).header(SecurityConstants.HEADER_STRING,
+            .perform(delete("/note/" + returnedNote.getId()).header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + pair.getRight()))
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
@@ -312,7 +311,7 @@ public class NoteControllerTest {
         MvcResult mvcResult = this.mockMvc
             .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(note))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -320,7 +319,7 @@ public class NoteControllerTest {
         String res = mvcResult.getResponse().getContentAsString();
         Note returnedNote = objectMapper.readValue(res, Note.class);
         assertTrue(noteService.getById(returnedNote.getId()).isPresent());
-        this.mockMvc.perform(get("/notes").header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+        this.mockMvc.perform(get("/notes").header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -329,7 +328,7 @@ public class NoteControllerTest {
 
         // search has result
         this.mockMvc
-            .perform(get("/notes?keyword=" + randKeyword).header(SecurityConstants.HEADER_STRING,
+            .perform(get("/notes?keyword=" + randKeyword).header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -340,7 +339,7 @@ public class NoteControllerTest {
         // search has no result
         this.mockMvc
             .perform(get("/notes?keyword=" + randKeyword + RandomStringUtils.randomAlphanumeric(6))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(equalTo(0))))
@@ -353,7 +352,7 @@ public class NoteControllerTest {
         MvcResult mvcResult = this.mockMvc
             .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(note))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + this.accessToken))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
