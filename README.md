@@ -16,6 +16,8 @@ for:
 1.  User (signup, login, token refresh, token cleanup, password reset)
 2.  Note (create, update, fetch and delete)
 
+![overview](./docs/images/overview.png)
+
 Unit Test Coverage report: https://saltynote.github.io/saltynote-service/jacoco/
 
 ## Get Started
