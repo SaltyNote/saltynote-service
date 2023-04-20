@@ -24,4 +24,4 @@ jobs:
       - name: Build the docker-compose for Database
         run: docker compose -f docker-compose.yml up -d
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml -s maven-settings.xml
