@@ -403,7 +403,7 @@ class UserControllerTest {
         this.mockMvc
             .perform(post("/password").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pu))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + token.getAccessToken()))
             .andExpect(status().isOk());
 
         // login with old password should fail
@@ -465,7 +465,7 @@ class UserControllerTest {
         mvcResult = this.mockMvc
             .perform(post("/note").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(note))
-                .header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+                .header(SecurityConstants.AUTH_HEADER, "Bearer " + token.getAccessToken()))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(content().string(containsString(note.getText())))
@@ -476,19 +476,19 @@ class UserControllerTest {
 
         // deletion should fail due to invalid user id
         this.mockMvc
-            .perform(delete("/account/invalid-id").header(SecurityConstants.HEADER_STRING,
+            .perform(delete("/account/invalid-id").header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + token.getAccessToken()))
             .andExpect(status().isBadRequest());
         // deletion should fail due to missing user id
         this.mockMvc
-            .perform(delete("/account").header(SecurityConstants.HEADER_STRING, "Bearer " + token.getAccessToken()))
+            .perform(delete("/account").header(SecurityConstants.AUTH_HEADER, "Bearer " + token.getAccessToken()))
             .andExpect(status().isNotFound());
 
         // deletion should fail due to no access token
         this.mockMvc.perform(delete("/account/" + jwtUser.getId())).andExpect(status().isForbidden());
 
         // deletion should succeed
-        this.mockMvc.perform(delete("/account/" + jwtUser.getId()).header(SecurityConstants.HEADER_STRING,
+        this.mockMvc.perform(delete("/account/" + jwtUser.getId()).header(SecurityConstants.AUTH_HEADER,
                 "Bearer " + token.getAccessToken()))
             .andExpect(status().isOk());
 
