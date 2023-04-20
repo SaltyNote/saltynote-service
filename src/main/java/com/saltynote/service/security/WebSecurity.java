@@ -29,9 +29,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class WebSecurity {
 
     private static final String[] PUBLIC_POST_ENDPOINTS = { SecurityConstants.SIGN_UP_URL, "/refresh_token",
-            "/password/forget", "/password/reset", "/email/verification", "/login", };
+            "/password/forget", "/password/reset", "/email/verification", "/login" };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = { "/", "/login", "/error", "/favicon.ico" };
+
+    private static final String[] ADMIN_GET_ENDPOINTS = { "/actuator/**" };
 
     private static final String[] SWAGGER_URLS = { "/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**",
             "/v3/api-docs/**" };
@@ -60,6 +62,8 @@ public class WebSecurity {
                             .permitAll()
                         .requestMatchers(SWAGGER_URLS)
                             .permitAll()
+                        .requestMatchers(ADMIN_GET_ENDPOINTS)
+                            .hasAuthority("ACTUATOR_ACCESS")
                         .anyRequest()
                             .authenticated())
                 .authenticationProvider(authenticationProvider)
