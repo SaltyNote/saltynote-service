@@ -14,7 +14,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,7 +25,6 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@CacheConfig(cacheNames = "vault")
 public class VaultService implements RepositoryService<String, Vault> {
 
     private final VaultRepository repository;
@@ -138,6 +136,10 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     @Override
+    public void delete(Vault entity) {
+        repository.deleteById(entity.getId());
+    }
+
     public void deleteById(String id) {
         repository.deleteById(id);
     }

@@ -1,11 +1,15 @@
 package com.saltynote.service.service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.saltynote.service.entity.Note;
 import com.saltynote.service.repository.NoteRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +24,7 @@ public class NoteService implements RepositoryService<String, Note> {
     private final NoteRepository repository;
 
     @Override
+    @Caching(evict = { @CacheEvict(key = "#entity.userId + #entity.url"), @CacheEvict(key = "#entity.userId") })
     public Note create(Note entity) {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
@@ -29,20 +34,24 @@ public class NoteService implements RepositoryService<String, Note> {
     }
 
     @Override
+    @Caching(evict = { @CacheEvict(key = "#entity.id"), @CacheEvict(key = "#entity.userId + #entity.url"),
+            @CacheEvict(key = "#entity.userId") })
     public Note update(Note entity) {
         checkIdExists(entity);
         return repository.save(entity);
     }
 
     @Override
+    @Cacheable(key = "#id")
     public Optional<Note> getById(String id) {
         return repository.findById(id);
     }
 
-    // cache evict here for user id and url
     @Override
-    public void deleteById(String id) {
-        repository.deleteById(id);
+    @Caching(evict = { @CacheEvict(key = "#entity.id"), @CacheEvict(key = "#entity.userId + #entity.url"),
+            @CacheEvict(key = "#entity.userId") })
+    public void delete(@NonNull Note entity) {
+        repository.deleteById(entity.getId());
     }
 
     @Cacheable(key = "#userId")
@@ -55,6 +64,8 @@ public class NoteService implements RepositoryService<String, Note> {
         return repository.findAllByUserIdAndUrl(userId, url);
     }
 
+    @VisibleForTesting
+    @CacheEvict(allEntries = true)
     public void deleteAll(List<Note> notesToCleaned) {
         repository.deleteAll(notesToCleaned);
     }

@@ -13,7 +13,7 @@ public interface RepositoryService<K, T extends Identifiable> {
 
     Optional<T> getById(K id);
 
-    void deleteById(K id);
+    void delete(T entity);
 
     default void checkIdExists(@NonNull T entity) {
         if (!hasValidId(entity)) {
