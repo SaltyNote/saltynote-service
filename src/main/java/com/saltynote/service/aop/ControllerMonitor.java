@@ -14,16 +14,16 @@ public class ControllerMonitor {
 
     @Pointcut("execution(* com.saltynote.service.controller.*Controller.*(..))")
     public void monitor() {
-        // an utility for aop
+        // utility method for aop
     }
 
     @Around("monitor()")
     public Object logServiceAccess(ProceedingJoinPoint pjp) throws Throwable {
-        log.info("processing: " + pjp);
         long start = System.currentTimeMillis();
         Object output = pjp.proceed();
         long elapsedTime = System.currentTimeMillis() - start;
-        log.info(pjp.getSignature() + " execution time: " + elapsedTime + " milliseconds.");
+        String target = pjp.getSignature().getDeclaringType().getSimpleName() + "_" + pjp.getSignature().getName();
+        log.info(target + " execution time: " + elapsedTime + " milliseconds.");
         return output;
     }
 
