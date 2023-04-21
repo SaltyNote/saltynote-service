@@ -14,16 +14,16 @@ import org.springframework.stereotype.Component;
 
     @Pointcut(&quot;execution(* com.saltynote.service.controller.*Controller.*(..))&quot;)
     public void monitor() {
-        // an utility for aop
+        // utility method for aop
 <span class="nc" id="L18">    }</span>
 
     @Around(&quot;monitor()&quot;)
     public Object logServiceAccess(ProceedingJoinPoint pjp) throws Throwable {
-<span class="fc" id="L22">        log.info(&quot;processing: &quot; + pjp);</span>
-<span class="fc" id="L23">        long start = System.currentTimeMillis();</span>
-<span class="fc" id="L24">        Object output = pjp.proceed();</span>
-<span class="fc" id="L25">        long elapsedTime = System.currentTimeMillis() - start;</span>
-<span class="fc" id="L26">        log.info(pjp.getSignature() + &quot; execution time: &quot; + elapsedTime + &quot; milliseconds.&quot;);</span>
+<span class="fc" id="L22">        long start = System.currentTimeMillis();</span>
+<span class="fc" id="L23">        Object output = pjp.proceed();</span>
+<span class="fc" id="L24">        long elapsedTime = System.currentTimeMillis() - start;</span>
+<span class="fc" id="L25">        String target = pjp.getSignature().getDeclaringType().getSimpleName() + &quot;_&quot; + pjp.getSignature().getName();</span>
+<span class="fc" id="L26">        log.info(target + &quot; execution time: &quot; + elapsedTime + &quot; milliseconds.&quot;);</span>
 <span class="fc" id="L27">        return output;</span>
     }
 

@@ -26,13 +26,13 @@ saltynote-service,com.saltynote.service.service,EmailService,62,18,0,0,18,5,2,1,
 saltynote-service,com.saltynote.service.service,JwtService,54,118,9,9,1,22,10,10,1,10
 saltynote-service,com.saltynote.service.service,UserService,19,81,1,1,5,16,3,8,2,8
 saltynote-service,com.saltynote.service.service,VaultService,69,204,5,7,20,32,9,20,5,18
-saltynote-service,com.saltynote.service.filter,GlobalFilter,0,24,0,0,0,7,0,4,0,4
+saltynote-service,com.saltynote.service.filter,GlobalFilter,15,30,3,3,0,9,3,4,0,4
 saltynote-service,com.saltynote.service.security,JWTAuthorizationFilter,4,61,3,5,2,17,3,4,0,3
 saltynote-service,com.saltynote.service.security,SecurityConfig,0,24,0,0,0,6,0,3,0,3
 saltynote-service,com.saltynote.service.security,SecurityConstants,7,0,0,0,2,0,1,0,1,0
-saltynote-service,com.saltynote.service.security,JWTAuthenticationService,0,61,0,0,0,9,0,3,0,3
+saltynote-service,com.saltynote.service.security,JWTAuthenticationService,0,62,0,0,0,10,0,3,0,3
 saltynote-service,com.saltynote.service.security,WebSecurity,0,182,0,0,0,37,0,7,0,7
-saltynote-service,com.saltynote.service.aop,ControllerMonitor,1,28,0,0,1,8,1,3,1,3
+saltynote-service,com.saltynote.service.aop,ControllerMonitor,1,32,0,0,1,8,1,3,1,3
 saltynote-service,com.saltynote.service.configure,ServiceConfig,0,3,0,0,0,1,0,1,0,1
 saltynote-service,com.saltynote.service.configure,SpringDocConfig,0,93,0,0,0,12,0,5,0,5
 saltynote-service,com.saltynote.service,ServiceApplication,5,9,0,0,2,2,1,2,1,2

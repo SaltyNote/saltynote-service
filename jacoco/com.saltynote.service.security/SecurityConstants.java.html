@@ -2,18 +2,24 @@
 
 import com.saltynote.service.exception.IllegalInitialException;
 
-public class SecurityConstants {
+public final class SecurityConstants {
 
     public static final String TOKEN_PREFIX = &quot;Bearer &quot;;
 
-    public static final String HEADER_STRING = &quot;Authorization&quot;;
+    public static final String AUTH_HEADER = &quot;Authorization&quot;;
+
+    public static final String USER_AGENT_HEADER = &quot;User-Agent&quot;;
+
+    public static final String REAL_IP_HEADER = &quot;X-Real-IP&quot;;
+
+    public static final String SALTY_PORT_HEADER = &quot;X-SaltyNote-Port&quot;;
 
     public static final String SIGN_UP_URL = &quot;/signup&quot;;
 
     public static final String CLAIM_KEY_USER_ID = &quot;user_id&quot;;
 
-<span class="nc" id="L15">    private SecurityConstants() {</span>
-<span class="nc" id="L16">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
+<span class="nc" id="L21">    private SecurityConstants() {</span>
+<span class="nc" id="L22">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
     }
 
 }
