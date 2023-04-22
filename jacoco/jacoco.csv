@@ -44,6 +44,7 @@ saltynote-service,com.saltynote.service.domain,EmailPayload,154,45,38,0,0,5,22,1
 saltynote-service,com.saltynote.service.domain,LoginUser,0,15,0,0,0,4,0,2,0,2
 saltynote-service,com.saltynote.service.domain,VaultType,0,35,0,0,0,6,0,3,0,3
 saltynote-service,com.saltynote.service.domain,VaultEntity,56,71,15,7,0,4,13,8,2,8
+saltynote-service,com.saltynote.service.start,CleanCache,0,31,1,1,0,9,1,4,0,4
 saltynote-service,com.saltynote.service.controller.advice,ExceptionHandlerControllerAdvice,13,42,0,0,3,8,1,5,1,5
 saltynote-service,com.saltynote.service.exception,WebAppRuntimeException,0,10,0,0,0,4,0,2,0,2
 saltynote-service,com.saltynote.service.exception,IllegalInitialException,4,0,0,0,2,0,1,0,1,0
