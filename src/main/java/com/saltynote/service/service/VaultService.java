@@ -11,8 +11,10 @@ import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
 import com.saltynote.service.repository.VaultRepository;
 import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,9 +43,16 @@ public class VaultService implements RepositoryService<String, Vault> {
         return create(userId, type, FriendlyId.createFriendlyId());
     }
 
+    public Vault createVerificationCode(@NotNull String email) {
+        return createForEmail(email, VaultType.NEW_ACCOUNT, RandomStringUtils.randomNumeric(6));
+    }
+
     public Vault createForEmail(@NotNull String email, VaultType type) {
-        return repository
-            .save(new Vault().setEmail(email).setType(type.getValue()).setSecret(FriendlyId.createFriendlyId()));
+        return createForEmail(email, type, FriendlyId.createFriendlyId());
+    }
+
+    public Vault createForEmail(@NotNull String email, VaultType type, @NonNull String secret) {
+        return repository.save(new Vault().setEmail(email).setType(type.getValue()).setSecret(secret));
     }
 
     public Vault create(@NotNull String userId, VaultType type, String secret) {
