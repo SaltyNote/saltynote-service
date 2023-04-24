@@ -34,7 +34,7 @@ public class EmailEventListener {
     public void handleEvent(EmailEvent event) throws MessagingException, IOException, TemplateException {
 <span class="fc" id="L35">        log.info(&quot;Event is received for {}&quot;, event.getType());</span>
 <span class="fc bfc" id="L36" title="All 2 branches covered.">        Vault vault = event.getType() == EmailEvent.Type.NEW_USER</span>
-<span class="fc" id="L37">                ? vaultService.createForEmail(event.getUser().getEmail(), event.getType().getVaultType())</span>
+<span class="fc" id="L37">                ? vaultService.createVerificationCode(event.getUser().getEmail())</span>
 <span class="fc" id="L38">                : vaultService.create(event.getUser().getId(), event.getType().getVaultType());</span>
 <span class="fc" id="L39">        EmailPayload payload = event.getType()</span>
 <span class="fc" id="L40">            .loadUser(event.getUser())</span>
