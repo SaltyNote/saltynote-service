@@ -1,4 +1,4 @@
-package com.saltynote.service.schedule;
+package com.saltynote.service.boot;
 
 import com.saltynote.service.utils.BaseUtils;
 import lombok.extern.slf4j.Slf4j;
