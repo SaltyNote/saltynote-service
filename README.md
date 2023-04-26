@@ -6,6 +6,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/saltynote/saltynote-service/badge)](https://www.codefactor.io/repository/github/saltynote/saltynote-service)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/406f90655dd44f12a6107bbfbf4c2c45)](https://app.codacy.com/gh/SaltyNote/saltynote-service/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
+![Website](https://img.shields.io/website?label=service&url=https%3A%2F%2Fapi.saltynote.com)
 
 ## Overview
 
