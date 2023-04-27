@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: saltynote
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql/data
+
+  redis:
+    image: 'redis:7.0-alpine'
+    container_name: redis
+    command: redis-server --requirepass 88888888
+    ports:
+      - '6379:6379'
+
+  saltynote:
+    image: zhouhao/saltynote-service:latest
+    container_name: saltynote-service
+    ports:
+      - "8888:8888"
+    restart: always
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/saltynote?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&permitMysqlScheme
+      SPRING_DATA_REDIS_HOST: redis
+    volumes:
+      - log_data:/tmp
+
+volumes:
+  mysql_data:
+  log_data:

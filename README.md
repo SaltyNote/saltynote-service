@@ -11,15 +11,19 @@
 ## Overview
 
 This is the backend service for [saltynote](https://saltynote.com). It
-uses [JWT](https://auth0.com/docs/tokens/json-web-tokens) for authentication. As high-level, this service provides APIs
+uses [JWT](https://auth0.com/docs/tokens/json-web-tokens) for authentication(`access token` & `refresh token`). As high-level, this service provides APIs
 for:
 
-1.  User (signup, login, token refresh, token cleanup, password reset)
+1.  User (signup, login, token refresh, token cleanup, password reset, account delete)
 2.  Note (create, update, fetch and delete)
 
 ![overview](./docs/images/overview.png)
 
 Unit Test Coverage report: https://saltynote.github.io/saltynote-service/jacoco/
+
+## Try with Docker
+You can download [docker-compose.yml](./script/docker-compose.yml), and run `docker compose up` to run it in docker.
+When it is ready, you can visit http://localhost:8888
 
 ## Get Started
 
@@ -31,16 +35,16 @@ Swagger UI will be available at http://localhost:8888/swagger-ui.html
 
 ### Prerequisite
 
-1.  Java 17 (due to Spring Boot V3)
-2.  Docker (docker-compose) for development database
+1.  Java 17 (due to Spring Boot v3)
+2.  Docker (docker compose) for setting up development dependencies, e.g. database, redis, etc.
 3.  IDE ([Eclipse](https://www.eclipse.org/) or [Intellij](https://www.jetbrains.com/idea/))
 
 ### Configuration
 
-1.  The service relies on database to store `user` and `note` information. In development env, you can run `docker compose up`
+1. The service relies on database to store `user` and `note` information. In development env, you can run `docker compose up`
    to start mariadb locally(*add `-d` if you want start it as “detached” mode*). 
    > *No need to manually patch the DB schemas, during service startup, these [DB migration scripts](src/main/resources/db/migration) will be executed automatically by [flyway](https://github.com/flyway/flyway).*
-2.  This service also need smtp service to send email(*Note: this is optional now, if not setup, the email payload will
+2. This service also need smtp service to send email(*Note: this is optional now, if not setup, the email payload will
    be logged([code](src/main/java/com/saltynote/service/event/EmailEventListener.java#L50-L55)).*). 
 
 ## License
