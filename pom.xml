@@ -185,6 +185,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <executable>true</executable>
+                    <imageName>saltynote-service</imageName>
                 </configuration>
             </plugin>
             <plugin>
