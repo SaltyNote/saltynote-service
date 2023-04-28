@@ -1,6 +1,5 @@
 package com.saltynote.service.entity;
 
-import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
@@ -34,11 +33,11 @@ public class Note implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "id", nullable = false)
-    private String id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "text", nullable = false)
     @NotBlank
@@ -64,15 +63,8 @@ public class Note implements Serializable, Identifiable {
     @Column(name = "tags")
     private String tags;
 
-    @Column(name = "idx")
-    private Long idx;
-
-    @Column(name = "user_idx")
-    private Long userIdx;
-
     @PrePersist
     private void beforeSave() {
-        this.id = FriendlyId.createFriendlyId();
         this.createdTime = new Timestamp(System.currentTimeMillis());
         if (this.pageOnly == null) {
             this.pageOnly = false;

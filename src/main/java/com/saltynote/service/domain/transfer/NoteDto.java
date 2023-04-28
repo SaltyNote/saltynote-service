@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NoteDto {
 
-    private String userId;
+    private Long userId;
 
     @NotBlank
     private String text;

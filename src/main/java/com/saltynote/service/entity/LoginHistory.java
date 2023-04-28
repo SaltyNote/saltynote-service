@@ -27,10 +27,8 @@ public class LoginHistory {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 40)
-    @NotNull
-    @Column(name = "user_id", nullable = false, length = 40)
-    private String userId;
+    @Column(name = "user_id")
+    private Long userId;
 
     @Size(max = 128)
     @Column(name = "remote_ip", length = 128)
@@ -43,9 +41,6 @@ public class LoginHistory {
     @NotNull
     @Column(name = "login_time", nullable = false)
     private Timestamp loginTime;
-
-    @Column(name = "user_idx")
-    private Long userIdx;
 
     @PrePersist
     private void beforeSave() {

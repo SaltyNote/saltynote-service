@@ -2,6 +2,7 @@ package com.saltynote.service.service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.saltynote.service.entity.Note;
+import com.saltynote.service.generator.IdGenerator;
 import com.saltynote.service.repository.NoteRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +20,19 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "note")
-public class NoteService implements RepositoryService<String, Note> {
+public class NoteService implements RepositoryService<Long, Note> {
 
     private final NoteRepository repository;
+
+    private final IdGenerator snowflakeIdGenerator;
 
     @Override
     @Caching(evict = { @CacheEvict(key = "#entity.userId + #entity.url"), @CacheEvict(key = "#entity.userId") })
     public Note create(Note entity) {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
-            entity.setId(null);
         }
+        entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 
@@ -43,7 +46,7 @@ public class NoteService implements RepositoryService<String, Note> {
 
     @Override
     @Cacheable(key = "#id")
-    public Optional<Note> getById(String id) {
+    public Optional<Note> getById(Long id) {
         return repository.findById(id);
     }
 
@@ -55,12 +58,12 @@ public class NoteService implements RepositoryService<String, Note> {
     }
 
     @Cacheable(key = "#userId")
-    public List<Note> getAllByUserId(String userId) {
+    public List<Note> getAllByUserId(Long userId) {
         return repository.findAllByUserId(userId);
     }
 
     @Cacheable(key = "#userId + #url")
-    public List<Note> getAllByUserIdAndUrl(String userId, String url) {
+    public List<Note> getAllByUserIdAndUrl(Long userId, String url) {
         return repository.findAllByUserIdAndUrl(userId, url);
     }
 

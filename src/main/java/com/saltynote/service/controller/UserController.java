@@ -31,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -94,7 +93,7 @@ public class UserController {
         SiteUser user = userNewRequest.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.create(user);
-        if (StringUtils.hasText(user.getId())) {
+        if (user.getId() != null && user.getId() > 0) {
             vaultService.deleteById(vaultOp.get().getId());
             return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
         }
@@ -200,7 +199,7 @@ public class UserController {
     }
 
     @DeleteMapping("/account/{id}")
-    public ResponseEntity<ServiceResponse> accountDeletion(@PathVariable("id") String userId, Authentication auth) {
+    public ResponseEntity<ServiceResponse> accountDeletion(@PathVariable("id") Long userId, Authentication auth) {
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         if (!Objects.equals(userId, jwtUser.getId())) {
             throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");
