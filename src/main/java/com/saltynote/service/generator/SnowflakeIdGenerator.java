@@ -4,11 +4,11 @@ import com.saltynote.service.exception.ClockBackwardException;
 
 /**
  * This algorithm is copied from https://github.com/beyondfengyu/SnowFlake
- *
+ * <p>
  * twitter的snowflake算法 -- java实现
  *
  * @author beyond
- * @date 2016/11/26
+ * @since 2016/11/26
  */
 public class SnowflakeIdGenerator implements IdGenerator {
 
@@ -24,7 +24,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     private static final long MACHINE_BIT = 4; // 机器标识占用的位数
 
-    private static final long DATACENTER_BIT = 3;// 数据中心占用的位数
+    private static final long DATACENTER_BIT = 3; // 数据中心占用的位数
 
     /**
      * 每一部分的最大值
@@ -52,15 +52,17 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     private long lastStamp = -1L; // 上一次时间戳
 
-    public SnowflakeIdGenerator(long datacenterId, long machineId) {
-        if (datacenterId > MAX_DATACENTER_NUM || datacenterId < 0) {
-            throw new IllegalArgumentException("datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0");
+    public SnowflakeIdGenerator(long dcId, long mId) {
+        if (dcId > MAX_DATACENTER_NUM || dcId < 0) {
+            throw new IllegalArgumentException(
+                    "datacenterId can't be greater than " + MAX_DATACENTER_NUM + " or less than 0");
         }
-        if (machineId > MAX_MACHINE_NUM || machineId < 0) {
-            throw new IllegalArgumentException("machineId can't be greater than MAX_MACHINE_NUM or less than 0");
+        if (mId > MAX_MACHINE_NUM || mId < 0) {
+            throw new IllegalArgumentException(
+                    "machineId can't be greater than " + MAX_MACHINE_NUM + " or less than 0");
         }
-        this.datacenterId = datacenterId;
-        this.machineId = machineId;
+        this.datacenterId = dcId;
+        this.machineId = mId;
     }
 
     /**
