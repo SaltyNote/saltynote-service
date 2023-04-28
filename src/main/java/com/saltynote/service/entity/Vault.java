@@ -49,6 +49,12 @@ public class Vault implements Serializable, Identifiable {
     @Column(name = "created_time", nullable = false)
     private Timestamp createdTime;
 
+    @Column(name = "idx")
+    private Long idx;
+
+    @Column(name = "user_idx")
+    private Long userIdx;
+
     @PrePersist
     private void beforeSave() {
         this.id = FriendlyId.createFriendlyId();
