@@ -44,10 +44,13 @@ import java.sql.Timestamp;
     @Column(name = &quot;login_time&quot;, nullable = false)
 <span class="nc" id="L45">    private Timestamp loginTime;</span>
 
+    @Column(name = &quot;user_idx&quot;)
+<span class="nc" id="L48">    private Long userIdx;</span>
+
     @PrePersist
     private void beforeSave() {
-<span class="fc" id="L49">        this.loginTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L52">        this.loginTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L53">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
