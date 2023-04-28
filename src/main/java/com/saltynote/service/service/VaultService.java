@@ -9,6 +9,7 @@ import com.saltynote.service.domain.IdentifiableUser;
 import com.saltynote.service.domain.VaultEntity;
 import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.entity.Vault;
+import com.saltynote.service.generator.IdGenerator;
 import com.saltynote.service.repository.VaultRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -27,7 +28,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class VaultService implements RepositoryService<String, Vault> {
+public class VaultService implements RepositoryService<Long, Vault> {
 
     private final VaultRepository repository;
 
@@ -35,11 +36,13 @@ public class VaultService implements RepositoryService<String, Vault> {
 
     private final JwtService jwtService;
 
+    private final IdGenerator snowflakeIdGenerator;
+
     // TTL in milliseconds
     @Value("${jwt.refresh_token.ttl}")
     private long refreshTokenTTL;
 
-    public Vault create(@NotNull String userId, VaultType type) {
+    public Vault create(@NotNull Long userId, VaultType type) {
         return create(userId, type, FriendlyId.createFriendlyId());
     }
 
@@ -52,11 +55,16 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     public Vault createForEmail(@NotNull String email, VaultType type, @NonNull String secret) {
-        return repository.save(new Vault().setEmail(email).setType(type.getValue()).setSecret(secret));
+        var vault = new Vault().setEmail(email).setType(type.getValue()).setSecret(secret);
+        vault.setId(snowflakeIdGenerator.nextId());
+        return repository.save(vault);
     }
 
-    public Vault create(@NotNull String userId, VaultType type, String secret) {
-        return repository.save(new Vault().setUserId(userId).setType(type.getValue()).setSecret(secret));
+    public Vault create(@NotNull Long userId, VaultType type, String secret) {
+        return repository.save(new Vault().setUserId(userId)
+            .setType(type.getValue())
+            .setSecret(secret)
+            .setId(snowflakeIdGenerator.nextId()));
     }
 
     public String encode(@NotNull VaultEntity entity) throws JsonProcessingException {
@@ -128,8 +136,8 @@ public class VaultService implements RepositoryService<String, Vault> {
     public Vault create(Vault entity) {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
-            entity.setId(null);
         }
+        entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 
@@ -140,7 +148,7 @@ public class VaultService implements RepositoryService<String, Vault> {
     }
 
     @Override
-    public Optional<Vault> getById(String id) {
+    public Optional<Vault> getById(Long id) {
         return repository.findById(id);
     }
 
@@ -149,15 +157,15 @@ public class VaultService implements RepositoryService<String, Vault> {
         repository.deleteById(entity.getId());
     }
 
-    public void deleteById(String id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 
-    public Optional<Vault> findByUserIdAndTypeAndValue(String userId, VaultType type, String secret) {
+    public Optional<Vault> findByUserIdAndTypeAndValue(Long userId, VaultType type, String secret) {
         return repository.findByUserIdAndTypeAndSecret(userId, type.getValue(), secret);
     }
 
-    public void cleanRefreshTokenByUserId(String userId) {
+    public void cleanRefreshTokenByUserId(Long userId) {
         repository.deleteByUserIdAndType(userId, VaultType.REFRESH_TOKEN.getValue());
     }
 
@@ -179,11 +187,11 @@ public class VaultService implements RepositoryService<String, Vault> {
         return repository.findByEmail(email);
     }
 
-    public List<Vault> getByUserIdAndType(String userId, VaultType vaultType) {
+    public List<Vault> getByUserIdAndType(Long userId, VaultType vaultType) {
         return repository.findByUserIdAndType(userId, vaultType.getValue());
     }
 
-    public List<Vault> getByUserId(String userId) {
+    public List<Vault> getByUserId(Long userId) {
         return repository.findByUserId(userId);
     }
 

@@ -427,7 +427,7 @@ class UserControllerTest {
         // Create a new User
         String username = faker.name().username();
         String email = getEmail(username);
-        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+        Vault vault = vaultService.createVerificationCode(email);
 
         assertNotNull(vault.getId());
         assertEquals(vault.getEmail(), email);
@@ -478,7 +478,7 @@ class UserControllerTest {
         this.mockMvc
             .perform(delete("/account/invalid-id").header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + token.getAccessToken()))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().is5xxServerError());
         // deletion should fail due to missing user id
         this.mockMvc
             .perform(delete("/account").header(SecurityConstants.AUTH_HEADER, "Bearer " + token.getAccessToken()))

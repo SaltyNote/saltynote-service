@@ -1,6 +1,5 @@
 package com.saltynote.service.entity;
 
-import com.devskiller.friendly_id.FriendlyId;
 import com.saltynote.service.domain.IdentifiableUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,8 +32,8 @@ public class SiteUser implements Serializable, IdentifiableUser {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "id", nullable = false)
-    private String id;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "username", nullable = false)
     @NotBlank
@@ -52,12 +51,8 @@ public class SiteUser implements Serializable, IdentifiableUser {
     @Column(name = "register_time")
     private Timestamp registerTime;
 
-    @Column(name = "idx")
-    private Long idx;
-
     @PrePersist
     private void beforeSave() {
-        this.id = FriendlyId.createFriendlyId();
         this.registerTime = new Timestamp(System.currentTimeMillis());
     }
 

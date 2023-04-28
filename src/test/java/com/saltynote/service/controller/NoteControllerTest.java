@@ -2,7 +2,6 @@ package com.saltynote.service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.saltynote.service.domain.VaultType;
 import com.saltynote.service.domain.converter.NoteConverter;
 import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.domain.transfer.TokenPair;
@@ -95,7 +94,7 @@ public class NoteControllerTest {
 
     private Note savedNote;
 
-    public static NoteDto createTmpNote(String userId) {
+    public static NoteDto createTmpNote(Long userId) {
         return new NoteDto().setUserId(userId)
             .setNote(faker.lorem().characters(50, 100))
             .setUrl(faker.internet().url())
@@ -109,7 +108,7 @@ public class NoteControllerTest {
 
         String username = faker.name().username();
         String email = username + "@saltynote.com";
-        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+        Vault vault = vaultService.createVerificationCode(email);
 
         assertNotNull(vault.getId());
         assertEquals(vault.getEmail(), email);

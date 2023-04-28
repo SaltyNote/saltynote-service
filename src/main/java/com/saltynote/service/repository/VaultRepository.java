@@ -8,21 +8,21 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 import java.util.Optional;
 
-public interface VaultRepository extends JpaRepository<Vault, String>, JpaSpecificationExecutor<Vault> {
+public interface VaultRepository extends JpaRepository<Vault, Long>, JpaSpecificationExecutor<Vault> {
 
     Optional<Vault> findBySecret(String secret);
 
-    void deleteByUserId(String userId);
+    void deleteByUserId(Long userId);
 
-    void deleteByUserIdAndType(String userId, String type);
+    void deleteByUserIdAndType(Long userId, String type);
 
-    Optional<Vault> findByUserIdAndTypeAndSecret(String userId, String type, String secret);
+    Optional<Vault> findByUserIdAndTypeAndSecret(Long userId, String type, String secret);
 
-    List<Vault> findByUserIdAndType(String userId, String type);
+    List<Vault> findByUserIdAndType(Long userId, String type);
 
-    Optional<Vault> findFirstByUserIdAndTypeOrderByCreatedTimeDesc(String userId, String type);
+    Optional<Vault> findFirstByUserIdAndTypeOrderByCreatedTimeDesc(Long userId, String type);
 
-    List<Vault> findByUserId(String userId);
+    List<Vault> findByUserId(Long userId);
 
     List<Vault> findByEmail(@NotBlank String email);
 

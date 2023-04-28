@@ -1,14 +1,13 @@
 package com.saltynote.service.service;
 
-import java.io.IOException;
-import java.util.Optional;
-
+import com.saltynote.service.domain.VaultEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.saltynote.service.domain.VaultEntity;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,7 +21,7 @@ class VaultServiceTest {
 
     @Test
     void encodeAndDecodeTest() throws IOException {
-        VaultEntity ve = new VaultEntity().setSecret("secret").setUserId("8888");
+        VaultEntity ve = new VaultEntity().setSecret("secret").setUserId(8888L);
         String encoded = vaultService.encode(ve);
         Optional<VaultEntity> decoded = vaultService.decode(encoded);
         assertTrue(decoded.isPresent());

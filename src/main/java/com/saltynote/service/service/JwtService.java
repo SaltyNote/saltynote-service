@@ -62,7 +62,7 @@ public class JwtService {
         return createToken(user.getUsername(), user.getId(), tokenTTL, secret);
     }
 
-    private String createToken(final @NonNull String subject, @NonNull String userId, @NonNull Long tokenTTL,
+    private String createToken(final @NonNull String subject, @NonNull Long userId, @NonNull Long tokenTTL,
             @NonNull String secret) throws JWTCreationException {
         return JWT.create()
             .withSubject(subject)
@@ -83,7 +83,7 @@ public class JwtService {
 
     public JwtUser parseRefreshToken(String token) throws JWTVerificationException {
         DecodedJWT jwt = verifyRefreshToken(token);
-        return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(), jwt.getSubject());
+        return new JwtUser(jwt.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asLong(), jwt.getSubject());
     }
 
     public String tokenToJson(String accessToken, String refreshToken) throws JsonProcessingException {

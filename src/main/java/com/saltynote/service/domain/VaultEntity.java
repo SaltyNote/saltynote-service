@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class VaultEntity {
 
-    private String userId;
+    private Long userId;
 
     private String secret;
 

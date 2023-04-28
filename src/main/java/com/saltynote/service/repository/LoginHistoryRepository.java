@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface LoginHistoryRepository
         extends JpaRepository<LoginHistory, Integer>, JpaSpecificationExecutor<LoginHistory> {
 
-    void deleteByUserId(String userId);
+    void deleteByUserId(Long userId);
 
 }

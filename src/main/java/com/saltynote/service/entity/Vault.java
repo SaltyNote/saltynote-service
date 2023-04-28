@@ -1,6 +1,5 @@
 package com.saltynote.service.entity;
 
-import com.devskiller.friendly_id.FriendlyId;
 import com.saltynote.service.domain.Identifiable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,11 +30,11 @@ public class Vault implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "id", nullable = false)
-    private String id;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "secret", nullable = false)
     private String secret;
@@ -49,15 +48,8 @@ public class Vault implements Serializable, Identifiable {
     @Column(name = "created_time", nullable = false)
     private Timestamp createdTime;
 
-    @Column(name = "idx")
-    private Long idx;
-
-    @Column(name = "user_idx")
-    private Long userIdx;
-
     @PrePersist
     private void beforeSave() {
-        this.id = FriendlyId.createFriendlyId();
         this.createdTime = new Timestamp(System.currentTimeMillis());
     }
 
