@@ -43,14 +43,14 @@ public class NoteController {
 <span class="fc" id="L43">    }</span>
 
     @GetMapping(&quot;/note/{id}&quot;)
-    public ResponseEntity&lt;Note&gt; getNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+    public ResponseEntity&lt;Note&gt; getNoteById(@PathVariable(&quot;id&quot;) Long id, Authentication auth) {
 <span class="fc" id="L47">        Optional&lt;Note&gt; note = noteService.getById(id);</span>
 <span class="fc" id="L48">        checkNoteOwner(note, auth);</span>
 <span class="pc" id="L49">        return note.map(ResponseEntity::ok).orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
     }
 
     @RequestMapping(value = &quot;/note/{id}&quot;, method = { RequestMethod.POST, RequestMethod.PUT })
-    public ResponseEntity&lt;Note&gt; updateNoteById(@PathVariable(&quot;id&quot;) String id, @RequestBody NoteDto noteDto,
+    public ResponseEntity&lt;Note&gt; updateNoteById(@PathVariable(&quot;id&quot;) Long id, @RequestBody NoteDto noteDto,
             Authentication auth) {
 <span class="fc" id="L55">        Optional&lt;Note&gt; queryNote = noteService.getById(id);</span>
 <span class="fc" id="L56">        checkNoteOwner(queryNote, auth);</span>
@@ -71,7 +71,7 @@ public class NoteController {
     }
 
     @DeleteMapping(&quot;/note/{id}&quot;)
-    public ResponseEntity&lt;ServiceResponse&gt; deleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+    public ResponseEntity&lt;ServiceResponse&gt; deleteNoteById(@PathVariable(&quot;id&quot;) Long id, Authentication auth) {
 <span class="fc" id="L75">        Optional&lt;Note&gt; note = noteService.getById(id);</span>
 <span class="fc" id="L76">        checkNoteOwner(note, auth);</span>
 <span class="fc" id="L77">        noteService.delete(note.get());</span>
@@ -82,7 +82,7 @@ public class NoteController {
     // requests will be
     // blocked by Chrome. Further investigation is required from me for this issue.
     @PostMapping(&quot;/note/{id}/delete&quot;)
-    public ResponseEntity&lt;ServiceResponse&gt; postDeleteNoteById(@PathVariable(&quot;id&quot;) String id, Authentication auth) {
+    public ResponseEntity&lt;ServiceResponse&gt; postDeleteNoteById(@PathVariable(&quot;id&quot;) Long id, Authentication auth) {
 <span class="nc" id="L86">        return deleteNoteById(id, auth);</span>
     }
 
@@ -113,7 +113,7 @@ public class NoteController {
 <span class="fc" id="L113">        noteDto.setUserId(user.getId());</span>
 <span class="fc" id="L114">        Note note = noteConverter.toEntity(noteDto);</span>
 <span class="fc" id="L115">        note = noteService.create(note);</span>
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (StringUtils.isNotBlank(note.getId())) {</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (note.getId() != null) {</span>
 <span class="fc" id="L117">            return ResponseEntity.ok(note);</span>
         }
 <span class="nc" id="L119">        throw new WebAppRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR,</span>

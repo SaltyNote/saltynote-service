@@ -70,12 +70,12 @@ public class SnowflakeIdGenerator implements IdGenerator {
      */
     @Override
     public synchronized long nextId() {
-<span class="nc" id="L73">        long currStamp = getCurrentTimestamp();</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (currStamp &lt; lastStamp) {</span>
+<span class="fc" id="L73">        long currStamp = getCurrentTimestamp();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (currStamp &lt; lastStamp) {</span>
 <span class="nc" id="L75">            throw new ClockBackwardException(&quot;Clock moved backwards.  Refusing to generate id&quot;);</span>
         }
 
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (currStamp == lastStamp) {</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (currStamp == lastStamp) {</span>
             // 相同毫秒内，序列号自增
 <span class="nc" id="L80">            sequence = (sequence + 1) &amp; MAX_SEQUENCE;</span>
             // 同一毫秒的序列数已经达到最大
@@ -85,12 +85,12 @@ public class SnowflakeIdGenerator implements IdGenerator {
         }
         else {
             // 不同毫秒内，序列号置为0
-<span class="nc" id="L88">            sequence = 0L;</span>
+<span class="fc" id="L88">            sequence = 0L;</span>
         }
 
-<span class="nc" id="L91">        lastStamp = currStamp;</span>
+<span class="fc" id="L91">        lastStamp = currStamp;</span>
 
-<span class="nc" id="L93">        return (currStamp - START_STAMP) &lt;&lt; TIMESTAMP_LEFT // 时间戳部分</span>
+<span class="fc" id="L93">        return (currStamp - START_STAMP) &lt;&lt; TIMESTAMP_LEFT // 时间戳部分</span>
                 | datacenterId &lt;&lt; DATACENTER_LEFT // 数据中心部分
                 | machineId &lt;&lt; MACHINE_LEFT // 机器标识部分
                 | sequence; // 序列号部分
@@ -105,7 +105,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
     }
 
     private long getCurrentTimestamp() {
-<span class="nc" id="L108">        return System.currentTimeMillis();</span>
+<span class="fc" id="L108">        return System.currentTimeMillis();</span>
     }
 
 }

@@ -49,9 +49,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 <span class="nc" id="L49">            return null;</span>
 
 <span class="fc" id="L51">        return new UsernamePasswordAuthenticationToken(</span>
-<span class="fc" id="L52">                new JwtUser(decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),</span>
-<span class="fc" id="L53">                        decodedJWT.getSubject()),</span>
-<span class="fc" id="L54">                null, Collections.emptyList());</span>
+<span class="fc" id="L52">                new JwtUser(decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asLong(), decodedJWT.getSubject()),</span>
+<span class="fc" id="L53">                null, Collections.emptyList());</span>
 
     }
 

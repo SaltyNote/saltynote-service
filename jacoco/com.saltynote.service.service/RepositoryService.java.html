@@ -22,7 +22,7 @@ public interface RepositoryService&lt;K, T extends Identifiable&gt; {
 <span class="fc" id="L22">    }</span>
 
 <span class="pc bpc" id="L24" title="1 of 2 branches missed.">    default boolean hasValidId(@NonNull T entity) {</span>
-<span class="pc bpc" id="L25" title="1 of 4 branches missed.">        return entity.getId() != null &amp;&amp; !entity.getId().isBlank();</span>
+<span class="pc bpc" id="L25" title="1 of 4 branches missed.">        return entity.getId() != null &amp;&amp; entity.getId() &gt; 0;</span>
     }
 
 }

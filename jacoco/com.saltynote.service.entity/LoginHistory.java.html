@@ -27,30 +27,25 @@ import java.sql.Timestamp;
     @Column(name = &quot;id&quot;, nullable = false)
 <span class="nc" id="L28">    private Integer id;</span>
 
-    @Size(max = 40)
-    @NotNull
-    @Column(name = &quot;user_id&quot;, nullable = false, length = 40)
-<span class="nc" id="L33">    private String userId;</span>
+    @Column(name = &quot;user_id&quot;)
+<span class="nc" id="L31">    private Long userId;</span>
 
     @Size(max = 128)
     @Column(name = &quot;remote_ip&quot;, length = 128)
-<span class="nc" id="L37">    private String remoteIp;</span>
+<span class="nc" id="L35">    private String remoteIp;</span>
 
     @Size(max = 256)
     @Column(name = &quot;user_agent&quot;, length = 256)
-<span class="nc" id="L41">    private String userAgent;</span>
+<span class="nc" id="L39">    private String userAgent;</span>
 
     @NotNull
     @Column(name = &quot;login_time&quot;, nullable = false)
-<span class="nc" id="L45">    private Timestamp loginTime;</span>
-
-    @Column(name = &quot;user_idx&quot;)
-<span class="nc" id="L48">    private Long userIdx;</span>
+<span class="nc" id="L43">    private Timestamp loginTime;</span>
 
     @PrePersist
     private void beforeSave() {
-<span class="fc" id="L52">        this.loginTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L47">        this.loginTime = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L48">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
