@@ -64,6 +64,12 @@ public class Note implements Serializable, Identifiable {
     @Column(name = "tags")
     private String tags;
 
+    @Column(name = "idx")
+    private Long idx;
+
+    @Column(name = "user_idx")
+    private Long userIdx;
+
     @PrePersist
     private void beforeSave() {
         this.id = FriendlyId.createFriendlyId();

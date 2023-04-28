@@ -44,6 +44,9 @@ public class LoginHistory {
     @Column(name = "login_time", nullable = false)
     private Timestamp loginTime;
 
+    @Column(name = "user_idx")
+    private Long userIdx;
+
     @PrePersist
     private void beforeSave() {
         this.loginTime = new Timestamp(System.currentTimeMillis());
