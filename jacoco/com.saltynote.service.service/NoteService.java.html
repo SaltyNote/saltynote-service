@@ -29,46 +29,45 @@ public class NoteService implements RepositoryService&lt;String, Note&gt; {
 <span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (hasValidId(entity)) {</span>
 <span class="nc" id="L30">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
         }
-        // entity.setId(snowflakeIdGenerator.nextId());
-<span class="fc" id="L33">        return repository.save(entity);</span>
+<span class="fc" id="L32">        return repository.save(entity);</span>
     }
 
     @Override
     @Caching(evict = { @CacheEvict(key = &quot;#entity.id&quot;), @CacheEvict(key = &quot;#entity.userId + #entity.url&quot;),
             @CacheEvict(key = &quot;#entity.userId&quot;) })
     public Note update(Note entity) {
-<span class="fc" id="L40">        checkIdExists(entity);</span>
-<span class="fc" id="L41">        return repository.save(entity);</span>
+<span class="fc" id="L39">        checkIdExists(entity);</span>
+<span class="fc" id="L40">        return repository.save(entity);</span>
     }
 
     @Override
     @Cacheable(key = &quot;#id&quot;)
     public Optional&lt;Note&gt; getById(String id) {
-<span class="fc" id="L47">        return repository.findById(id);</span>
+<span class="fc" id="L46">        return repository.findById(id);</span>
     }
 
     @Override
     @Caching(evict = { @CacheEvict(key = &quot;#entity.id&quot;), @CacheEvict(key = &quot;#entity.userId + #entity.url&quot;),
             @CacheEvict(key = &quot;#entity.userId&quot;) })
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">    public void delete(@NonNull Note entity) {</span>
-<span class="fc" id="L54">        repository.deleteById(entity.getId());</span>
-<span class="fc" id="L55">    }</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">    public void delete(@NonNull Note entity) {</span>
+<span class="fc" id="L53">        repository.deleteById(entity.getId());</span>
+<span class="fc" id="L54">    }</span>
 
     @Cacheable(key = &quot;#userId&quot;)
     public List&lt;Note&gt; getAllByUserId(String userId) {
-<span class="fc" id="L59">        return repository.findAllByUserId(userId);</span>
+<span class="fc" id="L58">        return repository.findAllByUserId(userId);</span>
     }
 
     @Cacheable(key = &quot;#userId + #url&quot;)
     public List&lt;Note&gt; getAllByUserIdAndUrl(String userId, String url) {
-<span class="nc" id="L64">        return repository.findAllByUserIdAndUrl(userId, url);</span>
+<span class="nc" id="L63">        return repository.findAllByUserIdAndUrl(userId, url);</span>
     }
 
     @VisibleForTesting
     @CacheEvict(allEntries = true)
     public void deleteAll(List&lt;Note&gt; notesToCleaned) {
-<span class="nc" id="L70">        repository.deleteAll(notesToCleaned);</span>
-<span class="nc" id="L71">    }</span>
+<span class="nc" id="L69">        repository.deleteAll(notesToCleaned);</span>
+<span class="nc" id="L70">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

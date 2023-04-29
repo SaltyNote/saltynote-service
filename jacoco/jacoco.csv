@@ -25,7 +25,7 @@ saltynote-service,com.saltynote.service.service,RepositoryService,16,20,4,6,1,5,
 saltynote-service,com.saltynote.service.service,EmailService,62,18,0,0,18,5,2,1,2,1
 saltynote-service,com.saltynote.service.service,JwtService,54,118,9,9,1,22,10,10,1,10
 saltynote-service,com.saltynote.service.service,UserService,15,81,1,1,4,16,3,8,2,8
-saltynote-service,com.saltynote.service.service,VaultService,70,221,6,8,19,35,10,22,5,20
+saltynote-service,com.saltynote.service.service,VaultService,70,216,6,8,19,34,10,21,5,19
 saltynote-service,com.saltynote.service.filter,GlobalFilter,15,30,3,3,0,9,3,4,0,4
 saltynote-service,com.saltynote.service.boot,CleanCache,0,31,1,1,0,9,1,4,0,4
 saltynote-service,com.saltynote.service.boot,Starter,18,0,0,0,6,0,3,0,3,0

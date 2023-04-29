@@ -39,29 +39,28 @@ public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
 <span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if (hasValidId(entity)) {</span>
 <span class="nc" id="L40">            log.warn(&quot;Note id must be empty: {}&quot;, entity);</span>
         }
-        // entity.setId(snowflakeIdGenerator.nextId());
-<span class="fc" id="L43">        return repository.save(entity);</span>
+<span class="fc" id="L42">        return repository.save(entity);</span>
     }
 
     @Override
     @Caching(put = { @CachePut(key = &quot;#entity.id&quot;), @CachePut(key = &quot;#entity.username&quot;),
             @CachePut(key = &quot;#entity.email&quot;) })
     public SiteUser update(SiteUser entity) {
-<span class="fc" id="L50">        checkIdExists(entity);</span>
-<span class="fc" id="L51">        return repository.save(entity);</span>
+<span class="fc" id="L49">        checkIdExists(entity);</span>
+<span class="fc" id="L50">        return repository.save(entity);</span>
     }
 
     @Override
     @Cacheable(key = &quot;#id&quot;)
     public Optional&lt;SiteUser&gt; getById(String id) {
-<span class="fc" id="L57">        return repository.findById(id);</span>
+<span class="fc" id="L56">        return repository.findById(id);</span>
     }
 
     @Override
     // No need to do cache evict here, since all stale content will be expired soon.
     public void delete(SiteUser entity) {
-<span class="nc" id="L63">        repository.deleteById(entity.getId());</span>
-<span class="nc" id="L64">    }</span>
+<span class="nc" id="L62">        repository.deleteById(entity.getId());</span>
+<span class="nc" id="L63">    }</span>
 
     // This api will delete all database records with given user id, including the user
     // itself.
@@ -69,26 +68,26 @@ public class UserService implements RepositoryService&lt;String, SiteUser&gt; {
     @Transactional
     @CacheEvict(key = &quot;#userId&quot;)
     public void cleanupByUserId(String userId) {
-<span class="fc" id="L72">        noteRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L73">        vaultRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L74">        loginHistoryRepository.deleteByUserId(userId);</span>
-<span class="fc" id="L75">        repository.deleteById(userId);</span>
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L71">        noteRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L72">        vaultRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L73">        loginHistoryRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L74">        repository.deleteById(userId);</span>
+<span class="fc" id="L75">    }</span>
 
     @Cacheable(key = &quot;#email&quot;)
     public Optional&lt;SiteUser&gt; getByEmail(String email) {
-<span class="fc" id="L80">        return repository.findByEmail(email);</span>
+<span class="fc" id="L79">        return repository.findByEmail(email);</span>
     }
 
     @Cacheable(key = &quot;#username&quot;)
     public SiteUser getByUsername(String username) {
-<span class="nc" id="L85">        return repository.findByUsername(username);</span>
+<span class="nc" id="L84">        return repository.findByUsername(username);</span>
     }
 
     public void saveLoginHistory(String userId, String ip, String userAgent) {
-<span class="fc" id="L89">        LoginHistory loginHistory = new LoginHistory().setUserId(userId).setRemoteIp(ip).setUserAgent(userAgent);</span>
-<span class="fc" id="L90">        loginHistoryRepository.save(loginHistory);</span>
-<span class="fc" id="L91">    }</span>
+<span class="fc" id="L88">        LoginHistory loginHistory = new LoginHistory().setUserId(userId).setRemoteIp(ip).setUserAgent(userAgent);</span>
+<span class="fc" id="L89">        loginHistoryRepository.save(loginHistory);</span>
+<span class="fc" id="L90">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
