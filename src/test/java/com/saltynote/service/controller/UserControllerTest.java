@@ -478,7 +478,7 @@ class UserControllerTest {
         this.mockMvc
             .perform(delete("/account/invalid-id").header(SecurityConstants.AUTH_HEADER,
                     "Bearer " + token.getAccessToken()))
-            .andExpect(status().is5xxServerError());
+            .andExpect(status().isBadRequest());
         // deletion should fail due to missing user id
         this.mockMvc
             .perform(delete("/account").header(SecurityConstants.AUTH_HEADER, "Bearer " + token.getAccessToken()))

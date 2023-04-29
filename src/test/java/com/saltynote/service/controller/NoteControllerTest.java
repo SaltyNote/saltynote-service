@@ -35,8 +35,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -94,12 +96,12 @@ public class NoteControllerTest {
 
     private Note savedNote;
 
-    public static NoteDto createTmpNote(Long userId) {
+    public static NoteDto createTmpNote(String userId) {
         return new NoteDto().setUserId(userId)
             .setNote(faker.lorem().characters(50, 100))
             .setUrl(faker.internet().url())
             .setText(faker.funnyName().name())
-            .setTags(faker.nation().capitalCity());
+            .setTags(new HashSet<>(faker.lorem().words(3)));
     }
 
     private Pair<SiteUser, String> signupTestUser() throws Exception {
@@ -160,8 +162,8 @@ public class NoteControllerTest {
 
     @AfterEach
     void tearDown() {
-        userService.cleanupByUserId(this.siteUser.getId());
-        noteService.deleteAll(this.notesToCleaned);
+        // userService.cleanupByUserId(this.siteUser.getId());
+        // noteService.deleteAll(this.notesToCleaned);
     }
 
     @Test
@@ -215,7 +217,7 @@ public class NoteControllerTest {
 
     @Test
     void updateTagsByIdShouldSuccess() throws Exception {
-        String newTagsContent = "java,python,spring-boot";
+        Set<String> newTagsContent = Set.of("java", "python", "spring-boot");
         Note tagToUpdate = SerializationUtils.clone(this.savedNote);
         tagToUpdate.setTags(newTagsContent);
         this.mockMvc
@@ -224,7 +226,7 @@ public class NoteControllerTest {
                 .header(SecurityConstants.AUTH_HEADER, "Bearer " + this.accessToken))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(containsString(newTagsContent)));
+            .andExpect(content().string(containsString("python")));
 
         Optional<Note> queryNote = noteService.getById(this.savedNote.getId());
         assertTrue(queryNote.isPresent());

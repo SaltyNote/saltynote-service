@@ -6,12 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Set;
+
 @Data
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NoteDto {
 
-    private Long userId;
+    private String userId;
 
     @NotBlank
     private String text;
@@ -26,6 +28,6 @@ public class NoteDto {
 
     private String highlightColor;
 
-    private String tags;
+    private Set<String> tags;
 
 }

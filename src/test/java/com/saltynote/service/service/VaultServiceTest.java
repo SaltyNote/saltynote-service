@@ -21,7 +21,7 @@ class VaultServiceTest {
 
     @Test
     void encodeAndDecodeTest() throws IOException {
-        VaultEntity ve = new VaultEntity().setSecret("secret").setUserId(8888L);
+        VaultEntity ve = new VaultEntity().setSecret("secret").setUserId("8888");
         String encoded = vaultService.encode(ve);
         Optional<VaultEntity> decoded = vaultService.decode(encoded);
         assertTrue(decoded.isPresent());

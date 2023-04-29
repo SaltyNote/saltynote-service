@@ -1,12 +1,11 @@
 package com.saltynote.service.repository;
 
 import com.saltynote.service.entity.SiteUser;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<SiteUser, Long>, JpaSpecificationExecutor<SiteUser> {
+public interface UserRepository extends MongoRepository<SiteUser, String> {
 
     SiteUser findByUsername(String username);
 

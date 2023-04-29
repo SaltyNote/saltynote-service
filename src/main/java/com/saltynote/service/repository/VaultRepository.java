@@ -2,27 +2,26 @@ package com.saltynote.service.repository;
 
 import com.saltynote.service.entity.Vault;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface VaultRepository extends JpaRepository<Vault, Long>, JpaSpecificationExecutor<Vault> {
+public interface VaultRepository extends MongoRepository<Vault, String> {
 
     Optional<Vault> findBySecret(String secret);
 
-    void deleteByUserId(Long userId);
+    void deleteByUserId(String userId);
 
-    void deleteByUserIdAndType(Long userId, String type);
+    void deleteByUserIdAndType(String userId, String type);
 
-    Optional<Vault> findByUserIdAndTypeAndSecret(Long userId, String type, String secret);
+    Optional<Vault> findByUserIdAndTypeAndSecret(String userId, String type, String secret);
 
-    List<Vault> findByUserIdAndType(Long userId, String type);
+    List<Vault> findByUserIdAndType(String userId, String type);
 
-    Optional<Vault> findFirstByUserIdAndTypeOrderByCreatedTimeDesc(Long userId, String type);
+    Optional<Vault> findFirstByUserIdAndTypeOrderByCreatedTimeDesc(String userId, String type);
 
-    List<Vault> findByUserId(Long userId);
+    List<Vault> findByUserId(String userId);
 
     List<Vault> findByEmail(@NotBlank String email);
 

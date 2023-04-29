@@ -1,17 +1,16 @@
 package com.saltynote.service.repository;
 
 import com.saltynote.service.entity.Note;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificationExecutor<Note> {
+public interface NoteRepository extends MongoRepository<Note, String> {
 
-    List<Note> findAllByUserId(Long userId);
+    List<Note> findAllByUserId(String userId);
 
-    List<Note> findAllByUserIdAndUrl(Long userId, String url);
+    List<Note> findAllByUserIdAndUrl(String userId, String url);
 
-    void deleteByUserId(Long userId);
+    void deleteByUserId(String userId);
 
 }
