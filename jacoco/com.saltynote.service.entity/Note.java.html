@@ -1,31 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Note.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.entity</a> &gt; <span class="el_source">Note.java</span></div><h1>Note.java</h1><pre class="source lang-java linenums">package com.saltynote.service.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saltynote.service.domain.Identifiable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.springframework.util.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Set;
 
-@Entity
-@Table(name = &quot;note&quot;)
+@Document
 @Getter
-<span class="fc" id="L26">@Setter</span>
-<span class="nc" id="L27">@ToString</span>
-<span class="fc" id="L28">@RequiredArgsConstructor</span>
+<span class="fc" id="L20">@Setter</span>
+<span class="nc" id="L21">@ToString</span>
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
 @Accessors(chain = true)
 public class Note implements Serializable, Identifiable {
 
@@ -33,62 +27,41 @@ public class Note implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = &quot;id&quot;)
-<span class="fc" id="L37">    private Long id;</span>
+<span class="fc" id="L30">    private String id;</span>
 
-    @Column(name = &quot;user_id&quot;)
-<span class="fc" id="L40">    private Long userId;</span>
+<span class="fc" id="L32">    private String userId;</span>
 
-    @Column(name = &quot;text&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L44">    private String text;</span>
+<span class="fc" id="L35">    private String text;</span>
 
-    @Column(name = &quot;url&quot;, nullable = false)
     @NotBlank
-<span class="fc" id="L48">    private String url;</span>
+<span class="fc" id="L38">    private String url;</span>
 
-    @Column(name = &quot;note&quot;)
-<span class="fc" id="L51">    private String note;</span>
+<span class="fc" id="L40">    private String note;</span>
 
-    @Column(name = &quot;is_page_only&quot;)
-    @JsonProperty(&quot;is_page_only&quot;)
-<span class="fc" id="L55">    private Boolean pageOnly;</span>
+<span class="fc" id="L42">    private Boolean isPageOnly = false;</span>
 
-    @Column(name = &quot;highlight_color&quot;)
-<span class="fc" id="L58">    private String highlightColor;</span>
+<span class="fc" id="L44">    private String highlightColor = &quot;&quot;;</span>
 
-    @Column(name = &quot;created_time&quot;, nullable = false)
-<span class="fc" id="L61">    private Timestamp createdTime;</span>
+<span class="fc" id="L46">    private Long createdTime = System.currentTimeMillis();</span>
 
-    @Column(name = &quot;tags&quot;)
-<span class="fc" id="L64">    private String tags;</span>
-
-    @PrePersist
-    private void beforeSave() {
-<span class="fc" id="L68">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (this.pageOnly == null) {</span>
-<span class="fc" id="L70">            this.pageOnly = false;</span>
-        }
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (!StringUtils.hasText(this.highlightColor)) {</span>
-<span class="fc" id="L73">            this.highlightColor = &quot;&quot;;</span>
-        }
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L48">    private Set&lt;String&gt; tags;</span>
 
     @Override
     public boolean equals(Object o) {
-<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (this == o)</span>
-<span class="nc" id="L80">            return true;</span>
-<span class="nc bnc" id="L81" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
-<span class="nc" id="L82">            return false;</span>
-<span class="nc" id="L83">        Note note1 = (Note) o;</span>
-<span class="nc bnc" id="L84" title="All 6 branches missed.">        return Objects.equals(id, note1.id) &amp;&amp; Objects.equals(userId, note1.userId) &amp;&amp; Objects.equals(text, note1.text)</span>
-<span class="nc bnc" id="L85" title="All 4 branches missed.">                &amp;&amp; Objects.equals(url, note1.url) &amp;&amp; Objects.equals(note, note1.note)</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">                &amp;&amp; Objects.equals(tags, note1.tags);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (this == o)</span>
+<span class="nc" id="L53">            return true;</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
+<span class="nc" id="L55">            return false;</span>
+<span class="nc" id="L56">        Note note1 = (Note) o;</span>
+<span class="nc bnc" id="L57" title="All 6 branches missed.">        return Objects.equals(id, note1.id) &amp;&amp; Objects.equals(userId, note1.userId) &amp;&amp; Objects.equals(text, note1.text)</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">                &amp;&amp; Objects.equals(url, note1.url) &amp;&amp; Objects.equals(note, note1.note)</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                &amp;&amp; Objects.equals(tags, note1.tags);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L91">        return Objects.hash(id, userId, text, url, note, tags);</span>
+<span class="nc" id="L64">        return Objects.hash(id, userId, text, url, note, tags);</span>
     }
 
 }

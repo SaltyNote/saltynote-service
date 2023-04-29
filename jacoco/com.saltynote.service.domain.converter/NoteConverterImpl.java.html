@@ -3,82 +3,88 @@
 import com.saltynote.service.domain.transfer.NoteDto;
 import com.saltynote.service.entity.Note;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2023-04-29T04:06:23+0000&quot;,
+    date = &quot;2023-04-29T07:09:40+0000&quot;,
     comments = &quot;version: 1.5.5.Final, compiler: javac, environment: Java 17.0.7 (Eclipse Adoptium)&quot;
 )
 @Component
-<span class="fc" id="L16">public class NoteConverterImpl implements NoteConverter {</span>
+<span class="fc" id="L18">public class NoteConverterImpl implements NoteConverter {</span>
 
     @Override
     public NoteDto toDto(Note entity) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">        if ( entity == null ) {</span>
-<span class="nc" id="L21">            return null;</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L23">            return null;</span>
         }
 
-<span class="nc" id="L24">        NoteDto noteDto = new NoteDto();</span>
+<span class="nc" id="L26">        NoteDto noteDto = new NoteDto();</span>
 
-<span class="nc" id="L26">        noteDto.setUserId( entity.getUserId() );</span>
-<span class="nc" id="L27">        noteDto.setText( entity.getText() );</span>
-<span class="nc" id="L28">        noteDto.setUrl( entity.getUrl() );</span>
-<span class="nc" id="L29">        noteDto.setNote( entity.getNote() );</span>
-<span class="nc" id="L30">        noteDto.setPageOnly( entity.getPageOnly() );</span>
-<span class="nc" id="L31">        noteDto.setHighlightColor( entity.getHighlightColor() );</span>
-<span class="nc" id="L32">        noteDto.setTags( entity.getTags() );</span>
+<span class="nc" id="L28">        noteDto.setUserId( entity.getUserId() );</span>
+<span class="nc" id="L29">        noteDto.setText( entity.getText() );</span>
+<span class="nc" id="L30">        noteDto.setUrl( entity.getUrl() );</span>
+<span class="nc" id="L31">        noteDto.setNote( entity.getNote() );</span>
+<span class="nc" id="L32">        noteDto.setHighlightColor( entity.getHighlightColor() );</span>
+<span class="nc" id="L33">        Set&lt;String&gt; set = entity.getTags();</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if ( set != null ) {</span>
+<span class="nc" id="L35">            noteDto.setTags( new LinkedHashSet&lt;String&gt;( set ) );</span>
+        }
 
-<span class="nc" id="L34">        return noteDto;</span>
+<span class="nc" id="L38">        return noteDto;</span>
     }
 
     @Override
     public List&lt;NoteDto&gt; toDto(List&lt;Note&gt; entityList) {
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        if ( entityList == null ) {</span>
-<span class="nc" id="L40">            return null;</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if ( entityList == null ) {</span>
+<span class="nc" id="L44">            return null;</span>
         }
 
-<span class="nc" id="L43">        List&lt;NoteDto&gt; list = new ArrayList&lt;NoteDto&gt;( entityList.size() );</span>
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        for ( Note note : entityList ) {</span>
-<span class="nc" id="L45">            list.add( toDto( note ) );</span>
-<span class="nc" id="L46">        }</span>
+<span class="nc" id="L47">        List&lt;NoteDto&gt; list = new ArrayList&lt;NoteDto&gt;( entityList.size() );</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        for ( Note note : entityList ) {</span>
+<span class="nc" id="L49">            list.add( toDto( note ) );</span>
+<span class="nc" id="L50">        }</span>
 
-<span class="nc" id="L48">        return list;</span>
+<span class="nc" id="L52">        return list;</span>
     }
 
     @Override
     public Note toEntity(NoteDto dto) {
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if ( dto == null ) {</span>
-<span class="nc" id="L54">            return null;</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( dto == null ) {</span>
+<span class="nc" id="L58">            return null;</span>
         }
 
-<span class="fc" id="L57">        Note note = new Note();</span>
+<span class="fc" id="L61">        Note note = new Note();</span>
 
-<span class="fc" id="L59">        note.setUserId( dto.getUserId() );</span>
-<span class="fc" id="L60">        note.setText( dto.getText() );</span>
-<span class="fc" id="L61">        note.setUrl( dto.getUrl() );</span>
-<span class="fc" id="L62">        note.setNote( dto.getNote() );</span>
-<span class="fc" id="L63">        note.setPageOnly( dto.getPageOnly() );</span>
-<span class="fc" id="L64">        note.setHighlightColor( dto.getHighlightColor() );</span>
-<span class="fc" id="L65">        note.setTags( dto.getTags() );</span>
+<span class="fc" id="L63">        note.setUserId( dto.getUserId() );</span>
+<span class="fc" id="L64">        note.setText( dto.getText() );</span>
+<span class="fc" id="L65">        note.setUrl( dto.getUrl() );</span>
+<span class="fc" id="L66">        note.setNote( dto.getNote() );</span>
+<span class="fc" id="L67">        note.setHighlightColor( dto.getHighlightColor() );</span>
+<span class="fc" id="L68">        Set&lt;String&gt; set = dto.getTags();</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if ( set != null ) {</span>
+<span class="fc" id="L70">            note.setTags( new LinkedHashSet&lt;String&gt;( set ) );</span>
+        }
 
-<span class="fc" id="L67">        return note;</span>
+<span class="fc" id="L73">        return note;</span>
     }
 
     @Override
     public List&lt;Note&gt; toEntity(List&lt;NoteDto&gt; dtoList) {
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( dtoList == null ) {</span>
-<span class="nc" id="L73">            return null;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if ( dtoList == null ) {</span>
+<span class="nc" id="L79">            return null;</span>
         }
 
-<span class="nc" id="L76">        List&lt;Note&gt; list = new ArrayList&lt;Note&gt;( dtoList.size() );</span>
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        for ( NoteDto noteDto : dtoList ) {</span>
-<span class="nc" id="L78">            list.add( toEntity( noteDto ) );</span>
-<span class="nc" id="L79">        }</span>
+<span class="nc" id="L82">        List&lt;Note&gt; list = new ArrayList&lt;Note&gt;( dtoList.size() );</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        for ( NoteDto noteDto : dtoList ) {</span>
+<span class="nc" id="L84">            list.add( toEntity( noteDto ) );</span>
+<span class="nc" id="L85">        }</span>
 
-<span class="nc" id="L81">        return list;</span>
+<span class="nc" id="L87">        return list;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

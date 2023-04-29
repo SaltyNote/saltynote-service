@@ -93,7 +93,7 @@ public class UserController {
 <span class="fc" id="L93">        SiteUser user = userNewRequest.toSiteUser();</span>
 <span class="fc" id="L94">        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));</span>
 <span class="fc" id="L95">        user = userService.create(user);</span>
-<span class="pc bpc" id="L96" title="2 of 4 branches missed.">        if (user.getId() != null &amp;&amp; user.getId() &gt; 0) {</span>
+<span class="pc bpc" id="L96" title="2 of 4 branches missed.">        if (user.getId() != null &amp;&amp; !user.getId().isBlank()) {</span>
 <span class="fc" id="L97">            vaultService.deleteById(vaultOp.get().getId());</span>
 <span class="fc" id="L98">            return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));</span>
         }
@@ -199,10 +199,10 @@ public class UserController {
     }
 
     @DeleteMapping(&quot;/account/{id}&quot;)
-    public ResponseEntity&lt;ServiceResponse&gt; accountDeletion(@PathVariable(&quot;id&quot;) Long userId, Authentication auth) {
+    public ResponseEntity&lt;ServiceResponse&gt; accountDeletion(@PathVariable(&quot;id&quot;) String userId, Authentication auth) {
 <span class="fc" id="L203">        JwtUser jwtUser = (JwtUser) auth.getPrincipal();</span>
-<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (!Objects.equals(userId, jwtUser.getId())) {</span>
-<span class="nc" id="L205">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;User information is not confirmed&quot;);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (!Objects.equals(userId, jwtUser.getId())) {</span>
+<span class="fc" id="L205">            throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, &quot;User information is not confirmed&quot;);</span>
         }
 <span class="fc" id="L207">        userService.cleanupByUserId(jwtUser.getId());</span>
 <span class="fc" id="L208">        return ResponseEntity.ok(ServiceResponse.ok(&quot;Account deletion is successful.&quot;));</span>

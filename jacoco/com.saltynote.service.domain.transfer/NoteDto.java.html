@@ -6,27 +6,29 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-<span class="pc bnc" id="L9" title="All 62 branches missed.">@Data</span>
+import java.util.Set;
+
+<span class="pc bnc" id="L11" title="All 62 branches missed.">@Data</span>
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NoteDto {
 
-<span class="fc" id="L14">    private Long userId;</span>
+<span class="fc" id="L16">    private String userId;</span>
 
     @NotBlank
-<span class="fc" id="L17">    private String text;</span>
+<span class="fc" id="L19">    private String text;</span>
 
     @NotBlank
-<span class="fc" id="L20">    private String url;</span>
+<span class="fc" id="L22">    private String url;</span>
 
-<span class="fc" id="L22">    private String note;</span>
+<span class="fc" id="L24">    private String note;</span>
 
     @JsonProperty(&quot;is_page_only&quot;)
-<span class="fc" id="L25">    private Boolean pageOnly;</span>
+<span class="fc" id="L27">    private Boolean pageOnly;</span>
 
-<span class="fc" id="L27">    private String highlightColor;</span>
+<span class="fc" id="L29">    private String highlightColor;</span>
 
-<span class="fc" id="L29">    private String tags;</span>
+<span class="fc" id="L31">    private Set&lt;String&gt; tags;</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Vault.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.entity</a> &gt; <span class="el_source">Vault.java</span></div><h1>Vault.java</h1><pre class="source lang-java linenums">package com.saltynote.service.entity;
 
 import com.saltynote.service.domain.Identifiable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Objects;
 
-@Entity
-@Table(name = &quot;vault&quot;)
+@Document
 @Getter
-<span class="pc" id="L23">@Setter</span>
-<span class="nc" id="L24">@ToString</span>
-<span class="fc" id="L25">@RequiredArgsConstructor</span>
+<span class="pc" id="L19">@Setter</span>
+<span class="nc" id="L20">@ToString</span>
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
 @Accessors(chain = true)
 public class Vault implements Serializable, Identifiable {
 
@@ -30,44 +26,34 @@ public class Vault implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = &quot;id&quot;)
-<span class="fc" id="L34">    private Long id;</span>
+<span class="fc" id="L29">    private String id;</span>
 
-    @Column(name = &quot;user_id&quot;)
-<span class="fc" id="L37">    private Long userId;</span>
+<span class="fc" id="L31">    private String userId;</span>
 
-    @Column(name = &quot;secret&quot;, nullable = false)
-<span class="fc" id="L40">    private String secret;</span>
+<span class="fc" id="L33">    private String secret;</span>
 
-    @Column(name = &quot;type&quot;, nullable = false)
-<span class="nc" id="L43">    private String type;</span>
+<span class="nc" id="L35">    private String type;</span>
 
-    @Column(name = &quot;email&quot;)
-<span class="fc" id="L46">    private String email;</span>
+    @Email
+<span class="fc" id="L38">    private String email;</span>
 
-    @Column(name = &quot;created_time&quot;, nullable = false)
-<span class="nc" id="L49">    private Timestamp createdTime;</span>
-
-    @PrePersist
-    private void beforeSave() {
-<span class="fc" id="L53">        this.createdTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L54">    }</span>
+<span class="pc" id="L40">    private Long createdTime = System.currentTimeMillis();</span>
 
     @Override
     public boolean equals(Object o) {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (this == o)</span>
-<span class="nc" id="L59">            return true;</span>
-<span class="nc bnc" id="L60" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
-<span class="nc" id="L61">            return false;</span>
-<span class="nc" id="L62">        Vault vault = (Vault) o;</span>
-<span class="nc bnc" id="L63" title="All 4 branches missed.">        return Objects.equals(id, vault.id) &amp;&amp; Objects.equals(userId, vault.userId)</span>
-<span class="nc bnc" id="L64" title="All 4 branches missed.">                &amp;&amp; Objects.equals(secret, vault.secret) &amp;&amp; Objects.equals(type, vault.type)</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">                &amp;&amp; Objects.equals(email, vault.email);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (this == o)</span>
+<span class="nc" id="L45">            return true;</span>
+<span class="nc bnc" id="L46" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass())</span>
+<span class="nc" id="L47">            return false;</span>
+<span class="nc" id="L48">        Vault vault = (Vault) o;</span>
+<span class="nc bnc" id="L49" title="All 4 branches missed.">        return Objects.equals(id, vault.id) &amp;&amp; Objects.equals(userId, vault.userId)</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">                &amp;&amp; Objects.equals(secret, vault.secret) &amp;&amp; Objects.equals(type, vault.type)</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                &amp;&amp; Objects.equals(email, vault.email);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L70">        return Objects.hash(id, userId, secret, type, email);</span>
+<span class="nc" id="L56">        return Objects.hash(id, userId, secret, type, email);</span>
     }
 
 }

@@ -4,20 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 @EnableCaching
-<span class="fc" id="L12">public class ServiceApplication {</span>
+<span class="fc" id="L13">public class ServiceApplication {</span>
 
     public static void main(final String[] args) {
-<span class="nc" id="L15">        SpringApplication.run(ServiceApplication.class, args);</span>
-<span class="nc" id="L16">    }</span>
+<span class="nc" id="L16">        SpringApplication.run(ServiceApplication.class, args);</span>
+<span class="nc" id="L17">    }</span>
 
     @Bean
     public ObjectMapper objectMapper() {
-<span class="fc" id="L20">        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);</span>
+<span class="fc" id="L21">        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);</span>
     }
 
 }

@@ -1,51 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginHistory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">saltynote-service</a> &gt; <a href="index.source.html" class="el_package">com.saltynote.service.entity</a> &gt; <span class="el_source">LoginHistory.java</span></div><h1>LoginHistory.java</h1><pre class="source lang-java linenums">package com.saltynote.service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.sql.Timestamp;
-
-@Entity
-@Table(name = &quot;login_history&quot;)
+@Document
 @Getter
-<span class="pc" id="L21">@Setter</span>
+<span class="pc" id="L11">@Setter</span>
 @Accessors(chain = true)
-<span class="fc" id="L23">public class LoginHistory {</span>
+<span class="fc" id="L13">public class LoginHistory {</span>
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = &quot;id&quot;, nullable = false)
-<span class="nc" id="L28">    private Integer id;</span>
+<span class="nc" id="L16">    private String id;</span>
 
-    @Column(name = &quot;user_id&quot;)
-<span class="nc" id="L31">    private Long userId;</span>
+<span class="nc" id="L18">    private String userId;</span>
 
-    @Size(max = 128)
-    @Column(name = &quot;remote_ip&quot;, length = 128)
-<span class="nc" id="L35">    private String remoteIp;</span>
+<span class="nc" id="L20">    private String remoteIp;</span>
 
-    @Size(max = 256)
-    @Column(name = &quot;user_agent&quot;, length = 256)
-<span class="nc" id="L39">    private String userAgent;</span>
+<span class="nc" id="L22">    private String userAgent;</span>
 
-    @NotNull
-    @Column(name = &quot;login_time&quot;, nullable = false)
-<span class="nc" id="L43">    private Timestamp loginTime;</span>
-
-    @PrePersist
-    private void beforeSave() {
-<span class="fc" id="L47">        this.loginTime = new Timestamp(System.currentTimeMillis());</span>
-<span class="fc" id="L48">    }</span>
+<span class="pc" id="L24">    private Long loginTime = System.currentTimeMillis();</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
