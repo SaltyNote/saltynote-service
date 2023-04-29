@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
@@ -44,7 +43,7 @@ public class Note implements Serializable, Identifiable {
 
     private String highlightColor = "";
 
-    private Date createdTime = new Date();
+    private Long createdTime = System.currentTimeMillis();
 
     private Set<String> tags;
 

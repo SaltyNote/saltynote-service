@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 
 @Document
@@ -38,8 +37,8 @@ public class Vault implements Serializable, Identifiable {
     @Email
     private String email;
 
-    private Date createdTime = new Date();
-    
+    private Long createdTime = System.currentTimeMillis();
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

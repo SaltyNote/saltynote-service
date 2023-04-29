@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 
 @Document
@@ -40,7 +39,7 @@ public class SiteUser implements Serializable, IdentifiableUser {
     @NotBlank
     private String password;
 
-    private Date registerTime = new Date();
+    private Long registerTime = System.currentTimeMillis();
 
     @Override
     public boolean equals(Object o) {
