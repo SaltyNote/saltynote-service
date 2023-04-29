@@ -30,7 +30,7 @@ When it is ready, you can visit http://localhost:8888
 This is a standard spring boot project with Maven, so you can use generic maven command to run it. While the simplest &
 quickest way is to run [`./start.sh`](./start.sh).
 
-Swagger UI will be available at http://localhost:8888/swagger-ui.html
+Swagger UI will be available at http://localhost:8888/swagger-ui.html (Screenshot for User APIs)
 ![swagger-ui](./docs/images/swagger-ui.jpg)
 
 ### Prerequisite
