@@ -2,7 +2,6 @@ package com.saltynote.service.service;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.devskiller.friendly_id.FriendlyId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltynote.service.domain.IdentifiableUser;
@@ -40,20 +39,15 @@ public class VaultService implements RepositoryService<String, Vault> {
     private long refreshTokenTTL;
 
     public Vault create(@NotNull String userId, VaultType type) {
-        return create(userId, type, FriendlyId.createFriendlyId());
+        return create(userId, type, RandomStringUtils.randomAlphanumeric(8));
     }
 
     public Vault createVerificationCode(@NotNull String email) {
         return createForEmail(email, VaultType.NEW_ACCOUNT, RandomStringUtils.randomNumeric(6));
     }
 
-    public Vault createForEmail(@NotNull String email, VaultType type) {
-        return createForEmail(email, type, FriendlyId.createFriendlyId());
-    }
-
     public Vault createForEmail(@NotNull String email, VaultType type, @NonNull String secret) {
         var vault = new Vault().setEmail(email).setType(type.getValue()).setSecret(secret);
-        // vault.setId(snowflakeIdGenerator.nextId());
         return repository.save(vault);
     }
 
@@ -131,7 +125,6 @@ public class VaultService implements RepositoryService<String, Vault> {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
         }
-        // entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 

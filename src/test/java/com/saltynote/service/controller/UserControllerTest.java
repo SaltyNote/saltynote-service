@@ -149,7 +149,7 @@ class UserControllerTest {
     void signupShouldReturnSuccess() throws Exception {
         String username = faker.name().username();
         String email = getEmail(username);
-        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+        Vault vault = vaultService.createVerificationCode(email);
 
         assertNotNull(vault.getId());
         assertEquals(vault.getEmail(), email);
@@ -363,7 +363,7 @@ class UserControllerTest {
         // Create a new User
         String username = faker.name().username();
         String email = getEmail(username);
-        Vault vault = vaultService.createForEmail(email, VaultType.NEW_ACCOUNT);
+        Vault vault = vaultService.createVerificationCode(email);
 
         assertNotNull(vault.getId());
         assertEquals(vault.getEmail(), email);

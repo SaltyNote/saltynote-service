@@ -39,7 +39,6 @@ public class UserService implements RepositoryService<String, SiteUser> {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
         }
-        // entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 

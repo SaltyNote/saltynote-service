@@ -29,7 +29,6 @@ public class NoteService implements RepositoryService<String, Note> {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
         }
-        // entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 
