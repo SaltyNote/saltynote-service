@@ -93,7 +93,7 @@ public class UserController {
         SiteUser user = userNewRequest.toSiteUser();
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user = userService.create(user);
-        if (user.getId() != null && user.getId() > 0) {
+        if (user.getId() != null && !user.getId().isBlank()) {
             vaultService.deleteById(vaultOp.get().getId());
             return ResponseEntity.ok(new JwtUser(user.getId(), user.getUsername()));
         }
@@ -199,7 +199,7 @@ public class UserController {
     }
 
     @DeleteMapping("/account/{id}")
-    public ResponseEntity<ServiceResponse> accountDeletion(@PathVariable("id") Long userId, Authentication auth) {
+    public ResponseEntity<ServiceResponse> accountDeletion(@PathVariable("id") String userId, Authentication auth) {
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         if (!Objects.equals(userId, jwtUser.getId())) {
             throw new WebAppRuntimeException(HttpStatus.BAD_REQUEST, "User information is not confirmed");

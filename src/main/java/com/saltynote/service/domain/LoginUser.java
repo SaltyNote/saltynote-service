@@ -10,7 +10,7 @@ import java.util.Objects;
 public class LoginUser extends User implements IdentifiableUser {
 
     @Getter
-    private final Long id;
+    private final String id;
 
     public LoginUser(SiteUser user) {
         super(user.getUsername(), user.getPassword(), Collections.emptyList());

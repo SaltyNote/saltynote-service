@@ -1,12 +1,10 @@
 package com.saltynote.service.repository;
 
 import com.saltynote.service.entity.LoginHistory;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface LoginHistoryRepository
-        extends JpaRepository<LoginHistory, Integer>, JpaSpecificationExecutor<LoginHistory> {
+public interface LoginHistoryRepository extends MongoRepository<LoginHistory, Integer> {
 
-    void deleteByUserId(Long userId);
+    void deleteByUserId(String userId);
 
 }

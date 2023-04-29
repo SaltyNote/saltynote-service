@@ -43,14 +43,14 @@ public class NoteController {
     }
 
     @GetMapping("/note/{id}")
-    public ResponseEntity<Note> getNoteById(@PathVariable("id") Long id, Authentication auth) {
+    public ResponseEntity<Note> getNoteById(@PathVariable("id") String id, Authentication auth) {
         Optional<Note> note = noteService.getById(id);
         checkNoteOwner(note, auth);
         return note.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @RequestMapping(value = "/note/{id}", method = { RequestMethod.POST, RequestMethod.PUT })
-    public ResponseEntity<Note> updateNoteById(@PathVariable("id") Long id, @RequestBody NoteDto noteDto,
+    public ResponseEntity<Note> updateNoteById(@PathVariable("id") String id, @RequestBody NoteDto noteDto,
             Authentication auth) {
         Optional<Note> queryNote = noteService.getById(id);
         checkNoteOwner(queryNote, auth);
@@ -59,9 +59,7 @@ public class NoteController {
             noteTobeUpdate.setNote(noteDto.getNote());
         }
 
-        if (StringUtils.isNotBlank(noteDto.getTags())) {
-            noteTobeUpdate.setTags(noteDto.getTags());
-        }
+        noteTobeUpdate.setTags(noteDto.getTags());
 
         if (StringUtils.isNotBlank(noteDto.getHighlightColor())) {
             noteTobeUpdate.setHighlightColor(noteDto.getHighlightColor());
@@ -71,7 +69,7 @@ public class NoteController {
     }
 
     @DeleteMapping("/note/{id}")
-    public ResponseEntity<ServiceResponse> deleteNoteById(@PathVariable("id") Long id, Authentication auth) {
+    public ResponseEntity<ServiceResponse> deleteNoteById(@PathVariable("id") String id, Authentication auth) {
         Optional<Note> note = noteService.getById(id);
         checkNoteOwner(note, auth);
         noteService.delete(note.get());
@@ -82,7 +80,7 @@ public class NoteController {
     // requests will be
     // blocked by Chrome. Further investigation is required from me for this issue.
     @PostMapping("/note/{id}/delete")
-    public ResponseEntity<ServiceResponse> postDeleteNoteById(@PathVariable("id") Long id, Authentication auth) {
+    public ResponseEntity<ServiceResponse> postDeleteNoteById(@PathVariable("id") String id, Authentication auth) {
         return deleteNoteById(id, auth);
     }
 

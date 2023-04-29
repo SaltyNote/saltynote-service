@@ -1,15 +1,6 @@
 version: "3.8"
 
 services:
-  mysql:
-    image: mariadb:10.4
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: saltynote
-      MYSQL_ROOT_PASSWORD: password
-    volumes:
-      - mysql_data:/var/lib/mysql/data
 
   redis:
     image: 'redis:7.0-alpine'
@@ -17,5 +8,17 @@ services:
     ports:
       - '6379:6379'
 
+  mongodb:
+    image: mongo:6-jammy
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: saltynote
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: saltynote
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
-  mysql_data:
+  mongo_data:

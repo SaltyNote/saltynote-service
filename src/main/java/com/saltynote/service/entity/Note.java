@@ -1,27 +1,22 @@
 package com.saltynote.service.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saltynote.service.domain.Identifiable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.springframework.util.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
-@Entity
-@Table(name = "note")
+@Document
 @Getter
 @Setter
 @ToString
@@ -33,46 +28,25 @@ public class Note implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "id")
-    private Long id;
+    private String id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    private String userId;
 
-    @Column(name = "text", nullable = false)
     @NotBlank
     private String text;
 
-    @Column(name = "url", nullable = false)
     @NotBlank
     private String url;
 
-    @Column(name = "note")
     private String note;
 
-    @Column(name = "is_page_only")
-    @JsonProperty("is_page_only")
-    private Boolean pageOnly;
+    private Boolean isPageOnly = false;
 
-    @Column(name = "highlight_color")
-    private String highlightColor;
+    private String highlightColor = "";
 
-    @Column(name = "created_time", nullable = false)
-    private Timestamp createdTime;
+    private Date createdTime = new Date();
 
-    @Column(name = "tags")
-    private String tags;
-
-    @PrePersist
-    private void beforeSave() {
-        this.createdTime = new Timestamp(System.currentTimeMillis());
-        if (this.pageOnly == null) {
-            this.pageOnly = false;
-        }
-        if (!StringUtils.hasText(this.highlightColor)) {
-            this.highlightColor = "";
-        }
-    }
+    private Set<String> tags;
 
     @Override
     public boolean equals(Object o) {

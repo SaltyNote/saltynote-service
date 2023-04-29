@@ -1,24 +1,21 @@
 package com.saltynote.service.entity;
 
 import com.saltynote.service.domain.Identifiable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
-@Entity
-@Table(name = "vault")
+@Document
 @Getter
 @Setter
 @ToString
@@ -30,29 +27,19 @@ public class Vault implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "id")
-    private Long id;
+    private String id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    private String userId;
 
-    @Column(name = "secret", nullable = false)
     private String secret;
 
-    @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "email")
+    @Email
     private String email;
 
-    @Column(name = "created_time", nullable = false)
-    private Timestamp createdTime;
-
-    @PrePersist
-    private void beforeSave() {
-        this.createdTime = new Timestamp(System.currentTimeMillis());
-    }
-
+    private Date createdTime = new Date();
+    
     @Override
     public boolean equals(Object o) {
         if (this == o)

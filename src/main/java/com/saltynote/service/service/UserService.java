@@ -2,7 +2,6 @@ package com.saltynote.service.service;
 
 import com.saltynote.service.entity.LoginHistory;
 import com.saltynote.service.entity.SiteUser;
-import com.saltynote.service.generator.IdGenerator;
 import com.saltynote.service.repository.LoginHistoryRepository;
 import com.saltynote.service.repository.NoteRepository;
 import com.saltynote.service.repository.UserRepository;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @CacheConfig(cacheNames = "user")
-public class UserService implements RepositoryService<Long, SiteUser> {
+public class UserService implements RepositoryService<String, SiteUser> {
 
     private final UserRepository repository;
 
@@ -33,8 +32,6 @@ public class UserService implements RepositoryService<Long, SiteUser> {
 
     private final LoginHistoryRepository loginHistoryRepository;
 
-    private final IdGenerator snowflakeIdGenerator;
-
     @Override
     @Caching(put = { @CachePut(key = "#entity.id"), @CachePut(key = "#entity.username"),
             @CachePut(key = "#entity.email") })
@@ -42,7 +39,7 @@ public class UserService implements RepositoryService<Long, SiteUser> {
         if (hasValidId(entity)) {
             log.warn("Note id must be empty: {}", entity);
         }
-        entity.setId(snowflakeIdGenerator.nextId());
+        // entity.setId(snowflakeIdGenerator.nextId());
         return repository.save(entity);
     }
 
@@ -56,7 +53,7 @@ public class UserService implements RepositoryService<Long, SiteUser> {
 
     @Override
     @Cacheable(key = "#id")
-    public Optional<SiteUser> getById(Long id) {
+    public Optional<SiteUser> getById(String id) {
         return repository.findById(id);
     }
 
@@ -71,7 +68,7 @@ public class UserService implements RepositoryService<Long, SiteUser> {
     // No need to do cache evict here, since all stale content will be expired soon.
     @Transactional
     @CacheEvict(key = "#userId")
-    public void cleanupByUserId(Long userId) {
+    public void cleanupByUserId(String userId) {
         noteRepository.deleteByUserId(userId);
         vaultRepository.deleteByUserId(userId);
         loginHistoryRepository.deleteByUserId(userId);
@@ -88,7 +85,7 @@ public class UserService implements RepositoryService<Long, SiteUser> {
         return repository.findByUsername(username);
     }
 
-    public void saveLoginHistory(Long userId, String ip, String userAgent) {
+    public void saveLoginHistory(String userId, String ip, String userAgent) {
         LoginHistory loginHistory = new LoginHistory().setUserId(userId).setRemoteIp(ip).setUserAgent(userAgent);
         loginHistoryRepository.save(loginHistory);
     }

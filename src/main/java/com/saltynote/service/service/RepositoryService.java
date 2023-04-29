@@ -22,7 +22,7 @@ public interface RepositoryService<K, T extends Identifiable> {
     }
 
     default boolean hasValidId(@NonNull T entity) {
-        return entity.getId() != null && entity.getId() > 0;
+        return entity.getId() != null && !entity.getId().isBlank();
     }
 
 }
