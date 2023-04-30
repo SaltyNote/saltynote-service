@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:6-jammy
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: saltynote
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: saltynote
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: 'redis:7.0-alpine'
+    container_name: redis2
+    command: redis-server --requirepass 88888888
+    ports:
+      - '6379:6379'
+
+  saltynote:
+    image: zhouhao/saltynote-service:0.5.0
+    container_name: saltynote-service-mongo
+    ports:
+      - "8888:8888"
+    restart: always
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_REDIS_HOST: redis2
+    volumes:
+      - log_data:/tmp
+
+volumes:
+  mongo_data:
+  log_data:

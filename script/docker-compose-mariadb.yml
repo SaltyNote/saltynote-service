@@ -20,8 +20,8 @@ services:
       - '6379:6379'
 
   saltynote:
-    image: zhouhao/saltynote-service:latest
-    container_name: saltynote-service
+    image: zhouhao/saltynote-service:0.4.0
+    container_name: saltynote-service-mariadb
     ports:
       - "8888:8888"
     restart: always
