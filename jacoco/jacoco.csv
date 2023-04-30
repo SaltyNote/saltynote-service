@@ -25,7 +25,7 @@ saltynote-service,com.saltynote.service.service,RepositoryService,16,20,4,6,1,5,
 saltynote-service,com.saltynote.service.service,EmailService,62,18,0,0,18,5,2,1,2,1
 saltynote-service,com.saltynote.service.service,JwtService,54,118,9,9,1,22,10,10,1,10
 saltynote-service,com.saltynote.service.service,UserService,15,81,1,1,4,16,3,8,2,8
-saltynote-service,com.saltynote.service.service,VaultService,70,216,6,8,19,34,10,21,5,19
+saltynote-service,com.saltynote.service.service,VaultService,65,206,5,7,19,33,9,20,5,18
 saltynote-service,com.saltynote.service.filter,GlobalFilter,15,30,3,3,0,9,3,4,0,4
 saltynote-service,com.saltynote.service.boot,CleanCache,0,31,1,1,0,9,1,4,0,4
 saltynote-service,com.saltynote.service.boot,Starter,18,0,0,0,6,0,3,0,3,0
@@ -38,7 +38,7 @@ saltynote-service,com.saltynote.service.aop,ControllerMonitor,1,32,0,0,1,8,1,3,1
 saltynote-service,com.saltynote.service.configure,ServiceConfig,0,3,0,0,0,1,0,1,0,1
 saltynote-service,com.saltynote.service.configure,SpringDocConfig,0,93,0,0,0,12,0,5,0,5
 saltynote-service,com.saltynote.service,ServiceApplication,5,9,0,0,2,2,1,2,1,2
-saltynote-service,com.saltynote.service.utils,BaseUtils,20,33,4,6,7,8,6,5,3,3
+saltynote-service,com.saltynote.service.utils,BaseUtils,0,49,2,8,0,14,2,8,0,5
 saltynote-service,com.saltynote.service.controller,NoteController,32,191,9,15,5,40,12,12,3,9
 saltynote-service,com.saltynote.service.controller,UserController,89,314,12,16,17,55,13,12,1,10
 saltynote-service,com.saltynote.service.controller,HomeController,0,8,0,0,0,2,0,2,0,2
@@ -49,4 +49,4 @@ saltynote-service,com.saltynote.service.domain,VaultEntity,56,71,15,7,0,4,13,8,2
 saltynote-service,com.saltynote.service.controller.advice,ExceptionHandlerControllerAdvice,13,42,0,0,3,8,1,5,1,5
 saltynote-service,com.saltynote.service.exception,ClockBackwardException,4,0,0,0,2,0,1,0,1,0
 saltynote-service,com.saltynote.service.exception,WebAppRuntimeException,0,10,0,0,0,4,0,2,0,2
-saltynote-service,com.saltynote.service.exception,IllegalInitialException,4,0,0,0,2,0,1,0,1,0
+saltynote-service,com.saltynote.service.exception,IllegalInitialException,0,4,0,0,0,2,0,1,0,1

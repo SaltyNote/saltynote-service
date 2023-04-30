@@ -8,35 +8,31 @@ public class BaseUtils {
 
 <span class="fc" id="L9">    private static String baseUrl = &quot;https://saltynote.com&quot;;</span>
 
-<span class="nc" id="L11">    private BaseUtils() {</span>
-<span class="nc" id="L12">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
+<span class="fc" id="L11">    private BaseUtils() {</span>
+<span class="fc" id="L12">        throw new IllegalInitialException(&quot;Do not instantiate me.&quot;);</span>
     }
 
     // This is used for test or dev usage, do not call it in prod.
     public static void setBaseUrl(String baseUrl) {
-<span class="nc bnc" id="L17" title="All 2 branches missed.">        if (StringUtils.startsWithIgnoreCase(baseUrl, &quot;http&quot;)) {</span>
-<span class="nc" id="L18">            BaseUtils.baseUrl = baseUrl;</span>
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (StringUtils.startsWithIgnoreCase(baseUrl, &quot;http&quot;)) {</span>
+<span class="fc" id="L18">            BaseUtils.baseUrl = baseUrl;</span>
         }
-<span class="nc" id="L20">    }</span>
-
-    public static String getConfirmationUrl(@NotNull String secret) {
-<span class="nc" id="L23">        return baseUrl + &quot;/email/verification?confirmation=&quot; + secret;</span>
-    }
+<span class="fc" id="L20">    }</span>
 
     public static String getPasswordResetUrl(@NotNull String secret) {
-<span class="fc" id="L27">        return baseUrl + &quot;/password/reset?token=&quot; + secret;</span>
+<span class="fc" id="L23">        return baseUrl + &quot;/password/reset?token=&quot; + secret;</span>
     }
 
     public static boolean containsAllIgnoreCase(String src, Iterable&lt;String&gt; queries) {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (StringUtils.isBlank(src)) {</span>
-<span class="nc" id="L32">            return false;</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (StringUtils.isBlank(src)) {</span>
+<span class="fc" id="L28">            return false;</span>
         }
-<span class="fc bfc" id="L34" title="All 2 branches covered.">        for (String q : queries) {</span>
-<span class="pc bpc" id="L35" title="1 of 4 branches missed.">            if (StringUtils.isNotBlank(q) &amp;&amp; !StringUtils.containsIgnoreCase(src, q.trim())) {</span>
-<span class="fc" id="L36">                return false;</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (String q : queries) {</span>
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">            if (StringUtils.isNotBlank(q) &amp;&amp; !StringUtils.containsIgnoreCase(src, q.trim())) {</span>
+<span class="fc" id="L32">                return false;</span>
             }
-<span class="fc" id="L38">        }</span>
-<span class="fc" id="L39">        return true;</span>
+<span class="fc" id="L34">        }</span>
+<span class="fc" id="L35">        return true;</span>
     }
 
 }
