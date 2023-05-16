@@ -2,6 +2,7 @@
 
 import com.saltynote.service.domain.transfer.ServiceResponse;
 import com.saltynote.service.exception.WebAppRuntimeException;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,33 +11,35 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-<span class="fc" id="L13">@Slf4j</span>
-<span class="fc" id="L14">public class ExceptionHandlerControllerAdvice {</span>
+<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L15">public class ExceptionHandlerControllerAdvice {</span>
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity&lt;ServiceResponse&gt; handleAuthenticationException(AuthenticationException e) {
-<span class="fc" id="L18">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
-<span class="fc" id="L19">            .body(new ServiceResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));</span>
+<span class="fc" id="L19">        Sentry.captureException(e);</span>
+<span class="fc" id="L20">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L21">            .body(new ServiceResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));</span>
     }
 
     @ExceptionHandler(WebAppRuntimeException.class)
     public ResponseEntity&lt;ServiceResponse&gt; handleWebClientRuntimeException(WebAppRuntimeException e) {
-<span class="fc" id="L24">        return ResponseEntity.status(e.getStatus()).body(new ServiceResponse(e.getStatus(), e.getMessage()));</span>
+<span class="fc" id="L26">        Sentry.captureException(e);</span>
+<span class="fc" id="L27">        return ResponseEntity.status(e.getStatus()).body(new ServiceResponse(e.getStatus(), e.getMessage()));</span>
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity&lt;ServiceResponse&gt; handleRuntimeException(RuntimeException e) {
-<span class="nc" id="L29">        log.error(e.getMessage());</span>
-<span class="nc" id="L30">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L31">            .body(new ServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR,</span>
+<span class="nc" id="L32">        Sentry.captureException(e);</span>
+<span class="nc" id="L33">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L34">            .body(new ServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR,</span>
                     &quot;Something is going wrong with the server, please try again later.&quot;));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity&lt;ServiceResponse&gt; handleRuntimeException(Exception e) {
-<span class="fc" id="L37">        log.error(e.getMessage());</span>
-<span class="fc" id="L38">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="fc" id="L39">            .body(new ServiceResponse(HttpStatus.BAD_REQUEST,</span>
+<span class="fc" id="L40">        Sentry.captureException(e);</span>
+<span class="fc" id="L41">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L42">            .body(new ServiceResponse(HttpStatus.BAD_REQUEST,</span>
                     &quot;Something is going wrong with your request, please try again later.&quot;));
     }
 
