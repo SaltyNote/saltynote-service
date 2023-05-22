@@ -1,5 +1,6 @@
 package com.saltynote.service.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.saltynote.service.domain.transfer.JwtUser;
 import com.saltynote.service.service.JwtService;
@@ -43,10 +44,17 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         String token = request.getHeader(SecurityConstants.AUTH_HEADER);
         if (token == null)
             return null;
-        // parse the token.
-        DecodedJWT decodedJWT = jwtService.verifyAccessToken(token);
-        if (decodedJWT == null)
+        DecodedJWT decodedJWT = null;
+        try {
+            // parse the token.
+            decodedJWT = jwtService.verifyAccessToken(token);
+            if (decodedJWT == null) {
+                return null;
+            }
+        }
+        catch (JWTVerificationException e) {
             return null;
+        }
 
         return new UsernamePasswordAuthenticationToken(
                 new JwtUser(decodedJWT.getClaim(SecurityConstants.CLAIM_KEY_USER_ID).asString(),
