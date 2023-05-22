@@ -29,7 +29,7 @@ saltynote-service,com.saltynote.service.service,VaultService,65,206,5,7,19,33,9,
 saltynote-service,com.saltynote.service.filter,GlobalFilter,15,30,3,3,0,9,3,4,0,4
 saltynote-service,com.saltynote.service.boot,CleanCache,0,31,1,1,0,9,1,4,0,4
 saltynote-service,com.saltynote.service.boot,Starter,18,0,0,0,6,0,3,0,3,0
-saltynote-service,com.saltynote.service.security,JWTAuthorizationFilter,4,61,3,5,2,17,3,4,0,3
+saltynote-service,com.saltynote.service.security,JWTAuthorizationFilter,7,64,3,5,4,19,3,4,0,3
 saltynote-service,com.saltynote.service.security,SecurityConfig,0,24,0,0,0,6,0,3,0,3
 saltynote-service,com.saltynote.service.security,SecurityConstants,7,0,0,0,2,0,1,0,1,0
 saltynote-service,com.saltynote.service.security,JWTAuthenticationService,0,62,0,0,0,10,0,3,0,3
