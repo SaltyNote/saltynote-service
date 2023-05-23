@@ -35,9 +35,8 @@ saltynote-service,com.saltynote.service.security,SecurityConstants,7,0,0,0,2,0,1
 saltynote-service,com.saltynote.service.security,JWTAuthenticationService,0,62,0,0,0,10,0,3,0,3
 saltynote-service,com.saltynote.service.security,WebSecurity,0,182,0,0,0,37,0,7,0,7
 saltynote-service,com.saltynote.service.aop,ControllerMonitor,1,32,0,0,1,8,1,3,1,3
-saltynote-service,com.saltynote.service.configure,ServiceConfig,0,3,0,0,0,1,0,1,0,1
-saltynote-service,com.saltynote.service.configure,SpringDocConfig,0,93,0,0,0,12,0,5,0,5
 saltynote-service,com.saltynote.service,ServiceApplication,5,9,0,0,2,2,1,2,1,2
+saltynote-service,com.saltynote.service.configure,SpringDocConfig,0,93,0,0,0,12,0,5,0,5
 saltynote-service,com.saltynote.service.utils,BaseUtils,0,49,2,8,0,14,2,8,0,5
 saltynote-service,com.saltynote.service.controller,NoteController,32,191,9,15,5,40,12,12,3,9
 saltynote-service,com.saltynote.service.controller,UserController,89,314,12,16,17,55,13,12,1,10
