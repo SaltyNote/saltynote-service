@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-saltynote-service,com.saltynote.service.event,EmailEvent,0,16,0,0,0,6,0,3,0,3
 saltynote-service,com.saltynote.service.event,EmailEvent.Type.new EmailEvent.Type() {...},2,15,0,0,1,3,1,2,1,2
+saltynote-service,com.saltynote.service.event,EmailEvent,0,16,0,0,0,6,0,3,0,3
 saltynote-service,com.saltynote.service.event,EmailEvent.Type.new EmailEvent.Type() {...},0,17,0,0,0,4,0,3,0,3
 saltynote-service,com.saltynote.service.event,EmailEventListener,11,67,1,3,1,18,1,4,0,3
 saltynote-service,com.saltynote.service.event,EmailEvent.Type,3,53,0,0,1,14,1,4,1,4
