@@ -9,6 +9,8 @@
 
 ![Website](https://img.shields.io/website?label=service&url=https%3A%2F%2Fapi.saltynote.com)
 
+>***Please see https://github.com/SaltyNote/saltynote-service-kotlin for further updates!***
+
 ## Overview
 
 This is the backend service for [saltynote](https://saltynote.com). It
